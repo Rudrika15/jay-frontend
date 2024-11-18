@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flipcodeattendence/models/leave_requests_model.dart';
+import 'package:flipcodeattendence/featuers/Admin/model/leave_requests_model.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 
-import '/models/leavelist_model.dart';
+import '../featuers/User/model/leavelist_model.dart';
 import '/service/shared_preferences_service.dart';
 import '/theme/app_colors.dart';
 import 'package:flutter/material.dart';

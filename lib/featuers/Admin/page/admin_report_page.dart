@@ -5,16 +5,17 @@ import 'package:flipcodeattendence/widget/date_selection_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../helper/string_helper.dart';
 
-class AdminReportScreen extends StatefulWidget {
-  const AdminReportScreen({super.key});
+import '../../../helper/string_helper.dart';
+
+class AdminReportPage extends StatefulWidget {
+  const AdminReportPage({super.key});
 
   @override
-  State<AdminReportScreen> createState() => _AdminReportScreenState();
+  State<AdminReportPage> createState() => _AdminReportPageState();
 }
 
-class _AdminReportScreenState extends State<AdminReportScreen>
+class _AdminReportPageState extends State<AdminReportPage>
     with NavigatorMixin {
   String? startDate, endDate;
 

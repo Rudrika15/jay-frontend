@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flipcodeattendence/models/employee_report_model.dart';
+import 'package:flipcodeattendence/featuers/Admin/model/employee_report_model.dart';
 import 'package:flipcodeattendence/service/shared_preferences_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';

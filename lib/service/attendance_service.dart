@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flipcodeattendence/models/daily_attendence_model.dart';
+import 'package:flipcodeattendence/featuers/Admin/model/daily_attendence_model.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:get/get.dart';
 
-import '/models/AttendanceRecord.dart';
+import '../featuers/Admin/model/AttendanceRecord.dart';
 import '/service/shared_preferences_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;

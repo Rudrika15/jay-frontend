@@ -7,15 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:view_more/view_more.dart';
 
-class NotificationScreen extends StatefulWidget {
+class NotificationPage extends StatefulWidget {
   final bool isAdmin;
-  const NotificationScreen({super.key, required this.isAdmin});
+  const NotificationPage({super.key, required this.isAdmin});
 
   @override
-  State<NotificationScreen> createState() => _NotificationScreenState();
+  State<NotificationPage> createState() => _NotificationPageState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> {
+class _NotificationPageState extends State<NotificationPage> {
   @override
   void initState() {
     Provider.of<NotificationProvider>(context, listen: false)

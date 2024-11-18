@@ -1,11 +1,11 @@
-import 'package:flipcodeattendence/models/leave_requests_model.dart';
+import 'package:flipcodeattendence/featuers/Admin/model/leave_requests_model.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:get/get.dart';
 
 import '/service/leave_service.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../models/leavelist_model.dart';
+import '../featuers/User/model/leavelist_model.dart';
 
 class LeaveProvider extends ChangeNotifier {
   final leaveService = LeaveService();

@@ -1,6 +1,6 @@
-import 'package:flipcodeattendence/models/daily_attendence_model.dart';
+import 'package:flipcodeattendence/featuers/Admin/model/daily_attendence_model.dart';
 
-import '/models/AttendanceRecord.dart';
+import '../featuers/Admin/model/AttendanceRecord.dart';
 import '/service/attendance_service.dart';
 import 'package:flutter/cupertino.dart';
 

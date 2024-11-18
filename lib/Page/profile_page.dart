@@ -1,8 +1,8 @@
-import 'package:flipcodeattendence/Screens/admin_report_screen.dart';
-import 'package:flipcodeattendence/Screens/home/admin_home.dart';
+import 'package:flipcodeattendence/featuers/Admin/page/admin_report_page.dart';
 import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../featuers/Admin/page/admin_home_page.dart';
 import '/mixins/navigator_mixin.dart';
 import '/provider/login_provider.dart';
 import '/widget/dialog_widget.dart';
@@ -12,16 +12,17 @@ import '../helper/height_width_helper.dart';
 import '../service/shared_preferences_service.dart';
 import '../theme/app_colors.dart';
 import '../widget/text_form_field_custom.dart';
-import 'login_screen.dart';
+import 'login_page.dart';
+import 'notification_page.dart';
 
-class Profile extends StatefulWidget {
-  const Profile({super.key});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
 
   @override
-  State<Profile> createState() => _ProfileState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfileState extends State<Profile> with NavigatorMixin {
+class _ProfilePageState extends State<ProfilePage> with NavigatorMixin {
   bool showPassword = false;
   bool isAdmin = false;
   String? mobileNumber, name, userRole;
@@ -67,7 +68,7 @@ class _ProfileState extends State<Profile> with NavigatorMixin {
               Navigator.pushAndRemoveUntil<void>(
                 context,
                 MaterialPageRoute<void>(
-                    builder: (BuildContext context) => Login()),
+                    builder: (BuildContext context) => LoginPage()),
                 ModalRoute.withName('/'),
               );
             },
@@ -229,90 +230,94 @@ class _ProfileState extends State<Profile> with NavigatorMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          StringHelper.profile,
-        ),
-        actions: [
-          Consumer<LoginProvider>(
-            builder: (context, loginValue, child) => NotificationButton(
-              isAdmin: loginValue.userRole?.toLowerCase() == 'admin',
-            ),
-          ),
-        ],
-      ),
-      body: Consumer<LoginProvider>(builder: (context, loginProvider, _) {
-        return Column(
-          children: [
-            Container(
-              height: 100,
-              width: 100,
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.aPrimary,
-              ),
-              child: Center(
-                child: Text(
-                  name?[0] ?? '',
-                  style: TextStyle(
-                      fontSize: 50,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.backgroundLight),
+    return SafeArea(
+      child: Scaffold(
+        body: Consumer<LoginProvider>(builder: (context, loginProvider, _) {
+          return Column(
+            children: [
+              Container(
+                height: 100,
+                width: 100,
+                margin: EdgeInsets.only(top: 12),
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.aPrimary,
+                ),
+                child: Center(
+                  child: Text(
+                    name?[0] ?? '',
+                    style: TextStyle(
+                        fontSize: 50,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.backgroundLight),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 12,
-            ),
-            Text(
-              name ?? 'User',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge!
-                  .copyWith(fontWeight: FontWeight.w600),
-            ),
-            Text(
-              '+91 $mobileNumber',
-              style: Theme.of(context).textTheme.bodyLarge!,
-            ),
-            SizedBox(height: 24),
-            Divider(
-              height: 1,
-            ),
-            SizedBox(height: 12),
-            ListTile(
-              onTap: () {
-                changePasswordPopup();
-              },
-              leading: Icon(Icons.edit),
-              title: Text(StringHelper.changePassword),
-            ),
-            if(isAdmin) ...[
+              SizedBox(
+                height: 12,
+              ),
+              Text(
+                name ?? 'User',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(fontWeight: FontWeight.w600),
+              ),
+              Text(
+                '+91 $mobileNumber',
+                style: Theme.of(context).textTheme.bodyLarge!,
+              ),
+              SizedBox(height: 24),
+              Divider(
+                height: 1,
+              ),
+              SizedBox(height: 12),
               ListTile(
                 onTap: () {
-                  push(context, AdminReportScreen());
+                  changePasswordPopup();
                 },
-                leading: Icon(CupertinoIcons.doc_text),
-                title: Text(StringHelper.report),
+                leading: Icon(Icons.edit),
+                title: Text(StringHelper.changePassword),
+              ),
+              if(isAdmin) ...[
+                ListTile(
+                  onTap: () {
+                    push(context, AdminReportPage());
+                  },
+                  leading: Icon(CupertinoIcons.doc_text),
+                  title: Text(StringHelper.report),
+                ),
+              ],
+              ListTile(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => NotificationPage(
+                        isAdmin: isAdmin,
+                      ),
+                    ),
+                  );
+                },
+                leading: Icon(Icons.notifications),
+                title: Text(StringHelper.notification),
+              ),
+              ListTile(
+                leading: Icon(CupertinoIcons.square_arrow_left),
+                title: Text(StringHelper.logOut),
+                onTap: () {
+                  _showLogoutDialog();
+                },
+              ),
+              SizedBox(
+                height: 12,
               ),
             ],
-            ListTile(
-              leading: Icon(CupertinoIcons.square_arrow_left),
-              title: Text(StringHelper.logOut),
-              onTap: () {
-                _showLogoutDialog();
-              },
-            ),
-            SizedBox(
-              height: 12,
-            ),
-          ],
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }

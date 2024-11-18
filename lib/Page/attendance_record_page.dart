@@ -6,16 +6,16 @@ import '/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AttendanceRecordScreen extends StatefulWidget {
-  const AttendanceRecordScreen({
+class AttendanceRecordPage extends StatefulWidget {
+  const AttendanceRecordPage({
     super.key,
   });
 
   @override
-  State<AttendanceRecordScreen> createState() => _AttendanceRecordScreenState();
+  State<AttendanceRecordPage> createState() => _AttendanceRecordPageState();
 }
 
-class _AttendanceRecordScreenState extends State<AttendanceRecordScreen> {
+class _AttendanceRecordPageState extends State<AttendanceRecordPage> {
   @override
   void initState() {
     super.initState();

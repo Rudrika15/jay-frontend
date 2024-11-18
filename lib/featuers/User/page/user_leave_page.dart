@@ -1,24 +1,24 @@
-import 'package:flipcodeattendence/Screens/home/admin_home.dart';
 import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flipcodeattendence/widget/call_widget.dart';
 import 'package:flipcodeattendence/widget/custom_elevated_button.dart';
-import '../../helper/method_helper.dart';
+import '../../../helper/method_helper.dart';
+import '../../Admin/page/admin_home_page.dart';
 import '/provider/leave_provider.dart';
 import '/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../helper/height_width_helper.dart';
-import '../../widget/text_form_field_custom.dart';
+import '../../../helper/height_width_helper.dart';
+import '../../../widget/text_form_field_custom.dart';
 
-class LeaveScreen extends StatefulWidget {
-  const LeaveScreen({super.key});
+class UserLeavePage extends StatefulWidget {
+  const UserLeavePage({super.key});
 
   @override
-  State<LeaveScreen> createState() => _LeaveScreenState();
+  State<UserLeavePage> createState() => _UserLeavePageState();
 }
 
-class _LeaveScreenState extends State<LeaveScreen> {
+class _UserLeavePageState extends State<UserLeavePage> {
   String? leaveType;
   DateTime selectedDate = DateTime.now();
   String selectedHalf = StringHelper.firstHalf;
@@ -340,66 +340,59 @@ class _LeaveScreenState extends State<LeaveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            StringHelper.leave,
-          ),
-          actions: [
-            NotificationButton(
-              isAdmin: false,
-            ),
-          ],
-        ),
-        body: Consumer<LeaveProvider>(
-          builder: (context, leave, child) => RefreshIndicator(
-            onRefresh: () async => await leave.getLeaveList(),
-            child: Column(
-              children: [
-                leave.isLoading
-                    ? Expanded(
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      )
-                    : leave.leaveList?.data?.isNotEmpty ?? false
-                        ? Expanded(
-                            child: Container(
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: leave.leaveList?.data?.length ?? 0,
-                                itemBuilder: (context, index) =>
-                                    CustomLeaveCard(
-                                  leaveCreatedAt:
-                                      leave.leaveList?.data?[index].createdAt,
-                                  isAdmin: false,
-                                  isLoading: false,
-                                  leaveStartDate:
-                                      leave.leaveList?.data?[index].startDate,
-                                  leaveEndDate:
-                                      leave.leaveList?.data?[index].endDate,
-                                  leaveType:
-                                      leave.leaveList?.data?[index].leaveType ??
-                                          '',
-                                  leaveReason:
-                                      leave.leaveList?.data?[index].reason ??
-                                          '',
-                                  leaveStatus:
-                                      leave.leaveList?.data?[index].status ??
-                                          '',
+        body: SafeArea(
+          child: Consumer<LeaveProvider>(
+            builder: (context, leave, child) => RefreshIndicator(
+              onRefresh: () async => await leave.getLeaveList(),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12.0),
+                  leave.isLoading
+                      ? Expanded(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : leave.leaveList?.data?.isNotEmpty ?? false
+                          ? Expanded(
+                              child: Container(
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: leave.leaveList?.data?.length ?? 0,
+                                  itemBuilder: (context, index) =>
+                                      CustomLeaveCard(
+                                    leaveCreatedAt:
+                                        leave.leaveList?.data?[index].createdAt,
+                                    isAdmin: false,
+                                    isLoading: false,
+                                    leaveStartDate:
+                                        leave.leaveList?.data?[index].startDate,
+                                    leaveEndDate:
+                                        leave.leaveList?.data?[index].endDate,
+                                    leaveType:
+                                        leave.leaveList?.data?[index].leaveType ??
+                                            '',
+                                    leaveReason:
+                                        leave.leaveList?.data?[index].reason ??
+                                            '',
+                                    leaveStatus:
+                                        leave.leaveList?.data?[index].status ??
+                                            '',
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Expanded(
+                              child: Center(
+                                child: Text(
+                                  StringHelper.noLeaveRequestFound,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300, fontSize: 20),
                                 ),
                               ),
                             ),
-                          )
-                        : Expanded(
-                            child: Center(
-                              child: Text(
-                                StringHelper.noLeaveRequestFound,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w300, fontSize: 20),
-                              ),
-                            ),
-                          ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

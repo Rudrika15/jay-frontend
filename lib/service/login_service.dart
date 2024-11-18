@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import '/helper/api_helper.dart';
 import '/models/login_model.dart';
 import '/service/shared_preferences_service.dart';
@@ -113,21 +112,21 @@ class LoginService {
     }
   }
 
-  Future<void> updateToken() async {
-    try {
-      final token = await SharedPreferencesService.getUserToken();
-      final fcmToken = await FirebaseMessaging.instance.getToken();
-      final response = await http.post(
-        Uri.parse(ApiHelper.updateToken),
-        headers: {'Authorization': 'Bearer $token'},
-        body: {"token": fcmToken},
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        print(response.body);
-        debugPrint("Token updated");
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
+  // Future<void> updateToken() async {
+  //   try {
+  //     final token = await SharedPreferencesService.getUserToken();
+  //     final fcmToken = await FirebaseMessaging.instance.getToken();
+  //     final response = await http.post(
+  //       Uri.parse(ApiHelper.updateToken),
+  //       headers: {'Authorization': 'Bearer $token'},
+  //       body: {"token": fcmToken},
+  //     );
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       print(response.body);
+  //       debugPrint("Token updated");
+  //     }
+  //   } catch (e) {
+  //     debugPrint(e.toString());
+  //   }
+  // }
 }

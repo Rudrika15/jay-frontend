@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class Works extends StatefulWidget {
-  const Works({super.key});
+class WorksPage extends StatefulWidget {
+  const WorksPage({super.key});
 
   @override
-  State<Works> createState() => _WorksState();
+  State<WorksPage> createState() => _WorksPageState();
 }
 
-class _WorksState extends State<Works> {
+class _WorksPageState extends State<WorksPage> {
   TextEditingController a = TextEditingController();
 
   @override

@@ -6,6 +6,8 @@ import '/service/login_service.dart';
 
 class LoginProvider extends ChangeNotifier {
   LoginService loginService = LoginService();
+  String? _userRole;
+  String? get userRole => _userRole;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -14,13 +16,10 @@ class LoginProvider extends ChangeNotifier {
       {required String phone, required String password}) async {
     _isLoading = true;
     notifyListeners();
-
     final value =
         await loginService.userLogin(phone: phone, password: password);
-
     _isLoading = false;
     notifyListeners();
-
     return value;
   }
 
@@ -40,11 +39,9 @@ class LoginProvider extends ChangeNotifier {
     return value;
   }
 
-  String? _userRole;
-  String? get userRole => _userRole;
-  Future<void> updateToken() async {
-    await loginService.updateToken();
-  }
+  // Future<void> updateToken() async {
+  //   await loginService.updateToken();
+  // }
 
   Future<String?> getUserRole() async {
     _isLoading = true;

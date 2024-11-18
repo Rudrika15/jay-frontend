@@ -105,4 +105,7 @@ class StringHelper {
 
   // notification screen
   static const String notification = 'Notification';
+
+  // Create call page
+  static const String createCall = 'Create Call';
 }

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../provider/login_provider.dart';
 import '/helper/height_width_helper.dart';
 import '/helper/string_helper.dart';
 import '/mixins/navigator_mixin.dart';
-import '/provider/login_provider.dart';
 import '/widget/text_form_field_custom.dart';
 import '../theme/app_colors.dart';
-import 'navbar_screen.dart';
+import 'navbar.dart';
 
-class Login extends StatefulWidget {
+class LoginPage extends StatefulWidget {
   @override
-  State<Login> createState() => _LoginState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginState extends State<Login> with NavigatorMixin {
+class _LoginPageState extends State<LoginPage> with NavigatorMixin {
   bool showPassword = false;
   final _formKey = GlobalKey<FormState>();
   final numberController = TextEditingController();

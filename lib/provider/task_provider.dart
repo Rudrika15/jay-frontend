@@ -1,5 +1,5 @@
-import 'package:flipcodeattendence/models/all_employee_task_model.dart';
-import 'package:flipcodeattendence/models/employee_tasks_model.dart';
+import 'package:flipcodeattendence/featuers/Admin/model/all_employee_task_model.dart';
+import 'package:flipcodeattendence/featuers/Admin/model/employee_tasks_model.dart';
 import 'package:flipcodeattendence/service/task_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';

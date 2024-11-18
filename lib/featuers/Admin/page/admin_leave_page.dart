@@ -1,8 +1,6 @@
-import 'package:flipcodeattendence/Screens/home/admin_home.dart';
-import 'package:flipcodeattendence/Screens/leave/leave.dart';
 import 'package:flipcodeattendence/helper/list_helper.dart';
 import 'package:flipcodeattendence/helper/string_helper.dart';
-import 'package:flipcodeattendence/models/leave_requests_model.dart';
+import 'package:flipcodeattendence/featuers/Admin/model/leave_requests_model.dart';
 import 'package:flipcodeattendence/provider/leave_provider.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:flipcodeattendence/widget/custom_alert_dialog.dart';
@@ -10,14 +8,17 @@ import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 
-class AdminLeaveScreen extends StatefulWidget {
-  const AdminLeaveScreen({super.key});
+import '../../User/page/user_leave_page.dart';
+import 'admin_home_page.dart';
+
+class AdminLeavePage extends StatefulWidget {
+  const AdminLeavePage({super.key});
 
   @override
-  State<AdminLeaveScreen> createState() => _AdminLeaveScreenState();
+  State<AdminLeavePage> createState() => _AdminLeavePageState();
 }
 
-class _AdminLeaveScreenState extends State<AdminLeaveScreen> {
+class _AdminLeavePageState extends State<AdminLeavePage> {
   LeaveType _selectedChip = LeaveType.values.first;
 
   final PagingController<int, LeaveData> _pagingController =

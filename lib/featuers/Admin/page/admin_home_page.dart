@@ -1,7 +1,7 @@
-import 'package:flipcodeattendence/Screens/notification/notification_screen.dart';
+import 'package:flipcodeattendence/Page/notification_page.dart';
 import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
-import 'package:flipcodeattendence/models/daily_attendence_model.dart';
+import 'package:flipcodeattendence/featuers/Admin/model/daily_attendence_model.dart';
 import 'package:flipcodeattendence/provider/attendance_provider.dart';
 import 'package:flipcodeattendence/provider/task_provider.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
@@ -12,14 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class AdminHomeScreen extends StatefulWidget {
-  const AdminHomeScreen({super.key});
+class AdminHomePage extends StatefulWidget {
+  const AdminHomePage({super.key});
 
   @override
-  State<AdminHomeScreen> createState() => _AdminHomeScreenState();
+  State<AdminHomePage> createState() => _AdminHomePageState();
 }
 
-class _AdminHomeScreenState extends State<AdminHomeScreen> with NavigatorMixin {
+class _AdminHomePageState extends State<AdminHomePage> with NavigatorMixin {
   DateTime? selectedDate;
   final TextEditingController_searchController = TextEditingController();
 
@@ -188,7 +188,7 @@ class NotificationButton extends StatelessWidget {
       onPressed: () async {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => NotificationScreen(
+            builder: (context) => NotificationPage(
               isAdmin: isAdmin,
             ),
           ),

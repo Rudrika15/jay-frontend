@@ -19,6 +19,10 @@ class AppTheme {
         ),
         colorScheme: ColorScheme.fromSeed(
             seedColor: AppColors.aPrimary, primary: AppColors.aPrimary),
+        datePickerTheme: DatePickerThemeData(
+          backgroundColor: AppColors.onPrimaryLight,
+          dividerColor: AppColors.aPrimary,
+        ),
         textTheme: TextStyleCustom.textThemeDark(),
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
@@ -29,6 +33,10 @@ class AppTheme {
                 foregroundColor: AppColors.onPrimaryLight,
                 iconColor: AppColors.onPrimaryLight,
                 textStyle: TextStyle(fontWeight: FontWeight.bold))),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: AppColors.aPrimary,
+          foregroundColor: AppColors.onPrimaryLight,
+        ),
         navigationBarTheme: NavigationBarThemeData(
           backgroundColor: AppColors.backgroundLight,
           indicatorColor: AppColors.aPrimary,

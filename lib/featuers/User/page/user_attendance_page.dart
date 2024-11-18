@@ -1,28 +1,28 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:flipcodeattendence/Screens/notification/notification_screen.dart';
+import 'package:flipcodeattendence/Page/notification_page.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../theme/app_colors.dart';
+import '../../../helper/time_helper.dart';
+import '../../../provider/today_provider.dart';
+import '../../../theme/app_colors.dart';
+import '../../../widget/custom_container_widget.dart';
 import '/provider/attendance_provider.dart';
-import '../widget/custom_container_widget.dart';
 import '/helper/string_helper.dart';
-import '../helper/time_helper.dart';
-import '../provider/today_provider.dart';
 
-class CheckAndBreak extends StatefulWidget {
-  const CheckAndBreak({Key? key}) : super(key: key);
+class UserAttendancePage extends StatefulWidget {
+  const UserAttendancePage({Key? key}) : super(key: key);
 
   @override
-  _CheckAndBreakState createState() => _CheckAndBreakState();
+  _UserAttendancePageState createState() => _UserAttendancePageState();
 }
 
-class _CheckAndBreakState extends State<CheckAndBreak> with NavigatorMixin {
+class _UserAttendancePageState extends State<UserAttendancePage> with NavigatorMixin {
   Timer? timer, longPressTimer;
   bool isLongPressing = false;
   bool loading = false;
@@ -240,7 +240,7 @@ class _CheckAndBreakState extends State<CheckAndBreak> with NavigatorMixin {
               onPressed: () {
                 push(
                     context,
-                    NotificationScreen(
+                    NotificationPage(
                       isAdmin: false,
                     ));
               },

@@ -79,7 +79,11 @@ class _TextFormFieldCustomState extends State<TextFormFieldWidget> {
       keyboardType: widget.keyboardType,
       maxLength: widget.maxLength,
       style: widget.textStyle,
+      onTapOutside: (event) {
+        FocusManager.instance.primaryFocus!.unfocus();
+      },
       decoration: InputDecoration(
+        alignLabelWithHint: true,
         filled: widget.isFilled,
         fillColor: widget.fillColor,
         enabled: true,
@@ -117,3 +121,4 @@ class _TextFormFieldCustomState extends State<TextFormFieldWidget> {
     );
   }
 }
+
