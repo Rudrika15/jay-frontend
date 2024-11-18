@@ -1,0 +1,1 @@
+enum LeaveType {all, today}
