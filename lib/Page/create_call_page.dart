@@ -1,17 +1,21 @@
 import 'dart:io';
 
+import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flipcodeattendence/helper/validation_helper.dart';
+import 'package:flipcodeattendence/provider/login_provider.dart';
 import 'package:flipcodeattendence/widget/actions_widget.dart';
 import 'package:flipcodeattendence/widget/custom_elevated_button.dart';
 import 'package:flipcodeattendence/widget/text_form_field_custom.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../helper/file_picker_helper.dart';
 import '../theme/app_colors.dart';
 import '../widget/common_widgets.dart';
+import '../widget/custom_outlined_button.dart';
 
 class CreateCallPage extends StatefulWidget {
   const CreateCallPage({super.key});
@@ -25,11 +29,22 @@ class _CreateCallPageState extends State<CreateCallPage> {
   final _formKey = GlobalKey<FormState>();
   final dateController = TextEditingController();
   final textController = TextEditingController();
+  final clientController = TextEditingController();
+  String? userRole;
 
   @override
   void initState() {
     super.initState();
+    userRole = Provider.of<LoginProvider>(context, listen: false).userRole;
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
+  }
+
+  @override
+  void dispose() {
+    dateController.dispose();
+    textController.dispose();
+    clientController.dispose();
+    super.dispose();
   }
 
   @override
@@ -110,8 +125,7 @@ class _CreateCallPageState extends State<CreateCallPage> {
                 readOnly: true,
                 suffixIcon: const Icon(Icons.calendar_month),
                 validator: (value) {
-                  if (value == null ||
-                      value.trim().isEmpty) {
+                  if (value == null || value.trim().isEmpty) {
                     return 'Please select date';
                   } else {
                     return null;
@@ -132,6 +146,30 @@ class _CreateCallPageState extends State<CreateCallPage> {
                 },
               ),
               const SizedBox(height: 16.0),
+              if(userRole?.trim().toLowerCase() == UserRole.admin.name) ...[
+                TextFormFieldWidget(
+                  labelText: 'Select client',
+                  controller: clientController,
+                  readOnly: true,
+                  suffixIcon: const Icon(Icons.arrow_drop_down_circle_outlined),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please select client';
+                    } else {
+                      return null;
+                    }
+                  },
+                  onTap: () async {
+                    final selectedClient = await showModalBottomSheet(
+                        context: context,
+                        builder: (context) => ClientBottomSheet());
+                    if(selectedClient != null) {
+                      clientController.text = selectedClient;
+                    }
+                  },
+                ),
+                const SizedBox(height: 16.0),
+              ],
               TextFormFieldWidget(
                 controller: textController,
                 maxLines: 10,
@@ -148,13 +186,93 @@ class _CreateCallPageState extends State<CreateCallPage> {
           children: [
             Expanded(
                 child: CustomElevatedButton(
-                    buttonText: 'Submit', onPressed: () {
-                      if(_formKey.currentState!.validate()) {
-
-                      }
-                })),
+                    buttonText: 'Submit',
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {}
+                    })),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ClientBottomSheet extends StatefulWidget {
+  const ClientBottomSheet({super.key});
+
+  @override
+  State<ClientBottomSheet> createState() => _ClientBottomSheetState();
+}
+
+class _ClientBottomSheetState extends State<ClientBottomSheet> {
+  String? client;
+  int? selectedIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Select client',
+                  style: textTheme.titleLarge!
+                      .copyWith(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          Expanded(
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text('Client ${index + 1}'),
+                    trailing: (selectedIndex == index)
+                        ? Icon(Icons.check_circle, color: AppColors.aPrimary)
+                        : const SizedBox.shrink(),
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = index;
+                        client = 'Client ${index + 1}';
+                      });
+                    },
+                  );
+                }),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CustomOutlinedButton(
+                    buttonText: 'Clear',
+                    onPressed: (selectedIndex != null)
+                        ? () {
+                            setState(() {
+                              selectedIndex = null;
+                              client = null;
+                            });
+                          }
+                        : null),
+                const SizedBox(width: 16.0),
+                CustomElevatedButton(
+                    buttonText: 'Ok',
+                    onPressed: (selectedIndex != null)
+                        ? () {
+                            Navigator.pop(context, client);
+                          }
+                        : null),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

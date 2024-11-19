@@ -1,3 +1,4 @@
+import 'package:flipcodeattendence/Page/call_log_details_page.dart';
 import 'package:flipcodeattendence/Page/create_call_page.dart';
 import 'package:flipcodeattendence/helper/user_role_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
@@ -182,64 +183,69 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                     shrinkWrap: true,
                     itemCount: 1,
                     itemBuilder: (context, index) {
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 16.0),
-                        padding: EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.0),
-                            border: Border.all(color: AppColors.aPrimary)),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Jigar parmar',
-                                style: textTheme.titleLarge!
-                                    .copyWith(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 10.0),
-                            Row(
-                              children: [
-                                Icon(Icons.call),
-                                const SizedBox(width: 6.0),
-                                Text('+91 1234567890',
-                                    style: textTheme.bodyLarge),
-                              ],
-                            ),
-                            const SizedBox(height: 10.0),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(Icons.location_on_outlined),
-                                const SizedBox(width: 6.0),
-                                Expanded(
-                                    child: Text(
-                                        'Yoginagar society, Dalmil road, Surendranagar, 363001, Gujarat',
-                                        style: textTheme.bodyLarge)),
-                              ],
-                            ),
-                            const SizedBox(height: 10.0),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(Icons.message_outlined),
-                                const SizedBox(width: 6.0),
-                                Expanded(
-                                    child: Text(
-                                        'Office speaker is not working. Please fix as soon as possible.',
-                                        style: textTheme.bodyLarge)),
-                              ],
-                            ),
-                            const SizedBox(height: 10.0),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(Icons.date_range),
-                                const SizedBox(width: 6.0),
-                                Expanded(
-                                    child: Text('19-11-2024',
-                                        style: textTheme.bodyLarge)),
-                              ],
-                            ),
-                          ],
+                      return GestureDetector(
+                        onTap: (){
+                          push(context, CallLogDetailsPage());
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 16.0),
+                          padding: EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(color: AppColors.aPrimary)),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Jigar parmar',
+                                  style: textTheme.titleLarge!
+                                      .copyWith(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 10.0),
+                              Row(
+                                children: [
+                                  Icon(Icons.call),
+                                  const SizedBox(width: 6.0),
+                                  Text('+91 1234567890',
+                                      style: textTheme.bodyLarge),
+                                ],
+                              ),
+                              const SizedBox(height: 10.0),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.location_on_outlined),
+                                  const SizedBox(width: 6.0),
+                                  Expanded(
+                                      child: Text(
+                                          'Yoginagar society, Dalmil road, Surendranagar, 363001, Gujarat',
+                                          style: textTheme.bodyLarge)),
+                                ],
+                              ),
+                              const SizedBox(height: 10.0),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.message_outlined),
+                                  const SizedBox(width: 6.0),
+                                  Expanded(
+                                      child: Text(
+                                          'Office speaker is not working. Please fix as soon as possible.',
+                                          style: textTheme.bodyLarge)),
+                                ],
+                              ),
+                              const SizedBox(height: 10.0),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.date_range),
+                                  const SizedBox(width: 6.0),
+                                  Expanded(
+                                      child: Text('19-11-2024',
+                                          style: textTheme.bodyLarge)),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }),
@@ -378,5 +384,4 @@ class _CallTypeRadioListTileWidget extends State<CallTypeRadioListTileWidget> {
     );
   }
 }
-
 

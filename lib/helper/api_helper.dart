@@ -1,6 +1,6 @@
 class ApiHelper {
   static String baseUrl = 'https://dev.jayinfotech.org/';
-  static String loginUrl = '${baseUrl}login';
+  static String loginUrl = '${baseUrl}api/auth/login';
   static String changePasswordUrl = '${baseUrl}change-password';
   static String attendance = '${baseUrl}api/attendance';
   static String today = '${baseUrl}api/today-attendance';

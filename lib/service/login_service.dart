@@ -18,7 +18,6 @@ class LoginService {
           body: {'phone': phone, 'password': password});
       print("body=======");
       print(response.body);
-      print("body=======");
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {
         await SharedPreferencesService.setUserMobileNo(

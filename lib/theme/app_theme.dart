@@ -23,6 +23,9 @@ class AppTheme {
           backgroundColor: AppColors.onPrimaryLight,
           dividerColor: AppColors.aPrimary,
         ),
+        dividerTheme: DividerThemeData(
+          color: AppColors.aPrimary,
+        ),
         textTheme: TextStyleCustom.textThemeDark(),
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
@@ -33,6 +36,13 @@ class AppTheme {
                 foregroundColor: AppColors.onPrimaryLight,
                 iconColor: AppColors.onPrimaryLight,
                 textStyle: TextStyle(fontWeight: FontWeight.bold))),
+        expansionTileTheme: ExpansionTileThemeData(
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Colors.transparent
+            )
+          )
+        ),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
           backgroundColor: AppColors.aPrimary,
           foregroundColor: AppColors.onPrimaryLight,
