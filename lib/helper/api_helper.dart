@@ -10,6 +10,9 @@ class ApiHelper {
   static String updateToken = '${baseUrl}api/save-token';
 
   // Admin
+  static String getClients = '${baseUrl}api/client-list';
+  static String createCall = '${baseUrl}api/create-call';
+  static String callLogList = '${baseUrl}api/list-call';
   static String dailyAttendence = '${baseUrl}api/daily';
   static String leaveApplications = '${baseUrl}api/leave-applications';
   static String todayLeave = '${baseUrl}api/todaysLeave';

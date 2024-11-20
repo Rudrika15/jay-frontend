@@ -55,120 +55,123 @@ class _AdminHomePageState extends State<AdminHomePage> with NavigatorMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Image.asset(StringHelper.appLogo, width: 150),
-              StreamBuilder(
-                stream: currentTime(),
-                builder: (context, snapShot) {
-                  return Column(
-                    children: [
-                      Text(
-                        snapShot.data != null
-                            ? DateFormat.yMMMEd().format(snapShot.data!)
-                            : '',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
-          actions: [
-            NotificationButton(
-              isAdmin: true,
-            )
-          ],
-        ),
-        body: Consumer2<AttendanceProvider, TaskProvider>(
-          builder: (context, attendancValue, taskProvider, child) =>
-              RefreshIndicator(
-            onRefresh: () async {
-              attendancValue.getDailyAttendence();
-              taskProvider.getAllEmployeeTask(
-                  context: context,
-                  date: DateFormat('yyyy-MM-dd').format(DateTime.now()));
-              selectedDate = null;
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: attendancValue.isLoading
-                  ? Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : Column(
-                      children: [
-                        TextFormFieldWidget(
-                          isFilled: true,
-                          prefixWidget: Icon(
-                            CupertinoIcons.search,
-                            color: AppColors.onPrimaryBlack,
-                          ),
-                          hintText: StringHelper.search,
-                          borderColor: AppColors.grey,
-                          fillColor: AppColors.onPrimaryLight,
-                          onChanged: (value) {
-                            attendancValue.searchEmployee(value);
-                          },
-                          controller: TextEditingController_searchController,
-                          suffixIcon: IconButton(
-                            onPressed: () async {
-                              selectedDate = await showDatePicker(
-                                context: context,
-                                initialDate: selectedDate ?? DateTime.now(),
-                                firstDate: DateTime(1947, 1, 1),
-                                lastDate: DateTime.now(),
-                              );
-                              if (selectedDate != null) {
-                                attendancValue.getDailyAttendence(
-                                    date: DateFormat('yyyy-MM-dd')
-                                        .format(selectedDate!));
-                                taskProvider.getAllEmployeeTask(
-                                    context: context,
-                                    date: DateFormat('yyyy-MM-dd')
-                                        .format(selectedDate!));
-                              }
+        // appBar: AppBar(
+        //   title: Row(
+        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //     children: [
+        //       Image.asset(StringHelper.appLogo, width: 150),
+        //       StreamBuilder(
+        //         stream: currentTime(),
+        //         builder: (context, snapShot) {
+        //           return Column(
+        //             children: [
+        //               Text(
+        //                 snapShot.data != null
+        //                     ? DateFormat.yMMMEd().format(snapShot.data!)
+        //                     : '',
+        //                 style: Theme.of(context)
+        //                     .textTheme
+        //                     .bodyMedium!
+        //                     .copyWith(fontWeight: FontWeight.w500),
+        //               ),
+        //             ],
+        //           );
+        //         },
+        //       ),
+        //     ],
+        //   ),
+        //   actions: [
+        //     NotificationButton(
+        //       isAdmin: true,
+        //     )
+        //   ],
+        // ),
+        body: SafeArea(
+          child: Consumer2<AttendanceProvider, TaskProvider>(
+            builder: (context, attendancValue, taskProvider, child) =>
+                RefreshIndicator(
+              onRefresh: () async {
+                attendancValue.getDailyAttendence();
+                taskProvider.getAllEmployeeTask(
+                    context: context,
+                    date: DateFormat('yyyy-MM-dd').format(DateTime.now()));
+                selectedDate = null;
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: attendancValue.isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : Column(
+                        children: [
+                          const SizedBox(height: 12.0),
+                          TextFormFieldWidget(
+                            isFilled: true,
+                            prefixWidget: Icon(
+                              CupertinoIcons.search,
+                              color: AppColors.onPrimaryBlack,
+                            ),
+                            hintText: StringHelper.search,
+                            borderColor: AppColors.grey,
+                            fillColor: AppColors.onPrimaryLight,
+                            onChanged: (value) {
+                              attendancValue.searchEmployee(value);
                             },
-                            icon: Icon(Icons.date_range),
+                            controller: TextEditingController_searchController,
+                            suffixIcon: IconButton(
+                              onPressed: () async {
+                                selectedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: selectedDate ?? DateTime.now(),
+                                  firstDate: DateTime(1947, 1, 1),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (selectedDate != null) {
+                                  attendancValue.getDailyAttendence(
+                                      date: DateFormat('yyyy-MM-dd')
+                                          .format(selectedDate!));
+                                  taskProvider.getAllEmployeeTask(
+                                      context: context,
+                                      date: DateFormat('yyyy-MM-dd')
+                                          .format(selectedDate!));
+                                }
+                              },
+                              icon: Icon(Icons.date_range),
+                            ),
                           ),
-                        ),
-                        attendancValue.dailyAttendanceList?.isNotEmpty ?? false
-                            ? Expanded(
-                                child: ListView.builder(
-                                    itemCount: attendancValue
-                                            .dailyAttendanceList?.length ??
-                                        0,
-                                    itemBuilder: (context, index) {
-                                      final DailyAttendenceData?
-                                          dailyAttendenceData = attendancValue
-                                              .dailyAttendanceList?[index];
-                                      return Padding(
-                                        padding: const EdgeInsets.only(top: 10),
-                                        child: AttendanceCard(
-                                          attendenceData: dailyAttendenceData,
-                                          hasSubmittedTask: hasSubmittedTask(
-                                              userId: dailyAttendenceData
-                                                      ?.user?.id
-                                                      ?.toString()
-                                                      .trim() ??
-                                                  '0'),
-                                        ),
-                                      );
-                                    }),
-                              )
-                            : Expanded(
-                                child: Center(
-                                  child: Text(StringHelper.noAttendanceFound),
+                          attendancValue.dailyAttendanceList?.isNotEmpty ?? false
+                              ? Expanded(
+                                  child: ListView.builder(
+                                      itemCount: attendancValue
+                                              .dailyAttendanceList?.length ??
+                                          0,
+                                      itemBuilder: (context, index) {
+                                        final DailyAttendenceData?
+                                            dailyAttendenceData = attendancValue
+                                                .dailyAttendanceList?[index];
+                                        return Padding(
+                                          padding: const EdgeInsets.only(top: 10),
+                                          child: AttendanceCard(
+                                            attendenceData: dailyAttendenceData,
+                                            hasSubmittedTask: hasSubmittedTask(
+                                                userId: dailyAttendenceData
+                                                        ?.user?.id
+                                                        ?.toString()
+                                                        .trim() ??
+                                                    '0'),
+                                          ),
+                                        );
+                                      }),
+                                )
+                              : Expanded(
+                                  child: Center(
+                                    child: Text(StringHelper.noAttendanceFound),
+                                  ),
                                 ),
-                              ),
-                      ],
-                    ),
+                        ],
+                      ),
+              ),
             ),
           ),
         ));

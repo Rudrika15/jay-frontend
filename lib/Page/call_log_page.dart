@@ -6,6 +6,7 @@ import 'package:flipcodeattendence/widget/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../provider/call_log_provider.dart';
 import '../provider/login_provider.dart';
 import '../theme/app_colors.dart';
 
@@ -37,6 +38,8 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
         isUser = isNormalUser(userRole);
       });
     });
+    Provider.of<CallLogProvider>(context, listen: false)
+        .getCallLogs(context: context);
   }
 
   @override
@@ -107,7 +110,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                             );
                           }).then((value) {
                         setState(() {
-                          if(value != null) {
+                          if (value != null) {
                             _selectedChip = value;
                           }
                         });
@@ -151,7 +154,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                           horizontal: 12.0),
                                       child: Row(
                                         mainAxisAlignment:
-                                        MainAxisAlignment.end,
+                                            MainAxisAlignment.end,
                                         children: [
                                           CustomElevatedButton(
                                               buttonText: 'Ok',
@@ -168,8 +171,8 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                             );
                           }).then((value) {
                         setState(() {
-                          if(value != null) {
-                          _selectedCallType = value;
+                          if (value != null) {
+                            _selectedCallType = value;
                           }
                         });
                       });
@@ -179,76 +182,96 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
               ),
               const SizedBox(height: 12.0),
               Expanded(
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: 1,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: (){
-                          push(context, CallLogDetailsPage());
-                        },
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: 16.0),
-                          padding: EdgeInsets.all(12.0),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12.0),
-                              border: Border.all(color: AppColors.aPrimary)),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Jigar parmar',
-                                  style: textTheme.titleLarge!
-                                      .copyWith(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 10.0),
-                              Row(
-                                children: [
-                                  Icon(Icons.call),
-                                  const SizedBox(width: 6.0),
-                                  Text('+91 1234567890',
-                                      style: textTheme.bodyLarge),
-                                ],
-                              ),
-                              const SizedBox(height: 10.0),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(Icons.location_on_outlined),
-                                  const SizedBox(width: 6.0),
-                                  Expanded(
-                                      child: Text(
-                                          'Yoginagar society, Dalmil road, Surendranagar, 363001, Gujarat',
-                                          style: textTheme.bodyLarge)),
-                                ],
-                              ),
-                              const SizedBox(height: 10.0),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(Icons.message_outlined),
-                                  const SizedBox(width: 6.0),
-                                  Expanded(
-                                      child: Text(
-                                          'Office speaker is not working. Please fix as soon as possible.',
-                                          style: textTheme.bodyLarge)),
-                                ],
-                              ),
-                              const SizedBox(height: 10.0),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(Icons.date_range),
-                                  const SizedBox(width: 6.0),
-                                  Expanded(
-                                      child: Text('19-11-2024',
-                                          style: textTheme.bodyLarge)),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
+                child:
+                    Consumer<CallLogProvider>(builder: (context, provider, _) {
+                  return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: provider.callLogsModel?.data?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        final callLog = provider.callLogsModel?.data?[index];
+                        return provider.isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : (provider.callLogsModel?.data?.isEmpty ?? false)
+                                ? const Center(
+                                    child: Text('No call logs found'))
+                                : GestureDetector(
+                                    onTap: () {
+                                      push(context, CallLogDetailsPage());
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.only(bottom: 16.0),
+                                      padding: EdgeInsets.all(12.0),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                          border: Border.all(
+                                              color: AppColors.aPrimary)),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(callLog?.user?.name ?? '',
+                                              style: textTheme.titleLarge!
+                                                  .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                          const SizedBox(height: 10.0),
+                                          Row(
+                                            children: [
+                                              Icon(Icons.call),
+                                              const SizedBox(width: 6.0),
+                                              Text(callLog?.user?.phone ?? '',
+                                                  style: textTheme.bodyLarge),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10.0),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.location_on_outlined),
+                                              const SizedBox(width: 6.0),
+                                              Expanded(
+                                                  child: Text(
+                                                      'Yoginagar society, Dalmil road, Surendranagar, 363001, Gujarat',
+                                                      style:
+                                                          textTheme.bodyLarge)),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10.0),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.message_outlined),
+                                              const SizedBox(width: 6.0),
+                                              Expanded(
+                                                  child: Text(
+                                                      callLog?.description ?? '',
+                                                      style:
+                                                          textTheme.bodyLarge)),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10.0),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.date_range),
+                                              const SizedBox(width: 6.0),
+                                              Expanded(
+                                                  child: Text(callLog?.date ?? '',
+                                                      style:
+                                                          textTheme.bodyLarge)),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                      });
+                }),
               ),
               const SizedBox(height: 16.0),
             ],
@@ -384,4 +407,3 @@ class _CallTypeRadioListTileWidget extends State<CallTypeRadioListTileWidget> {
     );
   }
 }
-

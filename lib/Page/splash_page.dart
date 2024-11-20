@@ -21,6 +21,7 @@ class _SplashPageState extends State<SplashPage> with NavigatorMixin {
 
   void _navigateToNextScreen() async {
     final token = await SharedPreferencesService.getUserToken();
+    print(token);
 
     Future.delayed(
       Duration(seconds: 2),

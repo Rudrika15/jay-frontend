@@ -25,7 +25,6 @@ class Navbar extends StatefulWidget {
 
 class _NavbarState extends State<Navbar> with NavigatorMixin {
   int _selectedIndex = 0;
-  final _appVersionChecker = AppVersionChecker();
   final _connectivityService = ConnectivityService();
 
   @override
@@ -33,7 +32,6 @@ class _NavbarState extends State<Navbar> with NavigatorMixin {
     super.initState();
     // Provider.of<LoginProvider>(context, listen: false).updateToken();
     Provider.of<LoginProvider>(context, listen: false).getUserRole();
-    _appVersionChecker.checkForAppUpdate(context);
   }
 
   @override

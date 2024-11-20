@@ -1,4 +1,6 @@
 import 'package:flipcodeattendence/provider/app_provider.dart';
+import 'package:flipcodeattendence/provider/call_log_provider.dart';
+import 'package:flipcodeattendence/provider/client_provider.dart';
 import 'package:flipcodeattendence/provider/notification_provider.dart';
 import 'package:flipcodeattendence/provider/report_provider.dart';
 import 'package:flipcodeattendence/provider/task_provider.dart';
@@ -34,7 +36,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => TaskProvider()),
         ChangeNotifierProvider(create: (context) => AppProvider()),
         ChangeNotifierProvider(create: (context) => ReportProvider()),
-
+        ChangeNotifierProvider(create: (context) => ClientProvider()),
+        ChangeNotifierProvider(create: (context) => CallLogProvider()),
       ],
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,

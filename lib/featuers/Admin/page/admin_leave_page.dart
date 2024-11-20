@@ -57,147 +57,149 @@ class _AdminLeavePageState extends State<AdminLeavePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            StringHelper.leave,
-          ),
-          actions: [
-            NotificationButton(
-              isAdmin: true,
-            ),
-          ],
-        ),
-        body: Consumer<LeaveProvider>(
-          builder: (context, leave, child) => RefreshIndicator(
-            onRefresh: () async {
-              _pagingController.refresh();
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.only(bottom: 8, left: 16, right: 16),
-                  child: Wrap(
-                      spacing: 8,
-                      children: List<Widget>.generate(
-                          LeaveType.values.length, (index) {
-                        return ChoiceChip(
-                          label: Text(LeaveType.values[index].name),
-                          selected: _selectedChip == LeaveType.values[index],
-                          labelStyle: TextStyle(
-                              color: _selectedChip ==
-                                      LeaveType.values[index]
-                                  ? AppColors.backgroundLight
-                                  : AppColors.backgroundBlack),
-                          onSelected: (value) {
-                            setState(() {
-                              _selectedChip = LeaveType.values[index];
-                            });
-                            _pagingController.refresh();
+        // appBar: AppBar(
+        //   title: Text(
+        //     StringHelper.leave,
+        //   ),
+        //   actions: [
+        //     NotificationButton(
+        //       isAdmin: true,
+        //     ),
+        //   ],
+        // ),
+        body: SafeArea(
+          child: Consumer<LeaveProvider>(
+            builder: (context, leave, child) => RefreshIndicator(
+              onRefresh: () async {
+                _pagingController.refresh();
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(bottom: 8, left: 16, right: 16),
+                    child: Wrap(
+                        spacing: 8,
+                        children: List<Widget>.generate(
+                            LeaveType.values.length, (index) {
+                          return ChoiceChip(
+                            label: Text(LeaveType.values[index].name),
+                            selected: _selectedChip == LeaveType.values[index],
+                            labelStyle: TextStyle(
+                                color: _selectedChip ==
+                                        LeaveType.values[index]
+                                    ? AppColors.backgroundLight
+                                    : AppColors.backgroundBlack),
+                            onSelected: (value) {
+                              setState(() {
+                                _selectedChip = LeaveType.values[index];
+                              });
+                              _pagingController.refresh();
+                            },
+                          );
+                        }).toList()),
+                  ),
+                  Expanded(
+                    child: PagedListView<int, LeaveData>(
+                      pagingController: _pagingController,
+                      builderDelegate: PagedChildBuilderDelegate<LeaveData>(
+                        itemBuilder: (context, item, index) => CustomLeaveCard(
+                          isAdmin: true,
+                          isLoading: item.id == leave.updateId
+                              ? leave.isUpdating
+                              : false,
+                          leaveCreatedAt: item.createdAt,
+                          name: item.user?.name,
+                          leaveStartDate: item.startDate,
+                          leaveEndDate: item.endDate,
+                          leaveType: item.leaveType ?? '',
+                          leaveReason: item.reason ?? '',
+                          leaveStatus: item.status ?? '',
+                          phoneNumber: item.user?.phone ?? '',
+                          onCancelPressed: () async {
+                            await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CustomAlertWidget(
+                                    alertText: StringHelper
+                                        .cancelLeaveApplicationWarning,
+                                    icon: Icons.cancel_rounded,
+                                    onActionButtonPressed: () async {
+                                      Navigator.of(context).pop();
+                                      await leave
+                                          .cancelLeave(
+                                        context: context,
+                                        leaveId: item.id,
+                                      )
+                                          .then((value) {
+                                        if (value) {
+                                          _pagingController.refresh();
+                                        }
+                                      });
+                                    },
+                                  );
+                                });
                           },
-                        );
-                      }).toList()),
-                ),
-                Expanded(
-                  child: PagedListView<int, LeaveData>(
-                    pagingController: _pagingController,
-                    builderDelegate: PagedChildBuilderDelegate<LeaveData>(
-                      itemBuilder: (context, item, index) => CustomLeaveCard(
-                        isAdmin: true,
-                        isLoading: item.id == leave.updateId
-                            ? leave.isUpdating
-                            : false,
-                        leaveCreatedAt: item.createdAt,
-                        name: item.user?.name,
-                        leaveStartDate: item.startDate,
-                        leaveEndDate: item.endDate,
-                        leaveType: item.leaveType ?? '',
-                        leaveReason: item.reason ?? '',
-                        leaveStatus: item.status ?? '',
-                        phoneNumber: item.user?.phone ?? '',
-                        onCancelPressed: () async {
-                          await showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return CustomAlertWidget(
-                                  alertText: StringHelper
-                                      .cancelLeaveApplicationWarning,
-                                  icon: Icons.cancel_rounded,
-                                  onActionButtonPressed: () async {
-                                    Navigator.of(context).pop();
-                                    await leave
-                                        .cancelLeave(
-                                      context: context,
-                                      leaveId: item.id,
-                                    )
-                                        .then((value) {
-                                      if (value) {
-                                        _pagingController.refresh();
-                                      }
-                                    });
-                                  },
-                                );
-                              });
-                        },
-                        onApprovePressed: () async {
-                          await showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return CustomAlertWidget(
-                                  alertText:
-                                      StringHelper.approveLeaveConfirmation,
-                                  icon: Icons.check_circle,
-                                  iconColor: AppColors.green,
-                                  onActionButtonPressed: () async {
-                                    Navigator.of(context).pop();
-                                    await leave
-                                        .leaveAction(
-                                      context: context,
-                                      isApprove: true,
-                                      leaveId: item.id,
-                                    )
-                                        .then((value) {
-                                      if (value) {
-                                        _pagingController.refresh();
-                                      }
-                                    });
-                                  },
-                                );
-                              });
-                        },
-                        onRejectPressed: () async {
-                          await showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return CustomAlertWidget(
-                                  alertText:
-                                      StringHelper.rejectLeaveConfirmation,
-                                  icon: Icons.cancel_rounded,
-                                  iconColor: AppColors.green,
-                                  onActionButtonPressed: () async {
-                                    Navigator.of(context).pop();
-                                    await leave
-                                        .leaveAction(
-                                      context: context,
-                                      isApprove: false,
-                                      leaveId: item.id,
-                                    )
-                                        .then((value) {
-                                      if (value) {
-                                        _pagingController.refresh();
-                                      }
-                                    });
-                                  },
-                                );
-                              });
-                        },
+                          onApprovePressed: () async {
+                            await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CustomAlertWidget(
+                                    alertText:
+                                        StringHelper.approveLeaveConfirmation,
+                                    icon: Icons.check_circle,
+                                    iconColor: AppColors.green,
+                                    onActionButtonPressed: () async {
+                                      Navigator.of(context).pop();
+                                      await leave
+                                          .leaveAction(
+                                        context: context,
+                                        isApprove: true,
+                                        leaveId: item.id,
+                                      )
+                                          .then((value) {
+                                        if (value) {
+                                          _pagingController.refresh();
+                                        }
+                                      });
+                                    },
+                                  );
+                                });
+                          },
+                          onRejectPressed: () async {
+                            await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CustomAlertWidget(
+                                    alertText:
+                                        StringHelper.rejectLeaveConfirmation,
+                                    icon: Icons.cancel_rounded,
+                                    iconColor: AppColors.green,
+                                    onActionButtonPressed: () async {
+                                      Navigator.of(context).pop();
+                                      await leave
+                                          .leaveAction(
+                                        context: context,
+                                        isApprove: false,
+                                        leaveId: item.id,
+                                      )
+                                          .then((value) {
+                                        if (value) {
+                                          _pagingController.refresh();
+                                        }
+                                      });
+                                    },
+                                  );
+                                });
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ));
