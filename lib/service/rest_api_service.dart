@@ -12,7 +12,7 @@ class RestApiService {
       {required String url,
       required HttpRequestType requestType,
       Map<String, String>? header,
-      Map<String, String>? body}) async {
+      dynamic body}) async {
     final parsedUrl = Uri.parse(url);
     printParameters(url: url,requestType: requestType,header: header,body: body);
     try {
@@ -22,7 +22,7 @@ class RestApiService {
         request.headers.addAll(header);
       }
       if (body != null) {
-        request.bodyFields = body;
+        request.body = body;
       }
       final response = await request.send();
       final data = await http.Response.fromStream(response);

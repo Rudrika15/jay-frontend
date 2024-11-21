@@ -4,6 +4,7 @@ import 'package:flipcodeattendence/provider/client_provider.dart';
 import 'package:flipcodeattendence/provider/notification_provider.dart';
 import 'package:flipcodeattendence/provider/report_provider.dart';
 import 'package:flipcodeattendence/provider/task_provider.dart';
+import 'package:flipcodeattendence/provider/team_provider.dart';
 import '/provider/attendance_provider.dart';
 import '/provider/leave_provider.dart';
 import '/provider/login_provider.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ReportProvider()),
         ChangeNotifierProvider(create: (context) => ClientProvider()),
         ChangeNotifierProvider(create: (context) => CallLogProvider()),
+        ChangeNotifierProvider(create: (context) => TeamProvider()),
       ],
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,

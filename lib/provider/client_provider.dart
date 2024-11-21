@@ -49,6 +49,7 @@ class ClientProvider extends ChangeNotifier {
       {required BuildContext context,
       required String description,
       required String date,
+      required String address,
       String? client_id,
       File? photo}) async {
     final url = ApiHelper.createCall;
@@ -57,6 +58,7 @@ class ClientProvider extends ChangeNotifier {
     final request = await http.MultipartRequest('POST', Uri.parse(url));
     request.headers.addAll(header);
     request.fields['description'] = description;
+    request.fields['address'] = address;
     request.fields['date'] = date;
     if (client_id != null) {
       request.fields['client_id'] = client_id;

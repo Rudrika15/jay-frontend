@@ -1,17 +1,17 @@
-class CallLogsModel {
+class TeamModel {
   bool? status;
   String? message;
-  List<CallLog>? data;
+  List<Data>? data;
 
-  CallLogsModel({this.status, this.message, this.data});
+  TeamModel({this.status, this.message, this.data});
 
-  CallLogsModel.fromJson(Map<String, dynamic> json) {
+  TeamModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = <CallLog>[];
+      data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new CallLog.fromJson(v));
+        data!.add(new Data.fromJson(v));
       });
     }
   }
@@ -27,38 +27,61 @@ class CallLogsModel {
   }
 }
 
-class CallLog {
+class Data {
   int? id;
-  String? date;
-  int? userId;
-  String? photo;
-  String? description;
-  String? address;
-  String? status;
+  String? name;
+  String? createdAt;
+  String? updatedAt;
+  List<Members>? members;
+
+  Data({this.id, this.name, this.createdAt, this.updatedAt, this.members});
+
+  Data.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    if (json['members'] != null) {
+      members = <Members>[];
+      json['members'].forEach((v) {
+        members!.add(new Members.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    if (this.members != null) {
+      data['members'] = this.members!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class Members {
+  int? id;
+  String? teamId;
+  String? userId;
   String? createdAt;
   String? updatedAt;
   User? user;
 
-  CallLog(
+  Members(
       {this.id,
-        this.date,
+        this.teamId,
         this.userId,
-        this.photo,
-        this.description,
-        this.address,
-        this.status,
         this.createdAt,
         this.updatedAt,
         this.user});
 
-  CallLog.fromJson(Map<String, dynamic> json) {
+  Members.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    date = json['date'];
+    teamId = json['teamId'];
     userId = json['userId'];
-    photo = json['photo'];
-    description = json['description'];
-    address = json['address'];
-    status = json['status'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
@@ -67,12 +90,8 @@ class CallLog {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
-    data['date'] = this.date;
+    data['teamId'] = this.teamId;
     data['userId'] = this.userId;
-    data['photo'] = this.photo;
-    data['description'] = this.description;
-    data['address'] = this.address;
-    data['status'] = this.status;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     if (this.user != null) {
@@ -87,7 +106,7 @@ class User {
   String? name;
   String? phone;
   String? email;
-  String? token;
+  Null? token;
   String? birthdate;
   String? createdAt;
   String? updatedAt;

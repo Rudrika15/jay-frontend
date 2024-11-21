@@ -33,6 +33,7 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
   final dateController = TextEditingController();
   final textController = TextEditingController();
   final clientController = TextEditingController();
+  final addressController = TextEditingController();
   String? userRole, clientId;
 
   @override
@@ -47,6 +48,7 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
     dateController.dispose();
     textController.dispose();
     clientController.dispose();
+    addressController.dispose();
     super.dispose();
   }
 
@@ -176,8 +178,15 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
               ],
               TextFormFieldWidget(
                 controller: textController,
-                maxLines: 10,
+                maxLines: 3,
                 labelText: 'Description',
+                validator: (value) => value?.isEmptyString,
+              ),
+              const SizedBox(height: 16.0),
+              TextFormFieldWidget(
+                controller: addressController,
+                maxLines: 3,
+                labelText: 'Address',
                 validator: (value) => value?.isEmptyString,
               ),
             ],
@@ -203,6 +212,7 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                                 description: textController.text,
                                 date: formattedDate,
                                 client_id: clientId,
+                                address: addressController.text,
                                 photo: file);
                         if(result) {
                           clearData();
