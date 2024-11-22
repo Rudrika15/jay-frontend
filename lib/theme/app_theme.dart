@@ -9,6 +9,9 @@ class AppTheme {
         fontFamily: 'Poppins',
         scaffoldBackgroundColor: AppColors.backgroundLight,
         canvasColor: AppColors.backgroundLight,
+        popupMenuTheme: PopupMenuThemeData(
+          color: AppColors.onPrimaryLight,
+        ),
         bottomSheetTheme: BottomSheetThemeData(
           backgroundColor: AppColors.onPrimaryLight
         ),

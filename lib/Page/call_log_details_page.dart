@@ -132,7 +132,15 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                   labelText: 'Select team',
                   controller: teamController,
                   readOnly: true,
-                  suffixIcon: const Icon(Icons.arrow_drop_down_circle_outlined),
+                  suffixIcon: (teamController.text.trim().isEmpty)
+                      ? const Icon(Icons.arrow_drop_down_circle_outlined)
+                      : IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () {
+                            setState(() {
+                              teamController.clear();
+                            });
+                          }),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please select team';
@@ -141,13 +149,19 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                     }
                   },
                   onTap: () async {
-                    this.selectedMembers = await showModalBottomSheet(
+                    await showModalBottomSheet(
                         context: context,
-                        builder: (context) => TeamBottomSheet());
-                    if (selectedMembers.isNotEmpty) {
-                      teamController.text =
-                          "${selectedMembers[0].user!.name}, ${selectedMembers[1].user!.name}";
-                    }
+                        builder: (context) => TeamBottomSheet()).then((value) {
+                      if (value != null) {
+                        this.selectedMembers = value;
+                        if (selectedMembers.isNotEmpty) {
+                          setState(() {
+                            teamController.text =
+                                "${selectedMembers[0].user!.name}, ${selectedMembers[1].user!.name}";
+                          });
+                        }
+                      }
+                    });
                   },
                 ),
                 const SizedBox(height: 16.0),
@@ -203,7 +217,10 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
           children: [
             Expanded(
                 child: CustomOutlinedButton(
-                    buttonText: 'Cancel', onPressed: () {})),
+                    buttonText: 'Cancel',
+                    onPressed: () {
+                      Navigator.pop(context, false);
+                    })),
             const SizedBox(width: 16.0),
             Expanded(
                 child: CustomElevatedButton(

@@ -16,6 +16,9 @@ class ApiHelper {
   static String teamList = '${baseUrl}api/team-list';
   static String assignTask = '${baseUrl}api/assign-task';
   static String getCallDetail = '${baseUrl}api/get-call-detail';
+  static String changeStatus = '${baseUrl}api/chage-status';
+
+
   static String dailyAttendence = '${baseUrl}api/daily';
   static String leaveApplications = '${baseUrl}api/leave-applications';
   static String todayLeave = '${baseUrl}api/todaysLeave';

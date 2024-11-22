@@ -64,6 +64,31 @@ class CallLogProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> changeStatus(
+      {required String id, required BuildContext context, required CallStatusEnum status}) async {
+    final url = ApiHelper.changeStatus;
+    final token = await SharedPreferencesService.getUserToken();
+    final header = {"Authorization": "Bearer $token", "Content-Type": "application/json"};
+    final _body = {
+      "id": id,
+      "status": status.name.trim().toLowerCase()
+    };
+    _isLoading = true;
+    try {
+      final response = await apiService.invokeApi(
+          url: url, header: header, body: jsonEncode(_body),requestType: HttpRequestType.get);
+      final body = jsonDecode(response.body);
+      CommonWidgets.customSnackBar(context: context, title: body['message']);
+      return true;
+    } catch (e) {
+      CommonWidgets.customSnackBar(context: context, title: e.toString());
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> assignTask({
     required BuildContext context,
     required String timeSlot,
