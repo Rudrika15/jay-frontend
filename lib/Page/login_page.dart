@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -99,25 +100,17 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                       fillColor: AppColors.backgroundLight,
                       hintText: StringHelper.passWordTextFieldHint,
                       prefixWidget: Icon(
-                        Icons.lock,
+                        Icons.password,
                         color: AppColors.onPrimaryBlack,
                       ),
+                      suffixIcon: IconButton(
+                        icon: Icon(showPassword ? Icons.visibility : Icons.visibility_off),
+                        onPressed: (){
+                          showPassword = !showPassword;
+                          setState(() {});
+                        },
+                      ),
                       keyboardType: TextInputType.number,
-                    ),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: showPassword,
-                          onChanged: (value) {
-                            if (value != null) {
-                              showPassword = !showPassword;
-                              setState(() {});
-                            }
-                          },
-                          visualDensity: VisualDensity(horizontal: -4),
-                        ),
-                        Text(StringHelper.showPassword),
-                      ],
                     ),
                     SizedBox(height: 16),
                     Row(

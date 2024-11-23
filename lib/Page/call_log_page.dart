@@ -4,6 +4,8 @@ import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/helper/user_role_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flipcodeattendence/models/call_logs_model.dart';
+import 'package:flipcodeattendence/provider/call_status_provider.dart';
+import 'package:flipcodeattendence/widget/call_log_action_widget.dart';
 import 'package:flipcodeattendence/widget/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -25,21 +27,18 @@ class CallLogPage extends StatefulWidget {
 class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
   String? userRole;
   bool isUser = false;
-  CallStatusEnum _selectedCallType = CallStatusEnum.values.first;
-  final dateController = TextEditingController();
   bool _isFabVisible = true;
   late ScrollController _scrollController;
+  final dateController = TextEditingController();
+  CallStatusEnum _selectedCallType = CallStatusEnum.values.first;
 
   @override
   void initState() {
     super.initState();
-    Provider.of<LoginProvider>(context, listen: false)
-        .getUserRole()
-        .then((value) {
-      userRole = value;
-      setState(() {
-        isUser = isNormalUser(userRole);
-      });
+    _selectedCallType = context.read<CallStatusProvider>().callStatusEnum;
+    userRole = context.read<LoginProvider>().userRole;
+    setState(() {
+      isUser = isNormalUser(userRole);
     });
     getCallLogs();
     _scrollController = ScrollController();
@@ -72,21 +71,20 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
   }
 
   Future<void> getCallLogs() async {
-    Provider.of<CallLogProvider>(context, listen: false)
-        .getCallLogs(context: context, status: _selectedCallType);
+    Provider.of<CallLogProvider>(context, listen: false).getCallLogs(
+        context: context,
+        status: context.read<CallStatusProvider>().callStatusEnum);
   }
 
-  Future<void> changeStatus({required String id,required CallStatusEnum status }) async {
-      Provider.of<CallLogProvider>(context,
-          listen: false)
-          .changeStatus(
-          id: id,
-          context: context,
-          status: status).then((value) {
-            if(value) {
-              getCallLogs();
-            }
-          });
+  Future<void> changeStatus(
+      {required String id, required CallStatusEnum status}) async {
+    Provider.of<CallLogProvider>(context, listen: false)
+        .changeStatus(id: id, context: context, status: status)
+        .then((value) {
+      if (value) {
+        getCallLogs();
+      }
+    });
   }
 
   @override
@@ -142,7 +140,10 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                     label: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(_selectedCallType.name),
+                        Text(context
+                            .watch<CallStatusProvider>()
+                            .callStatusEnum
+                            .name),
                         const Icon(Icons.arrow_drop_down),
                       ],
                     ),
@@ -151,15 +152,9 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                           context: context,
                           isScrollControlled: true,
                           builder: (context) {
-                            return CallTypeRadioListTileWidget(
-                                initialValue: _selectedCallType);
+                            return CallTypeRadioListTileWidget();
                           }).then((value) {
-                        setState(() {
-                          if (value != null) {
-                            _selectedCallType = value;
-                            getCallLogs();
-                          }
-                        });
+                        if (value == true) getCallLogs();
                       });
                     },
                   ),
@@ -193,23 +188,22 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                                           .toString())))
                                           .then((value) {
                                         if (value == true) {
-                                          Provider.of<CallLogProvider>(context,
-                                                  listen: false)
-                                              .getCallLogs(context: context);
+                                          getCallLogs();
                                         }
                                       });
                                     },
                                     child: CallLogDetails(
                                       callLog: callLog,
                                       onTapCancel: () {
-                                        changeStatus(id: callLog?.id.toString() ?? '', status: CallStatusEnum.cancelled);
+                                        pop(context);
+                                        changeStatus(
+                                            id: callLog?.id.toString() ?? '',
+                                            status: CallStatusEnum.cancelled);
                                       },
                                       onTapWaiting: () {
-                                        Provider.of<CallLogProvider>(context,
-                                            listen: false)
-                                            .changeStatus(
+                                        pop(context);
+                                        changeStatus(
                                             id: callLog?.id.toString() ?? '',
-                                            context: context,
                                             status: CallStatusEnum.waiting);
                                       },
                                     ),
@@ -222,7 +216,8 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
           ),
         ),
       ),
-      floatingActionButton: (!isUser)
+      floatingActionButton: (context.read<LoginProvider>().isAdmin ||
+              context.read<LoginProvider>().isClient)
           ? AnimatedOpacity(
               opacity: _isFabVisible ? 1.0 : 0.0,
               duration: Duration(milliseconds: 350),
@@ -230,7 +225,14 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                 ignoring: !_isFabVisible,
                 child: FloatingActionButton(
                   onPressed: () {
-                    push(context, CreateCallPage());
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(
+                            builder: (context) => CreateCallPage()))
+                        .then((value) {
+                      if (value == true) {
+                        getCallLogs();
+                      }
+                    });
                   },
                   child: const Icon(Icons.add),
                 ),
@@ -242,9 +244,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
 }
 
 class CallTypeRadioListTileWidget extends StatefulWidget {
-  final CallStatusEnum? initialValue;
-
-  const CallTypeRadioListTileWidget({super.key, required this.initialValue});
+  const CallTypeRadioListTileWidget({super.key});
 
   @override
   State<CallTypeRadioListTileWidget> createState() =>
@@ -252,12 +252,12 @@ class CallTypeRadioListTileWidget extends StatefulWidget {
 }
 
 class _CallTypeRadioListTileWidget extends State<CallTypeRadioListTileWidget> {
-  CallStatusEnum? _selectedValue;
+  late CallStatusEnum _selectedValue;
 
   @override
   void initState() {
     super.initState();
-    _selectedValue = widget.initialValue;
+    _selectedValue = context.read<CallStatusProvider>().callStatusEnum;
   }
 
   @override
@@ -297,11 +297,14 @@ class _CallTypeRadioListTileWidget extends State<CallTypeRadioListTileWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              CustomElevatedButton(
-                  buttonText: 'Apply',
-                  onPressed: () {
-                    Navigator.pop(context, _selectedValue);
-                  })
+              Consumer<CallStatusProvider>(builder: (context, provider, _) {
+                return CustomElevatedButton(
+                    buttonText: 'Apply',
+                    onPressed: () {
+                      provider.changeStatus(_selectedValue);
+                      Navigator.pop(context, true);
+                    });
+              })
             ],
           ),
         ),
@@ -321,6 +324,7 @@ class CallLogDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final status = context.read<CallStatusProvider>().callStatusEnum;
     return Container(
       margin: EdgeInsets.only(bottom: 16.0),
       padding: EdgeInsets.all(12.0),
@@ -345,37 +349,55 @@ class CallLogDetails extends StatelessWidget {
                       visualDensity: VisualDensity(vertical: -4),
                       shape: StadiumBorder(),
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  const SizedBox(width: 6.0),
-                  PopupMenuButton(
-                    padding: EdgeInsets.zero,
-                    style: ButtonStyle(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      visualDensity:
-                          VisualDensity(vertical: -4, horizontal: -4),
-                    ),
-                    itemBuilder: (context) {
-                      return [
-                        PopupMenuItem(
-                            child: Row(
-                              children: [
-                                const Icon(Icons.cancel),
-                                const SizedBox(width: 8.0),
-                                const Text('Cancel'),
-                              ],
-                            ),
-                            onTap: onTapCancel),
-                        PopupMenuItem(
-                            child: Row(
-                              children: [
-                                const Icon(Icons.timelapse),
-                                const SizedBox(width: 8.0),
-                                const Text('Add to waiting list'),
-                              ],
-                            ),
-                            onTap: onTapWaiting),
-                      ];
-                    },
-                  ),
+                  if (status == CallStatusEnum.pending ||
+                      status == CallStatusEnum.waiting) ...[
+                    const SizedBox(width: 6.0),
+                    IconButton(
+                        visualDensity:
+                            VisualDensity(horizontal: -4, vertical: -4),
+                        padding: EdgeInsets.zero,
+                        onPressed: () async {
+                          await showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return CallLogActionWidget(
+                                  onTapWaiting: onTapWaiting,
+                                  onTapCancel: onTapCancel,
+                                );
+                              });
+                        },
+                        icon: const Icon(Icons.more_vert))
+                  ],
+                  // PopupMenuButton(
+                  //   padding: EdgeInsets.zero,
+                  //   style: ButtonStyle(
+                  //     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  //     visualDensity:
+                  //         VisualDensity(vertical: -4, horizontal: -4),
+                  //   ),
+                  //   itemBuilder: (context) {
+                  //     return [
+                  //       PopupMenuItem(
+                  //           child: Row(
+                  //             children: [
+                  //               const Icon(Icons.cancel),
+                  //               const SizedBox(width: 8.0),
+                  //               const Text('Cancel'),
+                  //             ],
+                  //           ),
+                  //           onTap: onTapCancel),
+                  //       PopupMenuItem(
+                  //           child: Row(
+                  //             children: [
+                  //               const Icon(Icons.timelapse),
+                  //               const SizedBox(width: 8.0),
+                  //               const Text('Add to waiting list'),
+                  //             ],
+                  //           ),
+                  //           onTap: onTapWaiting),
+                  //     ];
+                  //   },
+                  // ),
                 ],
               )
             ],

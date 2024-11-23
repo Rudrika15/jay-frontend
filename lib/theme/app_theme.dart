@@ -27,7 +27,7 @@ class AppTheme {
           dividerColor: AppColors.aPrimary,
         ),
         dividerTheme: DividerThemeData(
-          color: AppColors.aPrimary,
+          color: AppColors.onPrimaryBlack,
         ),
         textTheme: TextStyleCustom.textThemeDark(),
         elevatedButtonTheme: ElevatedButtonThemeData(

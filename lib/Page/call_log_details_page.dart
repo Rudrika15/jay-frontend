@@ -50,7 +50,34 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          PopupMenuButton(
+            itemBuilder: (context) {
+              return [
+                PopupMenuItem(
+                    child: Row(
+                      children: [
+                        const Icon(Icons.cancel),
+                        const SizedBox(width: 8.0),
+                        const Text('Cancel'),
+                      ],
+                    ),
+                    onTap: (){}),
+                PopupMenuItem(
+                    child: Row(
+                      children: [
+                        const Icon(Icons.timelapse),
+                        const SizedBox(width: 8.0),
+                        const Text('Add to waiting list'),
+                      ],
+                    ),
+                    onTap: (){}),
+              ];
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Consumer<CallLogProvider>(builder: (context, provider, _) {
@@ -110,7 +137,15 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                   labelText: 'Select time slot',
                   controller: timeSlotController,
                   readOnly: true,
-                  suffixIcon: const Icon(Icons.arrow_drop_down_circle_outlined),
+                  suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          timeSlotController.clear();
+                        });
+                      },
+                      icon: timeSlotController.text.trim().isEmpty
+                          ? Icon(Icons.arrow_drop_down_circle_outlined)
+                          : Icon(Icons.close)),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please select time slot';
@@ -124,6 +159,7 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                         builder: (context) => TimeSlotBottomSheet());
                     if (timeSlot != null) {
                       timeSlotController.text = timeSlot.name;
+                      setState(() {});
                     }
                   },
                 ),
@@ -168,7 +204,7 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                 TextFormFieldWidget(
                   labelText: 'Enter charge',
                   controller: chargeController,
-                  suffixIcon: const Icon(Icons.currency_rupee),
+                  suffixIcon: Icon(Icons.currency_rupee),
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   validator: (value) {

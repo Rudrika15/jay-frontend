@@ -156,7 +156,15 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                   labelText: 'Select client',
                   controller: clientController,
                   readOnly: true,
-                  suffixIcon: const Icon(Icons.arrow_drop_down_circle_outlined),
+                  suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          clientController.clear();
+                        });
+                      },
+                      icon: clientController.text.trim().isEmpty
+                          ? Icon(Icons.arrow_drop_down_circle_outlined)
+                          : Icon(Icons.close)),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please select client';
@@ -171,6 +179,7 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                     if (clientRecord != null) {
                       clientController.text = clientRecord.name ?? '';
                       clientId = clientRecord.id;
+                      setState(() {});
                     }
                   },
                 ),
@@ -202,8 +211,10 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                     buttonText: 'Submit',
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        final date = DateFormat('dd-MM-yyyy').parse(dateController.text);
-                        final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+                        final date =
+                            DateFormat('dd-MM-yyyy').parse(dateController.text);
+                        final formattedDate =
+                            DateFormat('yyyy-MM-dd').format(date);
                         final result = await Provider.of<ClientProvider>(
                                 context,
                                 listen: false)
@@ -214,8 +225,9 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                                 client_id: clientId,
                                 address: addressController.text,
                                 photo: file);
-                        if(result) {
+                        if (result) {
                           clearData();
+                          Navigator.pop(context, true);
                         }
                       }
                     })),
