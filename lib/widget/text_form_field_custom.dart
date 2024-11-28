@@ -39,7 +39,7 @@ class TextFormFieldWidget extends StatefulWidget {
       this.hintText,
       this.hintTextStyle,
       this.prefixWidget,
-        this.onTap,
+      this.onTap,
       this.isFocused = _defaultAutofocused,
       this.validator,
       this.onSaved,

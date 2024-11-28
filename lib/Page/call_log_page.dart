@@ -25,8 +25,6 @@ class CallLogPage extends StatefulWidget {
 }
 
 class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
-  String? userRole;
-  bool isUser = false;
   bool _isFabVisible = true;
   late ScrollController _scrollController;
   final dateController = TextEditingController();
@@ -36,10 +34,6 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
   void initState() {
     super.initState();
     _selectedCallType = context.read<CallStatusProvider>().callStatusEnum;
-    userRole = context.read<LoginProvider>().userRole;
-    setState(() {
-      isUser = isNormalUser(userRole);
-    });
     getCallLogs();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
@@ -55,25 +49,23 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
   void _onScroll() {
     if (_scrollController.position.userScrollDirection ==
         ScrollDirection.reverse) {
-      if (_isFabVisible) {
+      if (_isFabVisible)
         setState(() {
           _isFabVisible = false;
         });
-      }
     } else if (_scrollController.position.userScrollDirection ==
         ScrollDirection.forward) {
-      if (!_isFabVisible) {
+      if (!_isFabVisible)
         setState(() {
           _isFabVisible = true;
         });
-      }
     }
   }
 
   Future<void> getCallLogs() async {
-    Provider.of<CallLogProvider>(context, listen: false).getCallLogs(
-        context: context,
-        status: context.read<CallStatusProvider>().callStatusEnum);
+      Provider.of<CallLogProvider>(context, listen: false).getCallLogs(
+          context: context,
+          status: context.read<CallStatusProvider>().callStatusEnum);
   }
 
   Future<void> changeStatus(
@@ -81,9 +73,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
     Provider.of<CallLogProvider>(context, listen: false)
         .changeStatus(id: id, context: context, status: status)
         .then((value) {
-      if (value) {
-        getCallLogs();
-      }
+      if (value) getCallLogs();
     });
   }
 
@@ -91,51 +81,50 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 12.0, right: 12.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Wrap(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Wrap(
                 spacing: 8.0,
                 children: [
                   InputChip(
-                    padding: EdgeInsets.zero,
-                    deleteIcon: Icon(
-                        dateController.text.isEmpty
-                            ? Icons.calendar_month
-                            : Icons.close,
-                        size: 18),
-                    label: Text(dateController.text.isNotEmpty
-                        ? dateController.text
-                        : 'Date'),
-                    onPressed: () async {
-                      final initialDate = dateController.text.isEmpty
-                          ? DateTime.now()
-                          : DateFormat('dd-MM-yyyy').parse(dateController.text);
-                      final pickedDate = await showDatePicker(
-                        context: context,
-                        firstDate: DateTime(2024),
-                        lastDate: DateTime(2025),
-                        initialDate: initialDate,
-                        currentDate: DateTime.now(),
-                        initialEntryMode: DatePickerEntryMode.calendarOnly,
-                      );
-                      if (pickedDate != null) {
-                        setState(() {
-                          dateController.text =
-                              DateFormat('dd-MM-yyyy').format(pickedDate);
-                        });
-                      }
-                    },
-                    onDeleted: () {
-                      setState(() {
-                        dateController.clear();
-                      });
-                    },
-                  ),
+                    tooltip: 'Date',
+                      padding: EdgeInsets.zero,
+                      deleteIcon: Icon(
+                          dateController.text.isEmpty
+                              ? Icons.calendar_month
+                              : Icons.close,
+                          size: 18),
+                      label: Text(dateController.text.isNotEmpty
+                          ? dateController.text
+                          : 'Date'),
+                      onPressed: () async {
+                        final initialDate = dateController.text.isEmpty
+                            ? DateTime.now()
+                            : DateFormat('dd-MM-yyyy')
+                                .parse(dateController.text);
+                        final pickedDate = await showDatePicker(
+                          context: context,
+                          firstDate: DateTime(2024),
+                          lastDate: DateTime(2025),
+                          initialDate: initialDate,
+                          currentDate: DateTime.now(),
+                          initialEntryMode: DatePickerEntryMode.calendarOnly,
+                        );
+                        if (pickedDate != null)
+                          setState(() {
+                            dateController.text =
+                                DateFormat('dd-MM-yyyy').format(pickedDate);
+                          });
+                      },
+                      onDeleted: () => setState(() {
+                            dateController.clear();
+                          })),
                   ActionChip(
+                    tooltip: 'Status',
                     padding: EdgeInsets.zero,
                     label: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -147,7 +136,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                         const Icon(Icons.arrow_drop_down),
                       ],
                     ),
-                    onPressed: () async {
+                    onPressed: (context.read<LoginProvider>().isUser) ? null : () async {
                       await showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -160,60 +149,75 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                   ),
                 ],
               ),
-              const SizedBox(height: 4.0),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () async => getCallLogs(),
-                  child: Consumer<CallLogProvider>(
-                      builder: (context, provider, _) {
-                    return provider.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : (provider.callLogsModel?.data?.isEmpty ?? false)
-                            ? const Center(child: Text('No call logs found'))
-                            : ListView.builder(
-                                shrinkWrap: true,
-                                controller: _scrollController,
-                                itemCount:
-                                    provider.callLogsModel?.data?.length ?? 0,
-                                itemBuilder: (context, index) {
-                                  final callLog =
-                                      provider.callLogsModel?.data?[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.of(context)
-                                          .push(MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CallLogDetailsPage(
-                                                      id: callLog!.id
-                                                          .toString())))
-                                          .then((value) {
-                                        if (value == true) {
-                                          getCallLogs();
-                                        }
-                                      });
+            ),
+            const SizedBox(height: 4.0),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async => getCallLogs(),
+                child:
+                    Consumer<CallLogProvider>(builder: (context, provider, _) {
+                  return provider.isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : (provider.callLogsModel?.data?.isEmpty ?? false)
+                          ? const Center(child: Text('No call logs found'))
+                          : ListView.separated(
+                              shrinkWrap: true,
+                              controller: _scrollController,
+                              itemCount:
+                                  provider.callLogsModel?.data?.length ?? 0,
+                              itemBuilder: (context, index) {
+                                final callLog =
+                                    provider.callLogsModel?.data?[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                            builder: (context) =>
+                                                CallLogDetailsPage(
+                                                    id: callLog!.id
+                                                        .toString())))
+                                        .then((value) {
+                                      if (value == true) {
+                                        getCallLogs();
+                                      }
+                                    });
+                                  },
+                                  child: CallLogDetails(
+                                    callLog: callLog,
+                                    onTapCancel: () {
+                                      pop(context);
+                                      changeStatus(
+                                          id: callLog?.id.toString() ?? '',
+                                          status: CallStatusEnum.cancelled);
                                     },
-                                    child: CallLogDetails(
-                                      callLog: callLog,
-                                      onTapCancel: () {
-                                        pop(context);
-                                        changeStatus(
-                                            id: callLog?.id.toString() ?? '',
-                                            status: CallStatusEnum.cancelled);
-                                      },
-                                      onTapWaiting: () {
-                                        pop(context);
-                                        changeStatus(
-                                            id: callLog?.id.toString() ?? '',
-                                            status: CallStatusEnum.waiting);
-                                      },
-                                    ),
-                                  );
-                                });
-                  }),
-                ),
+                                    onTapWaiting: () {
+                                      pop(context);
+                                      changeStatus(
+                                          id: callLog?.id.toString() ?? '',
+                                          status: CallStatusEnum.waiting);
+                                    },
+                                    onTapComplete: () {
+                                      pop(context);
+                                      changeStatus(
+                                          id: callLog?.id.toString() ?? '',
+                                          status: CallStatusEnum.completed);
+                                    },
+                                    onTapPending: () {
+                                      pop(context);
+                                      changeStatus(
+                                          id: callLog?.id.toString() ?? '',
+                                          status: CallStatusEnum.pending);
+                                    },
+                                  ),
+                                );
+                              },
+                              separatorBuilder: (context, index) =>
+                                  const Divider(color: AppColors.grey),
+                            );
+                }),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: (context.read<LoginProvider>().isAdmin ||
@@ -235,6 +239,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                     });
                   },
                   child: const Icon(Icons.add),
+                  tooltip: 'Create call',
                 ),
               ),
             )
@@ -316,10 +321,15 @@ class _CallTypeRadioListTileWidget extends State<CallTypeRadioListTileWidget> {
 
 class CallLogDetails extends StatelessWidget {
   final CallLog? callLog;
-  final void Function()? onTapCancel, onTapWaiting;
+  final void Function()? onTapCancel, onTapWaiting, onTapComplete, onTapPending;
 
   const CallLogDetails(
-      {super.key, this.callLog, this.onTapCancel, this.onTapWaiting});
+      {super.key,
+      this.callLog,
+      this.onTapCancel,
+      this.onTapWaiting,
+      this.onTapComplete,
+      this.onTapPending});
 
   @override
   Widget build(BuildContext context) {
@@ -328,9 +338,9 @@ class CallLogDetails extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 16.0),
       padding: EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(color: AppColors.aPrimary)),
+      // decoration: BoxDecoration(
+      //     borderRadius: BorderRadius.circular(12.0),
+      //     border: Border.all(color: AppColors.aPrimary)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,18 +353,20 @@ class CallLogDetails extends StatelessWidget {
                       .copyWith(fontWeight: FontWeight.bold)),
               Row(
                 children: [
-                  Chip(
+                  InputChip(
+                    tooltip: 'Status',
                       label: Text(callLog?.status ?? ''),
                       padding: EdgeInsets.zero,
+                      onPressed: (){},
                       visualDensity: VisualDensity(vertical: -4),
                       shape: StadiumBorder(),
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  if (status == CallStatusEnum.pending ||
-                      status == CallStatusEnum.waiting) ...[
-                    const SizedBox(width: 6.0),
+                  const SizedBox(width: 6.0),
+                  if(!context.read<LoginProvider>().isUser) ...[
                     IconButton(
+                        tooltip: 'More actions',
                         visualDensity:
-                            VisualDensity(horizontal: -4, vertical: -4),
+                        VisualDensity(horizontal: -4, vertical: -4),
                         padding: EdgeInsets.zero,
                         onPressed: () async {
                           await showModalBottomSheet(
@@ -363,6 +375,8 @@ class CallLogDetails extends StatelessWidget {
                                 return CallLogActionWidget(
                                   onTapWaiting: onTapWaiting,
                                   onTapCancel: onTapCancel,
+                                  onTapComplete: onTapComplete,
+                                  onTapPending: onTapPending,
                                 );
                               });
                         },

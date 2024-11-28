@@ -56,6 +56,9 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Icon(CupertinoIcons.clear)),
         title: const Text(StringHelper.createCall),
         titleSpacing: 0.0,
       ),
@@ -130,24 +133,25 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                 readOnly: true,
                 suffixIcon: const Icon(Icons.calendar_month),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please select date';
-                  } else {
-                    return null;
-                  }
+                  return (value == null || value.trim().isEmpty)
+                      ? 'Please select date'
+                      : null;
                 },
                 onTap: () async {
+                  final initialDate = dateController.text.isEmpty
+                      ? DateTime.now()
+                      : DateFormat('dd-MM-yyyy').parse(dateController.text);
                   final pickedDate = await showDatePicker(
                     context: context,
                     firstDate: DateTime.now(),
                     lastDate: DateTime(2025),
-                    initialDate: DateTime.now(),
+                    initialDate: initialDate,
+                    currentDate: DateTime.now(),
                     initialEntryMode: DatePickerEntryMode.calendarOnly,
                   );
-                  if (pickedDate != null) {
+                  if (pickedDate != null)
                     dateController.text =
                         DateFormat('dd-MM-yyyy').format(pickedDate);
-                  }
                 },
               ),
               const SizedBox(height: 16.0),

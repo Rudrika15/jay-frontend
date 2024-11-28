@@ -1,6 +1,9 @@
 import 'package:flipcodeattendence/helper/enum_helper.dart';
+import 'package:flipcodeattendence/provider/call_status_provider.dart';
+import 'package:flipcodeattendence/provider/login_provider.dart';
 import 'package:flipcodeattendence/provider/team_provider.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -8,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../featuers/Admin/model/team_model.dart';
 import '../provider/call_log_provider.dart';
+import '../widget/call_log_action_widget.dart';
 import '../widget/custom_elevated_button.dart';
 import '../widget/custom_outlined_button.dart';
 import '../widget/text_form_field_custom.dart';
@@ -51,31 +55,24 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Icon(CupertinoIcons.clear)),
         actions: [
-          PopupMenuButton(
-            itemBuilder: (context) {
-              return [
-                PopupMenuItem(
-                    child: Row(
-                      children: [
-                        const Icon(Icons.cancel),
-                        const SizedBox(width: 8.0),
-                        const Text('Cancel'),
-                      ],
-                    ),
-                    onTap: (){}),
-                PopupMenuItem(
-                    child: Row(
-                      children: [
-                        const Icon(Icons.timelapse),
-                        const SizedBox(width: 8.0),
-                        const Text('Add to waiting list'),
-                      ],
-                    ),
-                    onTap: (){}),
-              ];
-            },
-          ),
+          if (!context.read<LoginProvider>().isUser) ...[
+            IconButton(
+                onPressed: () async {
+                  await showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return CallLogActionWidget(
+                          onTapWaiting: null,
+                          onTapCancel: null,
+                        );
+                      });
+                },
+                icon: const Icon(Icons.more_vert))
+          ],
         ],
       ),
       body: SingleChildScrollView(
@@ -132,156 +129,158 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                             style: textTheme.bodyLarge)),
                   ],
                 ),
-                const SizedBox(height: 24.0),
-                TextFormFieldWidget(
-                  labelText: 'Select time slot',
-                  controller: timeSlotController,
-                  readOnly: true,
-                  suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          timeSlotController.clear();
-                        });
-                      },
-                      icon: timeSlotController.text.trim().isEmpty
-                          ? Icon(Icons.arrow_drop_down_circle_outlined)
-                          : Icon(Icons.close)),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please select time slot';
-                    } else {
-                      return null;
-                    }
-                  },
-                  onTap: () async {
-                    final TimeSlot? timeSlot = await showModalBottomSheet(
-                        context: context,
-                        builder: (context) => TimeSlotBottomSheet());
-                    if (timeSlot != null) {
-                      timeSlotController.text = timeSlot.name;
-                      setState(() {});
-                    }
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                TextFormFieldWidget(
-                  labelText: 'Select team',
-                  controller: teamController,
-                  readOnly: true,
-                  suffixIcon: (teamController.text.trim().isEmpty)
-                      ? const Icon(Icons.arrow_drop_down_circle_outlined)
-                      : IconButton(
-                          icon: Icon(Icons.close),
-                          onPressed: () {
-                            setState(() {
-                              teamController.clear();
-                            });
-                          }),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please select team';
-                    } else {
-                      return null;
-                    }
-                  },
-                  onTap: () async {
-                    await showModalBottomSheet(
-                        context: context,
-                        builder: (context) => TeamBottomSheet()).then((value) {
-                      if (value != null) {
-                        this.selectedMembers = value;
-                        if (selectedMembers.isNotEmpty) {
-                          setState(() {
-                            teamController.text =
-                                "${selectedMembers[0].user!.name}, ${selectedMembers[1].user!.name}";
-                          });
-                        }
+                if (context.read<CallStatusProvider>().callStatusEnum !=
+                    CallStatusEnum.allocated && context.read<LoginProvider>().isAdmin) ...[
+                  const SizedBox(height: 24.0),
+                  TextFormFieldWidget(
+                    labelText: 'Select time slot',
+                    controller: timeSlotController,
+                    readOnly: true,
+                    suffixIcon: IconButton(
+                        onPressed: () => setState(() {
+                              timeSlotController.clear();
+                            }),
+                        icon: timeSlotController.text.trim().isEmpty
+                            ? Icon(Icons.arrow_drop_down_circle_outlined)
+                            : Icon(Icons.close)),
+                    validator: (value) {
+                      return (value == null || value.trim().isEmpty)
+                          ? 'Please select time slot'
+                          : null;
+                    },
+                    onTap: () async {
+                      final TimeSlot? timeSlot = await showModalBottomSheet(
+                          context: context,
+                          builder: (context) => TimeSlotBottomSheet());
+                      if (timeSlot != null) {
+                        timeSlotController.text = timeSlot.name;
+                        setState(() {});
                       }
-                    });
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                TextFormFieldWidget(
-                  labelText: 'Enter charge',
-                  controller: chargeController,
-                  suffixIcon: Icon(Icons.currency_rupee),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter charge';
-                    } else {
-                      return null;
-                    }
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                TextFormFieldWidget(
-                  labelText: 'Select date',
-                  controller: dateController,
-                  readOnly: true,
-                  suffixIcon: const Icon(Icons.calendar_month),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please select date';
-                    } else {
-                      return null;
-                    }
-                  },
-                  onTap: () async {
-                    final pickedDate = await showDatePicker(
-                      context: context,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime(2025),
-                      initialDate: DateTime.now(),
-                      initialEntryMode: DatePickerEntryMode.calendarOnly,
-                    );
-                    if (pickedDate != null) {
-                      dateController.text =
-                          DateFormat('dd-MM-yyyy').format(pickedDate);
-                    }
-                  },
-                ),
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextFormFieldWidget(
+                    labelText: 'Select team',
+                    controller: teamController,
+                    readOnly: true,
+                    suffixIcon: (teamController.text.trim().isEmpty)
+                        ? const Icon(Icons.arrow_drop_down_circle_outlined)
+                        : IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: () {
+                              setState(() {
+                                teamController.clear();
+                              });
+                            }),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please select team';
+                      } else {
+                        return null;
+                      }
+                    },
+                    onTap: () async {
+                      await showModalBottomSheet(
+                              context: context,
+                              builder: (context) => TeamBottomSheet())
+                          .then((value) {
+                        if (value != null) {
+                          this.selectedMembers = value;
+                          if (selectedMembers.isNotEmpty) {
+                            setState(() {
+                              teamController.text =
+                                  "${selectedMembers[0].user!.name}, ${selectedMembers[1].user!.name}";
+                            });
+                          }
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextFormFieldWidget(
+                    labelText: 'Enter charge',
+                    controller: chargeController,
+                    suffixIcon: Icon(Icons.currency_rupee),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter charge';
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextFormFieldWidget(
+                    labelText: 'Select date',
+                    controller: dateController,
+                    readOnly: true,
+                    suffixIcon: const Icon(Icons.calendar_month),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please select date';
+                      } else {
+                        return null;
+                      }
+                    },
+                    onTap: () async {
+                      final initialDate = dateController.text.isEmpty
+                          ? DateTime.now()
+                          : DateFormat('dd-MM-yyyy').parse(dateController.text);
+                      final pickedDate = await showDatePicker(
+                        context: context,
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2025),
+                        initialDate: initialDate,
+                        currentDate: DateTime.now(),
+                        initialEntryMode: DatePickerEntryMode.calendarOnly,
+                      );
+                      if (pickedDate != null) {
+                        dateController.text =
+                            DateFormat('dd-MM-yyyy').format(pickedDate);
+                      }
+                    },
+                  ),
+                ],
               ],
             ),
           );
         }),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
-        child: Row(
-          children: [
-            Expanded(
-                child: CustomOutlinedButton(
-                    buttonText: 'Cancel',
-                    onPressed: () {
-                      Navigator.pop(context, false);
-                    })),
-            const SizedBox(width: 16.0),
-            Expanded(
-                child: CustomElevatedButton(
-                    buttonText: 'Submit',
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        Provider.of<CallLogProvider>(context, listen: false)
-                            .assignTask(
-                                context: context,
-                                timeSlot: timeSlotController.text,
-                                members: selectedMembers,
-                                charge: chargeController.text,
-                                date: dateController.text,
-                                callId: widget.id)
-                            .then((value) {
-                          if (value) {
-                            resetValues();
-                            Navigator.pop(context, true);
-                          }
-                        });
-                      }
-                    }))
-          ],
-        ),
-      ),
+      bottomNavigationBar: (context.read<CallStatusProvider>().callStatusEnum !=
+              CallStatusEnum.allocated && context.read<LoginProvider>().isAdmin)
+          ? Padding(
+              padding:
+                  const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: CustomElevatedButton(
+                          buttonText: 'Allocate',
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              Provider.of<CallLogProvider>(context,
+                                      listen: false)
+                                  .assignTask(
+                                      context: context,
+                                      timeSlot: timeSlotController.text,
+                                      members: selectedMembers,
+                                      charge: chargeController.text,
+                                      date: dateController.text,
+                                      callId: widget.id)
+                                  .then((value) {
+                                if (value) {
+                                  resetValues();
+                                  Navigator.pop(context, true);
+                                }
+                              });
+                            }
+                          }))
+                ],
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }

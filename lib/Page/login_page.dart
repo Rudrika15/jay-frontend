@@ -53,9 +53,16 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                 key: _formKey,
                 child: Column(
                   children: [
-                    Image.asset(StringHelper.appLogo),
-                    SizedBox(height: 24),
-                    SizedBox(height: 16.0),
+                    Row(
+                      children: [
+                        Text('Login',
+                            style: Theme.of(context)
+                                .textTheme
+                                .displayMedium!
+                                .copyWith(fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                    const SizedBox(height: 24.0),
                     TextFormFieldWidget(
                         isFilled: true,
                         prefixWidget: Icon(
@@ -104,8 +111,10 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                         color: AppColors.onPrimaryBlack,
                       ),
                       suffixIcon: IconButton(
-                        icon: Icon(showPassword ? Icons.visibility : Icons.visibility_off),
-                        onPressed: (){
+                        icon: Icon(showPassword
+                            ? Icons.visibility
+                            : Icons.visibility_off),
+                        onPressed: () {
                           showPassword = !showPassword;
                           setState(() {});
                         },

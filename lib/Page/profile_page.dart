@@ -270,16 +270,18 @@ class _ProfilePageState extends State<ProfilePage> with NavigatorMixin {
                 '+91 $mobileNumber',
                 style: Theme.of(context).textTheme.bodyLarge!,
               ),
-              SizedBox(height: 24),
+              SizedBox(height: 18),
               Divider(
                 height: 1,
               ),
-              SizedBox(height: 12),
+              SizedBox(height: 18),
               ListTile(
                 onTap: () {
                   changePasswordPopup();
                 },
-                leading: Icon(Icons.edit),
+                leading: CircleAvatar(
+                    backgroundColor: AppColors.aPrimary,
+                    child: Icon(Icons.edit,color: AppColors.onPrimaryLight)),
                 title: Text(StringHelper.changePassword),
               ),
               if(isAdmin) ...[
@@ -287,7 +289,9 @@ class _ProfilePageState extends State<ProfilePage> with NavigatorMixin {
                   onTap: () {
                     push(context, AdminReportPage());
                   },
-                  leading: Icon(CupertinoIcons.doc_text),
+                  leading: CircleAvatar(
+                    backgroundColor: AppColors.aPrimary,
+                      child: Icon(CupertinoIcons.doc_text,color: AppColors.onPrimaryLight)),
                   title: Text(StringHelper.report),
                 ),
               ],
@@ -301,11 +305,15 @@ class _ProfilePageState extends State<ProfilePage> with NavigatorMixin {
                     ),
                   );
                 },
-                leading: Icon(Icons.notifications),
+                leading: CircleAvatar(
+                    backgroundColor: AppColors.aPrimary,
+                    child: Icon(CupertinoIcons.bell,color: AppColors.onPrimaryLight)),
                 title: Text(StringHelper.notification),
               ),
               ListTile(
-                leading: Icon(CupertinoIcons.square_arrow_left),
+                leading: CircleAvatar(
+                    backgroundColor: AppColors.aPrimary,
+                    child: Icon(Icons.logout,color: AppColors.onPrimaryLight)),
                 title: Text(StringHelper.logOut),
                 onTap: () {
                   _showLogoutDialog();

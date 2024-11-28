@@ -51,13 +51,13 @@ class LoginProvider extends ChangeNotifier {
   }
 
   bool isAdmin = false;
-  bool isStaff = false;
+  bool isUser = false;
   bool isClient = false;
 
-  changeStatus({required bool isAdmin, required bool isStaff, required bool isClient}) {
-    isAdmin = isAdmin;
-    isStaff = isStaff;
-    isClient = isClient;
+  changeStatus({required bool isAdmin, required bool isUser, required bool isClient}) {
+    this.isAdmin = isAdmin;
+    this.isUser = isUser;
+    this.isClient = isClient;
   }
 
   Future<void> setUserRole() async {
@@ -65,11 +65,11 @@ class LoginProvider extends ChangeNotifier {
     final userRole = _userRole;
     if(userRole != null) {
       if(userRole.trim().toLowerCase() == UserRole.admin.name.toLowerCase()) {
-        changeStatus(isAdmin: true, isStaff: false, isClient: false);
-      } else if(userRole.trim().toLowerCase() == UserRole.staff.name.toLowerCase()) {
-        changeStatus(isAdmin: false, isStaff: true, isClient: false);
+        changeStatus(isAdmin: true, isUser: false, isClient: false);
+      } else if(userRole.trim().toLowerCase() == UserRole.user.name.toLowerCase()) {
+        changeStatus(isAdmin: false, isUser: true, isClient: false);
       } else {
-        changeStatus(isAdmin: false, isStaff: false, isClient: true);
+        changeStatus(isAdmin: false, isUser: false, isClient: true);
       }
     }
     notifyListeners();

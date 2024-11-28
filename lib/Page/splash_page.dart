@@ -1,4 +1,7 @@
 import 'package:flipcodeattendence/Page/login_page.dart';
+import 'package:flipcodeattendence/provider/call_status_provider.dart';
+import 'package:flipcodeattendence/provider/login_provider.dart';
+import 'package:provider/provider.dart';
 
 import '/helper/string_helper.dart';
 import '/mixins/navigator_mixin.dart';
@@ -21,12 +24,13 @@ class _SplashPageState extends State<SplashPage> with NavigatorMixin {
 
   void _navigateToNextScreen() async {
     final token = await SharedPreferencesService.getUserToken();
+    Provider.of<LoginProvider>(context, listen: false).setUserRole();
     print(token);
 
     Future.delayed(
       Duration(seconds: 2),
       () {
-        (token == null || token == '' || token.isEmpty)
+        (token == null || token.isEmpty)
             ? pushReplacement(context, LoginPage())
             : pushReplacement(context, Navbar());
       },

@@ -119,33 +119,33 @@ class _NavbarState extends State<Navbar> with NavigatorMixin {
                     result.first == ConnectivityResult.none;
                 return (isDisconnected)
                     ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(CupertinoIcons.wifi_exclamationmark,
-                          color: AppColors.aPrimary, size: 100),
-                      Text(
-                        'No connection',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
-                  ),
-                )
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(CupertinoIcons.wifi_exclamationmark,
+                                color: AppColors.aPrimary, size: 100),
+                            Text(
+                              'No connection',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                          ],
+                        ),
+                      )
                     : loginValue.isLoading
-                    ? Center(
-                  child: CircularProgressIndicator(),
-                )
-                    : [
-                  userRole == 'admin'
-                      ? AdminHomePage()
-                      : UserAttendancePage(),
-                  userRole == 'admin'
-                      ? AdminLeavePage()
-                      : UserLeavePage(),
-                  CallLogPage(),
-                  ProfilePage(),
-                ][_selectedIndex];
+                        ? Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : [
+                            userRole == 'admin'
+                                ? AdminHomePage()
+                                : UserAttendancePage(),
+                            userRole == 'admin'
+                                ? AdminLeavePage()
+                                : UserLeavePage(),
+                            CallLogPage(),
+                            ProfilePage(),
+                          ][_selectedIndex];
               },
             ),
           );
