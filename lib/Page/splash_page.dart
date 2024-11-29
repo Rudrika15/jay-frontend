@@ -19,14 +19,12 @@ class _SplashPageState extends State<SplashPage> with NavigatorMixin {
   @override
   void initState() {
     super.initState();
+    Provider.of<LoginProvider>(context, listen: false).setUserRole();
     _navigateToNextScreen();
   }
 
   void _navigateToNextScreen() async {
     final token = await SharedPreferencesService.getUserToken();
-    Provider.of<LoginProvider>(context, listen: false).setUserRole();
-    print(token);
-
     Future.delayed(
       Duration(seconds: 2),
       () {

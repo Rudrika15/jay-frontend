@@ -13,6 +13,10 @@ class LoginProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  bool isAdmin = false;
+  bool isUser = false;
+  bool isClient = false;
+
   Future<bool> getUserToken(
       {required String phone, required String password}) async {
     _isLoading = true;
@@ -49,10 +53,6 @@ class LoginProvider extends ChangeNotifier {
     notifyListeners();
     return _userRole;
   }
-
-  bool isAdmin = false;
-  bool isUser = false;
-  bool isClient = false;
 
   changeStatus({required bool isAdmin, required bool isUser, required bool isClient}) {
     this.isAdmin = isAdmin;

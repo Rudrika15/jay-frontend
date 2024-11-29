@@ -18,6 +18,10 @@ class ApiHelper {
   static String getCallDetail = '${baseUrl}api/get-call-detail';
   static String changeStatus = '${baseUrl}api/chage-status';
 
+  // Staff
+  static String staffCallLogList = '${baseUrl}api/call-list';
+  static String getParts = '${baseUrl}api/parts-list';
+
 
   static String dailyAttendence = '${baseUrl}api/daily';
   static String leaveApplications = '${baseUrl}api/leave-applications';

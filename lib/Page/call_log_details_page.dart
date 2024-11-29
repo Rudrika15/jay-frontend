@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
 import '../featuers/Admin/model/team_model.dart';
 import '../provider/call_log_provider.dart';
 import '../widget/call_log_action_widget.dart';
@@ -31,7 +30,22 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
   final timeSlotController = TextEditingController();
   final chargeController = TextEditingController();
   final dateController = TextEditingController();
+  final partsController = TextEditingController();
   List<Members> selectedMembers = [];
+  List<dynamic> selectedParts = [];
+  late final isAdmin, isUser, isClient;
+  late final CallLogProvider provider;
+
+  @override
+  void initState() {
+    super.initState();
+    provider = Provider.of<CallLogProvider>(context, listen: false);
+    isAdmin = context.read<LoginProvider>().isAdmin;
+    isUser = context.read<LoginProvider>().isUser;
+    isClient = context.read<LoginProvider>().isClient;
+    dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
+    provider.getCallLogDetail(context: context, id: widget.id);
+  }
 
   resetValues() {
     setState(() {
@@ -43,11 +57,13 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
-    Provider.of<CallLogProvider>(context, listen: false)
-        .getCallLogDetail(context: context, id: widget.id);
+  void dispose() {
+    teamController.dispose();
+    timeSlotController.dispose();
+    chargeController.dispose();
+    dateController.dispose();
+    partsController.dispose();
+    super.dispose();
   }
 
   @override
@@ -59,7 +75,7 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
             onPressed: () => Navigator.pop(context),
             icon: Icon(CupertinoIcons.clear)),
         actions: [
-          if (!context.read<LoginProvider>().isUser) ...[
+          if (!isUser) ...[
             IconButton(
                 onPressed: () async {
                   await showModalBottomSheet(
@@ -130,7 +146,8 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                   ],
                 ),
                 if (context.read<CallStatusProvider>().callStatusEnum !=
-                    CallStatusEnum.allocated && context.read<LoginProvider>().isAdmin) ...[
+                        CallStatusEnum.allocated &&
+                    isAdmin) ...[
                   const SizedBox(height: 24.0),
                   TextFormFieldWidget(
                     labelText: 'Select time slot',
@@ -160,7 +177,7 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                   ),
                   const SizedBox(height: 16.0),
                   TextFormFieldWidget(
-                    labelText: 'Select team',
+                    labelText: 'Select members',
                     controller: teamController,
                     readOnly: true,
                     suffixIcon: (teamController.text.trim().isEmpty)
@@ -242,14 +259,51 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                       }
                     },
                   ),
-                ],
+                  const SizedBox(height: 16.0),
+                  TextFormFieldWidget(
+                    labelText: 'Select parts',
+                    controller: partsController,
+                    readOnly: true,
+                    suffixIcon: (partsController.text.trim().isEmpty)
+                        ? const Icon(Icons.arrow_drop_down_circle_outlined)
+                        : IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: () =>
+                                setState(() => partsController.clear())),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please select parts';
+                      } else {
+                        return null;
+                      }
+                    },
+                    onTap: () async {
+                      await showModalBottomSheet(
+                              context: context,
+                              builder: (context) => PartsBottomSheet())
+                          .then((value) {
+                        if (value != null) {
+                          this.selectedParts = value;
+                          if (selectedParts.isNotEmpty) {
+                            setState(() {
+                              partsController.text =
+                              "${selectedParts[0]['name']}";
+                            });
+                          }
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                ]
               ],
             ),
           );
         }),
       ),
       bottomNavigationBar: (context.read<CallStatusProvider>().callStatusEnum !=
-              CallStatusEnum.allocated && context.read<LoginProvider>().isAdmin)
+                  CallStatusEnum.allocated &&
+              isAdmin)
           ? Padding(
               padding:
                   const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
@@ -523,6 +577,125 @@ class _TeamBottomSheetState extends State<TeamBottomSheet> {
                                             Navigator.pop(context, members);
                                           }
                                         : null),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+    });
+  }
+}
+
+class PartsBottomSheet extends StatefulWidget {
+  const PartsBottomSheet({super.key});
+
+  @override
+  State<PartsBottomSheet> createState() => _PartsBottomSheetState();
+}
+
+class _PartsBottomSheetState extends State<PartsBottomSheet> {
+  List<dynamic> parts = [];
+
+  @override
+  void initState() {
+    Provider.of<CallLogProvider>(context, listen: false).getParts(context);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Consumer<CallLogProvider>(builder: (context, provider, _) {
+      return provider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : (provider.parts.isEmpty)
+              ? const Center(child: Text('No parts found'))
+              : Container(
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Select parts',
+                              style: textTheme.titleLarge!
+                                  .copyWith(fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 12.0),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Wrap(
+                          spacing: 8.0,
+                          children: List.generate(parts.length, (index) {
+                            return InputChip(
+                                backgroundColor: AppColors.aPrimary,
+                                deleteIconColor: AppColors.onPrimaryLight,
+                                visualDensity: VisualDensity.compact,
+                                label: Text(parts[index]['name'] ?? '',
+                                    style: TextStyle(
+                                        color: AppColors.onPrimaryLight)),
+                                onPressed: () {},
+                                onDeleted: () {
+                                  setState(() {
+                                    parts.removeAt(index);
+                                  });
+                                });
+                          }),
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: provider.parts.length,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              final partItem = provider.parts[index];
+                              return CheckboxListTile(
+                                value: parts.any((element) =>
+                                        element['id'] == partItem['id'])
+                                    ? true
+                                    : false,
+                                onChanged: (value) {
+                                  setState(() {
+                                    if (parts.any((element) =>
+                                        element['id'] == partItem['id'])) {
+                                      parts.remove(partItem);
+                                    } else {
+                                      parts.add(partItem);
+                                    }
+                                  });
+                                },
+                                title: Text(partItem['name'] ?? ''),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                              );
+                            }),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            CustomOutlinedButton(
+                                buttonText: 'Clear all',
+                                onPressed: (parts.isNotEmpty)
+                                    ? () => setState(() => parts.clear())
+                                    : null),
+                            const SizedBox(width: 16.0),
+                            CustomElevatedButton(
+                                buttonText: 'Ok',
+                                onPressed: (parts.isNotEmpty)
+                                    ? () {
+                                        Navigator.pop(context, parts);
+                                      }
+                                    : null),
                           ],
                         ),
                       ),

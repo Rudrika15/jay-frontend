@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flipcodeattendence/featuers/User/model/staff_allocated_call_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
@@ -21,22 +22,59 @@ class CallLogProvider extends ChangeNotifier {
 
   CallLogsModel? get callLogsModel => _callLogsModel;
 
+  StaffAllocatedCallModel? _staffCallLogs;
+
+  StaffAllocatedCallModel? get staffCallLogs => _staffCallLogs;
+
+  List<StaffCallLogData> _allocatedStaffCallLogList = [];
+
+  List<StaffCallLogData> get allocatedStaffCallLogList =>
+      _allocatedStaffCallLogList;
+
   CallLog? _callLog = CallLog();
 
   CallLog? get callLog => _callLog;
+
+  List<dynamic> _parts = [];
+
+  List<dynamic> get parts => _parts;
 
   Future<void> getCallLogs(
       {CallStatusEnum status = CallStatusEnum.pending,
       required BuildContext context}) async {
     final url = ApiHelper.callLogList +
         '?status=${status.name.toString().toLowerCase()}';
-    final token = await SharedPreferencesService.getUserToken();
-    final header = {"Authorization": "Bearer $token"};
     _isLoading = true;
     try {
       final response = await apiService.invokeApi(
-          url: url, header: header, requestType: HttpRequestType.get);
+          url: url, requestType: HttpRequestType.get);
       _callLogsModel = CallLogsModel.fromJson(jsonDecode(response.body));
+    } catch (e) {
+      CommonWidgets.customSnackBar(context: context, title: e.toString());
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getStaffCallLogs(
+      {required BuildContext context, String date = ''}) async {
+    final url = (date.trim().isNotEmpty)
+        ? ApiHelper.staffCallLogList + '?date=$date'
+        : ApiHelper.staffCallLogList;
+    _isLoading = true;
+    try {
+      final response = await apiService.invokeApi(
+          url: url, requestType: HttpRequestType.get);
+      _staffCallLogs =
+          StaffAllocatedCallModel.fromJson(jsonDecode(response.body));
+      _allocatedStaffCallLogList = [];
+      final List<StaffCallLogData> callLogList = _staffCallLogs?.data ?? [];
+      _allocatedStaffCallLogList = callLogList
+          .where((element) =>
+              element.call?.status?.trim().toLowerCase() ==
+              CallStatusEnum.allocated.name.trim().toLowerCase())
+          .toList();
     } catch (e) {
       CommonWidgets.customSnackBar(context: context, title: e.toString());
     } finally {
@@ -48,12 +86,10 @@ class CallLogProvider extends ChangeNotifier {
   Future<void> getCallLogDetail(
       {required String id, required BuildContext context}) async {
     final url = ApiHelper.getCallDetail + '/$id';
-    final token = await SharedPreferencesService.getUserToken();
-    final header = {"Authorization": "Bearer $token"};
     _isLoading = true;
     try {
       final response = await apiService.invokeApi(
-          url: url, header: header, requestType: HttpRequestType.get);
+          url: url, requestType: HttpRequestType.get);
       final body = jsonDecode(response.body);
       _callLog = CallLog.fromJson(body['data']);
     } catch (e) {
@@ -65,18 +101,15 @@ class CallLogProvider extends ChangeNotifier {
   }
 
   Future<bool> changeStatus(
-      {required String id, required BuildContext context, required CallStatusEnum status}) async {
+      {required String id,
+      required BuildContext context,
+      required CallStatusEnum status}) async {
     final url = ApiHelper.changeStatus;
-    final token = await SharedPreferencesService.getUserToken();
-    final header = {"Authorization": "Bearer $token", "Content-Type": "application/json"};
-    final _body = {
-      "id": id,
-      "status": status.name.trim().toLowerCase()
-    };
+    final _body = {"id": id, "status": status.name.trim().toLowerCase()};
     _isLoading = true;
     try {
       final response = await apiService.invokeApi(
-          url: url, header: header, body: jsonEncode(_body),requestType: HttpRequestType.get);
+          url: url, body: jsonEncode(_body), requestType: HttpRequestType.get);
       final body = jsonDecode(response.body);
       CommonWidgets.customSnackBar(context: context, title: body['message']);
       return true;
@@ -98,26 +131,43 @@ class CallLogProvider extends ChangeNotifier {
     required String callId,
   }) async {
     final url = ApiHelper.assignTask;
-    final token = await SharedPreferencesService.getUserToken();
-    final header = {"Authorization": "Bearer $token","Content-Type": "application/json"};
     final parsedDate = DateFormat("dd-MM-yyyy").parse(date);
     final formattedDate = DateFormat("yyyy-MM-dd").format(parsedDate);
     final dynamic _body = {
-      "userId":[members[0].userId!, members[1].userId!],
-      "callId":callId,
-      "date":formattedDate,
-      "charge":charge,
-      "slot":timeSlot
+      "userId": [members[0].userId!, members[1].userId!],
+      "callId": callId,
+      "date": formattedDate,
+      "charge": charge,
+      "slot": timeSlot
     };
     _isLoading = true;
     try {
       await apiService.invokeApi(
-          url: url, header: header,body: jsonEncode(_body), requestType: HttpRequestType.post);
-      CommonWidgets.customSnackBar(context: context, title: 'Task assigned successfully');
+          url: url, body: jsonEncode(_body), requestType: HttpRequestType.post);
+      CommonWidgets.customSnackBar(
+          context: context, title: 'Task assigned successfully');
       return true;
     } catch (e) {
       CommonWidgets.customSnackBar(context: context, title: e.toString());
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getParts(BuildContext context) async {
+    final url = ApiHelper.getParts;
+    _isLoading = true;
+    try {
+      final response = await apiService.invokeApi(
+          url: url, requestType: HttpRequestType.get);
+      final decodedResponse = jsonDecode(response.body);
+      final responseData = decodedResponse['data'];
+      _parts = responseData;
+      print(responseData);
+    } catch (e) {
+      CommonWidgets.customSnackBar(context: context, title: e.toString());
     } finally {
       _isLoading = false;
       notifyListeners();

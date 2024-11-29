@@ -18,12 +18,10 @@ class TeamProvider extends ChangeNotifier {
 
   Future<void> getTeams(BuildContext context) async {
     final url = ApiHelper.teamList;
-    final token = await SharedPreferencesService.getUserToken();
-    final header = {"Authorization": "Bearer $token"};
     _isLoading = true;
     try {
       final response = await apiService.invokeApi(
-          url: url, header: header, requestType: HttpRequestType.get);
+          url: url, requestType: HttpRequestType.get);
       _teamModel = TeamModel.fromJson(jsonDecode(response.body));
     } catch (e) {
       CommonWidgets.customSnackBar(context: context, title: e.toString());

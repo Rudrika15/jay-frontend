@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flipcodeattendence/helper/validation_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
@@ -18,7 +16,6 @@ import '../featuers/Admin/page/client_list_page.dart';
 import '../helper/file_picker_helper.dart';
 import '../theme/app_colors.dart';
 import '../widget/common_widgets.dart';
-import '../widget/custom_outlined_button.dart';
 
 class CreateCallPage extends StatefulWidget {
   const CreateCallPage({super.key});
@@ -29,26 +26,27 @@ class CreateCallPage extends StatefulWidget {
 
 class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
   File? file;
+  String? clientId;
+  late final bool isAdmin;
   final _formKey = GlobalKey<FormState>();
-  final dateController = TextEditingController();
-  final textController = TextEditingController();
-  final clientController = TextEditingController();
-  final addressController = TextEditingController();
-  String? userRole, clientId;
+  final _dateController = TextEditingController();
+  final _textController = TextEditingController();
+  final _clientController = TextEditingController();
+  final _addressController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    userRole = Provider.of<LoginProvider>(context, listen: false).userRole;
-    dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
+    isAdmin = context.read<LoginProvider>().isAdmin;
+    _dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
   }
 
   @override
   void dispose() {
-    dateController.dispose();
-    textController.dispose();
-    clientController.dispose();
-    addressController.dispose();
+    _dateController.dispose();
+    _textController.dispose();
+    _clientController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
@@ -92,9 +90,7 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                               context: context,
                               title: 'File cannot be larger than 2 MB');
                         } else {
-                          setState(() {
-                            file = pickedFile;
-                          });
+                          setState(() => file = pickedFile);
                         }
                       } else {
                         CommonWidgets.customSnackBar(
@@ -113,9 +109,7 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                               context: context,
                               title: 'File cannot be larger than 2 MB');
                         } else {
-                          setState(() {
-                            file = pickedFile;
-                          });
+                          setState(() => file = pickedFile);
                         }
                       } else {
                         CommonWidgets.customSnackBar(
@@ -129,7 +123,7 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
               const SizedBox(height: 16.0),
               TextFormFieldWidget(
                 labelText: 'Select date',
-                controller: dateController,
+                controller: _dateController,
                 readOnly: true,
                 suffixIcon: const Icon(Icons.calendar_month),
                 validator: (value) {
@@ -138,9 +132,9 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                       : null;
                 },
                 onTap: () async {
-                  final initialDate = dateController.text.isEmpty
+                  final initialDate = _dateController.text.isEmpty
                       ? DateTime.now()
-                      : DateFormat('dd-MM-yyyy').parse(dateController.text);
+                      : DateFormat('dd-MM-yyyy').parse(_dateController.text);
                   final pickedDate = await showDatePicker(
                     context: context,
                     firstDate: DateTime.now(),
@@ -150,23 +144,19 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                     initialEntryMode: DatePickerEntryMode.calendarOnly,
                   );
                   if (pickedDate != null)
-                    dateController.text =
+                    _dateController.text =
                         DateFormat('dd-MM-yyyy').format(pickedDate);
                 },
               ),
               const SizedBox(height: 16.0),
-              if (userRole?.trim().toLowerCase() == UserRole.admin.name) ...[
+              if (isAdmin) ...[
                 TextFormFieldWidget(
                   labelText: 'Select client',
-                  controller: clientController,
+                  controller: _clientController,
                   readOnly: true,
                   suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          clientController.clear();
-                        });
-                      },
-                      icon: clientController.text.trim().isEmpty
+                      onPressed: () => setState(() => _clientController.clear()),
+                      icon: _clientController.text.trim().isEmpty
                           ? Icon(Icons.arrow_drop_down_circle_outlined)
                           : Icon(Icons.close)),
                   validator: (value) {
@@ -181,7 +171,7 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                         await Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => ClientListPage()));
                     if (clientRecord != null) {
-                      clientController.text = clientRecord.name ?? '';
+                      _clientController.text = clientRecord.name ?? '';
                       clientId = clientRecord.id;
                       setState(() {});
                     }
@@ -190,14 +180,14 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                 const SizedBox(height: 16.0),
               ],
               TextFormFieldWidget(
-                controller: textController,
+                controller: _textController,
                 maxLines: 3,
                 labelText: 'Description',
                 validator: (value) => value?.isEmptyString,
               ),
               const SizedBox(height: 16.0),
               TextFormFieldWidget(
-                controller: addressController,
+                controller: _addressController,
                 maxLines: 3,
                 labelText: 'Address',
                 validator: (value) => value?.isEmptyString,
@@ -216,7 +206,7 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         final date =
-                            DateFormat('dd-MM-yyyy').parse(dateController.text);
+                            DateFormat('dd-MM-yyyy').parse(_dateController.text);
                         final formattedDate =
                             DateFormat('yyyy-MM-dd').format(date);
                         final result = await Provider.of<ClientProvider>(
@@ -224,10 +214,10 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                                 listen: false)
                             .createCall(
                                 context: context,
-                                description: textController.text,
+                                description: _textController.text,
                                 date: formattedDate,
                                 client_id: clientId,
-                                address: addressController.text,
+                                address: _addressController.text,
                                 photo: file);
                         if (result) {
                           clearData();
@@ -245,9 +235,9 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
     setState(() {
       file = null;
       clientId = null;
-      dateController.clear();
-      clientController.clear();
-      textController.clear();
+      _dateController.clear();
+      _clientController.clear();
+      _textController.clear();
     });
   }
 }

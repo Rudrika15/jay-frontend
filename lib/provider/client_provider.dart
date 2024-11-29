@@ -27,15 +27,13 @@ class ClientProvider extends ChangeNotifier {
       {String name = "", required BuildContext context}) async {
     final url = ApiHelper.getClients +
         (name.trim().isNotEmpty ? '?name=$name' : '?name=');
-    final token = await SharedPreferencesService.getUserToken();
-    final header = {"Authorization": "Bearer $token"};
     _isLoading = true;
     if (name.trim().isNotEmpty) {
       notifyListeners();
     }
     try {
       final response = await apiService.invokeApi(
-          url: url, header: header, requestType: HttpRequestType.get);
+          url: url, requestType: HttpRequestType.get);
       _clientModel = ClientModel.fromJson(jsonDecode(response.body));
     } catch (e) {
       CommonWidgets.customSnackBar(context: context, title: e.toString());

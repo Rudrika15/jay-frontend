@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flipcodeattendence/service/shared_preferences_service.dart';
 import 'package:flutter/foundation.dart';
 import '../../exception/api_exception.dart';
 import 'package:http/http.dart' as http;
@@ -12,21 +13,22 @@ class RestApiService {
       {required String url,
       required HttpRequestType requestType,
       Map<String, String>? header,
-      dynamic body}) async {
+      dynamic body, bool needHeader = true}) async {
     final parsedUrl = Uri.parse(url);
-    printParameters(url: url,requestType: requestType,header: header,body: body);
+    final token = await SharedPreferencesService.getUserToken();
+    final header = {"Authorization": "Bearer $token", "Content-Type": "application/json"};
+    printParameters(
+        url: url, requestType: requestType, header: header, body: body);
     try {
       final request =
           await http.Request(requestType.name.toUpperCase(), parsedUrl);
-      if (header != null) {
-        request.headers.addAll(header);
-      }
-      if (body != null) {
-        request.body = body;
-      }
+      if (needHeader) request.headers.addAll(header);
+      if (body != null) request.body = body;
+
       final response = await request.send();
       final data = await http.Response.fromStream(response);
       final responseBody = jsonDecode(data.body);
+
       printResponse(response: response, responseBody: responseBody);
       if (response.statusCode == 201 || response.statusCode == 200) {
         if (responseBody['status'].toString() == 'true') {
@@ -62,7 +64,8 @@ class RestApiService {
   }
 
   void printResponse(
-      {required http.StreamedResponse response, required dynamic responseBody}) {
+      {required http.StreamedResponse response,
+      required dynamic responseBody}) {
     if (kDebugMode || kReleaseMode) {
       print('=====Response=====================================');
       print(response.statusCode);
@@ -73,9 +76,9 @@ class RestApiService {
 
   void printParameters(
       {required String url,
-        HttpRequestType requestType = HttpRequestType.delete,
-        Map<String, String>? header,
-        Object? body}) {
+      HttpRequestType requestType = HttpRequestType.delete,
+      Map<String, String>? header,
+      Object? body}) {
     print('=====Parameters=============================================');
     print('Url : $url');
     print('Header : $header');

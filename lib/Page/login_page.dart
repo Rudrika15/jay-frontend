@@ -18,26 +18,26 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> with NavigatorMixin {
   bool showPassword = false;
   final _formKey = GlobalKey<FormState>();
-  final numberController = TextEditingController();
+  final _numberController = TextEditingController();
   final _passwordController = TextEditingController();
   final buttonEnabled = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     super.initState();
-    numberController.addListener(_handleInputChange);
+    _numberController.addListener(_handleInputChange);
     _passwordController.addListener(_handleInputChange);
   }
 
   @override
   void dispose() {
-    numberController.dispose();
+    _numberController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   _handleInputChange() {
-    buttonEnabled.value = numberController.text.trim().isNotEmpty &&
+    buttonEnabled.value = _numberController.text.trim().isNotEmpty &&
         _passwordController.text.trim().isNotEmpty;
   }
 
@@ -88,7 +88,7 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                           _handleInputChange();
                         },
                         keyboardType: TextInputType.phone,
-                        controller: numberController),
+                        controller: _numberController),
                     SizedBox(height: 16),
                     TextFormFieldWidget(
                       obscureText: !showPassword,
@@ -145,16 +145,16 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                                             await loginProvider
                                                 .getUserToken(
                                                     phone:
-                                                        numberController.text,
+                                                        _numberController.text,
                                                     password:
                                                         _passwordController
                                                             .text)
                                                 .then(
                                               (value) {
-                                                if (value) {
+                                                if (value)
                                                   pushReplacement(
                                                       context, Navbar());
-                                                }
+
                                               },
                                             );
                                           }
