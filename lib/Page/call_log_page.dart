@@ -133,10 +133,14 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                             getCallLogs();
                           });
                       },
-                      onDeleted: () => setState(() {
+                      onDeleted: () {
+                        if(dateController.text.trim().isNotEmpty) {
+                          setState(() {
                             dateController.clear();
                             getCallLogs();
-                          })),
+                          });
+                        }
+                      }),
                   if(!isUser) ...[
                     ActionChip(
                       tooltip: 'Status',
@@ -249,18 +253,17 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                 itemBuilder: (context, index) {
                                   final callLog = provider.allocatedStaffCallLogList[index];
                                   return InkWell(
-                                    onTap: (){},
-                                    // onTap: () {
-                                    //   Navigator.of(context)
-                                    //       .push(MaterialPageRoute(
-                                    //       builder: (context) =>
-                                    //           CallLogDetailsPage(
-                                    //               id: callLog.call!.id
-                                    //                   .toString())))
-                                    //       .then((value) {
-                                    //     if (value == true) getCallLogs();
-                                    //   });
-                                    // },
+                                    onTap: () {
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(
+                                          builder: (context) =>
+                                              CallLogDetailsPage(
+                                                  id: callLog.call!.id
+                                                      .toString())))
+                                          .then((value) {
+                                        if (value == true) getCallLogs();
+                                      });
+                                    },
                                     child: StaffCallLogDetails(
                                       callLog: callLog,
                                       onTapComplete: () {

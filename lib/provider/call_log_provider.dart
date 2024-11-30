@@ -11,6 +11,7 @@ import '../models/call_logs_model.dart';
 import '../service/rest_api_service.dart';
 import '../service/shared_preferences_service.dart';
 import '../widget/common_widgets.dart';
+import 'call_status_provider.dart';
 
 class CallLogProvider extends ChangeNotifier {
   final apiService = RestApiService();
@@ -23,11 +24,12 @@ class CallLogProvider extends ChangeNotifier {
   CallLogsModel? get callLogsModel => _callLogsModel;
 
   StaffAllocatedCallModel? _staffCallLogs;
-
   StaffAllocatedCallModel? get staffCallLogs => _staffCallLogs;
 
-  List<StaffCallLogData> _allocatedStaffCallLogList = [];
+  StaffCallLogData? _staffCallLogData;
+  StaffCallLogData? get staffCallLogData => _staffCallLogData;
 
+  List<StaffCallLogData> _allocatedStaffCallLogList = [];
   List<StaffCallLogData> get allocatedStaffCallLogList =>
       _allocatedStaffCallLogList;
 
@@ -92,6 +94,24 @@ class CallLogProvider extends ChangeNotifier {
           url: url, requestType: HttpRequestType.get);
       final body = jsonDecode(response.body);
       _callLog = CallLog.fromJson(body['data']);
+      print(_callLog?.user?.name);
+    } catch (e) {
+      CommonWidgets.customSnackBar(context: context, title: e.toString());
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getAllocatedCallLogDetails(
+      {required String id, required BuildContext context}) async {
+    final url = ApiHelper.getCallDetail + '/$id';
+    _isLoading = true;
+    try {
+      final response = await apiService.invokeApi(
+          url: url, requestType: HttpRequestType.get);
+      final body = jsonDecode(response.body);
+      _staffCallLogData = StaffCallLogData.fromJson(body["data"]);
     } catch (e) {
       CommonWidgets.customSnackBar(context: context, title: e.toString());
     } finally {

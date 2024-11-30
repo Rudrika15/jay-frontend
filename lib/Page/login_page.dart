@@ -148,9 +148,7 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                                                         _numberController.text,
                                                     password:
                                                         _passwordController
-                                                            .text)
-                                                .then(
-                                              (value) {
+                                                            .text).then((value) {
                                                 if (value)
                                                   pushReplacement(
                                                       context, Navbar());
