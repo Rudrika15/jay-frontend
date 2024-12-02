@@ -6,6 +6,7 @@ import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../featuers/Admin/model/team_model.dart';
@@ -48,7 +49,7 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
     callStatus = context.read<CallStatusProvider>().callStatusEnum;
     (callStatus == CallStatusEnum.allocated)
         ? provider.getAllocatedCallLogDetails(context: context, id: widget.id)
-        : provider.getCallLogDetail(context: context, id: widget.id);
+        : null;
   }
 
   resetValues() {
@@ -109,7 +110,7 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                       children: [
                         if (callStatus == CallStatusEnum.allocated) ...[
                           Text(
-                              provider.staffCallLogData?.call?.user?.name ?? '',
+                              provider.staffCallLogData?.call?.user?.name?.capitalizeFirst ?? '',
                               style: textTheme.titleLarge!
                                   .copyWith(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12.0),
@@ -131,7 +132,7 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                               Expanded(
                                   child: Text(
                                       provider.staffCallLogData?.call
-                                              ?.address ??
+                                              ?.address?.capitalizeFirst ??
                                           'N/A',
                                       style: textTheme.bodyLarge)),
                             ],
@@ -145,7 +146,7 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                               Expanded(
                                   child: Text(
                                       provider.staffCallLogData?.call
-                                              ?.description ??
+                                              ?.description?.capitalizeFirst ??
                                           '',
                                       style: textTheme.bodyLarge)),
                             ],
@@ -170,7 +171,7 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                               const SizedBox(width: 6.0),
                               Expanded(
                                   child: Text(
-                                      provider.staffCallLogData?.slot ?? '',
+                                      provider.staffCallLogData?.slot?.capitalizeFirst ?? '',
                                       style: textTheme.bodyLarge)),
                             ],
                           ),
@@ -186,58 +187,9 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                                       style: textTheme.bodyLarge)),
                             ],
                           ),
-                        ] else ...[
-                          Text(provider.callLog?.user?.name ?? '',
-                              style: textTheme.titleLarge!
-                                  .copyWith(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            children: [
-                              Icon(Icons.call),
-                              const SizedBox(width: 6.0),
-                              Text('${provider.callLog?.user?.phone}',
-                                  style: textTheme.bodyLarge),
-                            ],
-                          ),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.location_on_outlined),
-                              const SizedBox(width: 6.0),
-                              Expanded(
-                                  child: Text(provider.callLog?.address ?? '',
-                                      style: textTheme.bodyLarge)),
-                            ],
-                          ),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.message_outlined),
-                              const SizedBox(width: 6.0),
-                              Expanded(
-                                  child: Text(
-                                      provider.callLog?.description ?? '',
-                                      style: textTheme.bodyLarge)),
-                            ],
-                          ),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.date_range),
-                              const SizedBox(width: 6.0),
-                              Expanded(
-                                  child: Text(provider.callLog?.date ?? '',
-                                      style: textTheme.bodyLarge)),
-                            ],
-                          ),
-                        ],
-                        if (context.read<CallStatusProvider>().callStatusEnum !=
-                                CallStatusEnum.allocated &&
-                            isAdmin) ...[
                           const SizedBox(height: 24.0),
+                        ],
+                        if (context.read<CallStatusProvider>().callStatusEnum != CallStatusEnum.allocated && isAdmin) ...[
                           TextFormFieldWidget(
                             labelText: 'Select time slot',
                             controller: timeSlotController,
@@ -262,7 +214,7 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                                       builder: (context) =>
                                           TimeSlotBottomSheet());
                               if (timeSlot != null) {
-                                timeSlotController.text = timeSlot.name;
+                                timeSlotController.text = timeSlot.name.capitalizeFirst!;
                                 setState(() {});
                               }
                             },
@@ -497,7 +449,7 @@ class _TimeSlotBottomSheetState extends State<TimeSlotBottomSheet> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(TimeSlot.values[index].name,
+                          Text(TimeSlot.values[index].name.capitalizeFirst!,
                               style: TextStyle(
                                   color:
                                       selectedTimeSlot == TimeSlot.values[index]

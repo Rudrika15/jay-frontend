@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import '../helper/enum_helper.dart';
 import '../provider/login_provider.dart';
 import '/helper/height_width_helper.dart';
 import '/helper/string_helper.dart';
@@ -21,10 +23,13 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
   final _numberController = TextEditingController();
   final _passwordController = TextEditingController();
   final buttonEnabled = ValueNotifier<bool>(false);
+  var selectedUserType = UserRole.admin;
 
   @override
   void initState() {
     super.initState();
+    _numberController.text = "9979404044";
+    _passwordController.text = "12345678";
     _numberController.addListener(_handleInputChange);
     _passwordController.addListener(_handleInputChange);
   }
@@ -65,6 +70,7 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                     const SizedBox(height: 24.0),
                     TextFormFieldWidget(
                         isFilled: true,
+                        readOnly: true,
                         prefixWidget: Icon(
                           Icons.phone,
                           color: AppColors.onPrimaryBlack,
@@ -91,6 +97,7 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                         controller: _numberController),
                     SizedBox(height: 16),
                     TextFormFieldWidget(
+                      readOnly: true,
                       obscureText: !showPassword,
                       controller: _passwordController,
                       // obscureText: _obscureText,
@@ -125,9 +132,54 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                     Row(
                       children: [
                         Expanded(
+                          child: SegmentedButton(
+                            segments: <ButtonSegment<UserRole>>[
+                              ButtonSegment(
+                                  value: UserRole.admin,
+                                  label: Text(UserRole.admin.name.capitalizeFirst!)),
+                              ButtonSegment(
+                                  value: UserRole.user,
+                                  label: Text(UserRole.user.name.capitalizeFirst!)),
+                              ButtonSegment(
+                                  value: UserRole.client,
+                                  label: Text(UserRole.client.name.capitalizeFirst!)),
+                            ],
+                            selected: <UserRole>{selectedUserType},
+                            onSelectionChanged: (Set<UserRole> value) {
+                              setState(() {
+                                if(value.first == UserRole.admin) {
+                                  _numberController.text = "9979404044";
+                                  _passwordController.text = "12345678";
+                                } else if(value.first == UserRole.user) {
+                                  _numberController.text = "9687574999";
+                                  _passwordController.text = "123456";
+                                } else {
+                                  _numberController.text = "8306180808";
+                                  _passwordController.text = "123456";
+                                }
+                                selectedUserType = value.first;
+                              });
+                            },
+                            showSelectedIcon: false,
+                            style: SegmentedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)
+                              ),
+                                selectedBackgroundColor: AppColors.aPrimary,
+                                selectedForegroundColor:
+                                    AppColors.onPrimaryLight),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
                           child: ValueListenableBuilder<bool>(
                               valueListenable: buttonEnabled,
                               builder: (context, enabled, _) {
+                                final enabled = true;
                                 return ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                       fixedSize: Size(
@@ -140,19 +192,16 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                                   onPressed: enabled
                                       ? () async {
                                           setState(() {});
-                                          if (_formKey.currentState!
-                                              .validate()) {
+                                          if(_formKey.currentState!.validate()) {
                                             await loginProvider
                                                 .getUserToken(
-                                                    phone:
-                                                        _numberController.text,
-                                                    password:
-                                                        _passwordController
-                                                            .text).then((value) {
+                                                phone: _numberController.text,
+                                                password: _passwordController.text)
+                                                .then(
+                                                  (value) {
                                                 if (value)
                                                   pushReplacement(
                                                       context, Navbar());
-
                                               },
                                             );
                                           }
