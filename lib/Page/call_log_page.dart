@@ -28,14 +28,12 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
   bool _isFabVisible = true;
   late ScrollController _scrollController;
   final dateController = TextEditingController();
-  var _selectedCallType = CallStatusEnum.values.first;
   late final isAdmin, isUser, isClient;
   late final provider;
 
   @override
   void initState() {
     super.initState();
-    _selectedCallType = context.read<CallStatusProvider>().callStatusEnum;
     provider = Provider.of<CallLogProvider>(context, listen: false);
     isAdmin = context.read<LoginProvider>().isAdmin;
     isUser = context.read<LoginProvider>().isUser;
@@ -69,13 +67,13 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
   }
 
   Future<void> getCallLogs() async {
-    if (isAdmin || isClient) {
+    if (isUser) {
+      provider.getStaffCallLogs(context: context, date: dateController.text);
+    } else {
       provider.getCallLogs(
           context: context,
           status: context.read<CallStatusProvider>().callStatusEnum);
-    } else if (isUser) {
-      provider.getStaffCallLogs(context: context, date: dateController.text);
-    } else {}
+    }
   }
 
   Future<void> changeStatus(
@@ -149,7 +147,8 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                           Text(context
                               .watch<CallStatusProvider>()
                               .callStatusEnum
-                              .name.capitalizeFirst!),
+                              .name
+                              .capitalizeFirst!),
                           const Icon(Icons.arrow_drop_down),
                         ],
                       ),
@@ -177,11 +176,11 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                     children: [
                       if (provider.isLoading) ...[
                         Expanded(
-                            child:
-                                const Center(child: CircularProgressIndicator()))
+                            child: const Center(
+                                child: CircularProgressIndicator()))
                       ] else ...[
-                        if (isAdmin || isClient) ...[
-                          if (provider.callLogsModel?.data?.isEmpty ?? false) ...[
+                        if(isUser) ...[
+                          if (provider.allocatedStaffCallLogList.isEmpty) ...[
                             Expanded(
                                 child: const Center(
                                     child: Text('No call logs found')))
@@ -191,24 +190,83 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                 shrinkWrap: true,
                                 controller: _scrollController,
                                 itemCount:
-                                    provider.callLogsModel?.data?.length ?? 0,
+                                provider.allocatedStaffCallLogList.length ??
+                                    0,
                                 itemBuilder: (context, index) {
                                   final callLog =
-                                      provider.callLogsModel?.data?[index];
+                                  provider.allocatedStaffCallLogList[index];
                                   return InkWell(
                                     onTap: () {
-                                      Future.delayed(Duration(milliseconds: 400),
-                                          () {
-                                        Navigator.of(context)
-                                            .push(MaterialPageRoute(
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(
+                                          builder: (context) =>
+                                              CallLogDetailsPage(
+                                                  id: callLog.call!.id
+                                                      .toString())))
+                                          .then((value) {
+                                        if (value == true) getCallLogs();
+                                      });
+                                    },
+                                    child: StaffCallLogDetails(
+                                      callLog: callLog,
+                                      onTapComplete: () {
+                                        pop(context);
+                                        changeStatus(
+                                            id: callLog.id.toString(),
+                                            status: CallStatusEnum.completed);
+                                      },
+                                    ),
+                                  );
+                                },
+                                separatorBuilder: (context, index) =>
+                                const Divider(color: AppColors.grey),
+                              ),
+                            )
+                          ]
+                        ] else...[
+                          if (provider.callLogsModel?.data?.isEmpty ??
+                              false) ...[
+                            Expanded(
+                                child: const Center(
+                                    child: Text('No call logs found')))
+                          ] else ...[
+                            Expanded(
+                              child: ListView.separated(
+                                shrinkWrap: true,
+                                controller: _scrollController,
+                                itemCount:
+                                provider.callLogsModel?.data?.length ?? 0,
+                                itemBuilder: (context, index) {
+                                  final callLog =
+                                  provider.callLogsModel?.data?[index];
+                                  final bool cannotTap = (isClient &&
+                                      (context.read<CallStatusProvider>()
+                                          .callStatusEnum ==
+                                          CallStatusEnum.pending ||
+                                          context.read<CallStatusProvider>()
+                                              .callStatusEnum ==
+                                              CallStatusEnum.cancelled ||
+                                          context.read<CallStatusProvider>()
+                                              .callStatusEnum ==
+                                              CallStatusEnum.waiting));
+                                  return InkWell(
+                                    onTap: cannotTap
+                                        ? null
+                                        : () {
+                                      Future.delayed(
+                                          Duration(milliseconds: 400),
+                                              () {
+                                            Navigator.of(context)
+                                                .push(MaterialPageRoute(
                                                 builder: (context) =>
                                                     CallLogDetailsPage(
                                                         id: callLog!.id
                                                             .toString())))
-                                            .then((value) {
-                                          if (value == true) getCallLogs();
-                                        });
-                                      });
+                                                .then((value) {
+                                              if (value == true)
+                                                getCallLogs();
+                                            });
+                                          });
                                     },
                                     child: CallLogDetails(
                                       callLog: callLog,
@@ -240,51 +298,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                   );
                                 },
                                 separatorBuilder: (context, index) =>
-                                    const Divider(color: AppColors.grey),
-                              ),
-                            )
-                          ]
-                        ] else if (isUser) ...[
-                          if (provider.allocatedStaffCallLogList.isEmpty) ...[
-                            Expanded(
-                                child: const Center(
-                                    child: Text('No call logs found')))
-                          ] else ...[
-                            Expanded(
-                              child: ListView.separated(
-                                shrinkWrap: true,
-                                controller: _scrollController,
-                                itemCount:
-                                    provider.allocatedStaffCallLogList.length ??
-                                        0,
-                                itemBuilder: (context, index) {
-                                  final callLog =
-                                      provider.allocatedStaffCallLogList[index];
-                                  return InkWell(
-                                    onTap: () {
-                                      Navigator.of(context)
-                                          .push(MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CallLogDetailsPage(
-                                                      id: callLog.call!.id
-                                                          .toString())))
-                                          .then((value) {
-                                        if (value == true) getCallLogs();
-                                      });
-                                    },
-                                    child: StaffCallLogDetails(
-                                      callLog: callLog,
-                                      onTapComplete: () {
-                                        pop(context);
-                                        changeStatus(
-                                            id: callLog.id.toString(),
-                                            status: CallStatusEnum.completed);
-                                      },
-                                    ),
-                                  );
-                                },
-                                separatorBuilder: (context, index) =>
-                                    const Divider(color: AppColors.grey),
+                                const Divider(color: AppColors.grey),
                               ),
                             )
                           ]
@@ -300,27 +314,26 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
       ),
       // Hide FAB while scrolling up and Show FAB while scrolling down
       // Only staff and admin can create call
-      floatingActionButton: (isAdmin || isClient)
-          ? AnimatedOpacity(
-              opacity: _isFabVisible ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 350),
-              child: IgnorePointer(
-                ignoring: !_isFabVisible,
-                child: FloatingActionButton(
-                  onPressed: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(
-                            builder: (context) => CreateCallPage()))
-                        .then((value) {
-                      if (value == true) getCallLogs();
-                    });
-                  },
-                  child: const Icon(Icons.add),
-                  tooltip: 'Create call',
-                ),
-              ),
-            )
-          : const SizedBox.shrink(),
+      floatingActionButton: isUser
+          ? const SizedBox.shrink() : AnimatedOpacity(
+        opacity: _isFabVisible ? 1.0 : 0.0,
+        duration: Duration(milliseconds: 350),
+        child: IgnorePointer(
+          ignoring: !_isFabVisible,
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(
+                  builder: (context) => CreateCallPage()))
+                  .then((value) {
+                if (value == true) getCallLogs();
+              });
+            },
+            child: const Icon(Icons.add),
+            tooltip: 'Create call',
+          ),
+        ),
+      )
     );
   }
 }
@@ -439,56 +452,24 @@ class CallLogDetails extends StatelessWidget {
                       shape: StadiumBorder(),
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   const SizedBox(width: 6.0),
-                  if (!context.read<LoginProvider>().isUser) ...[
-                    IconButton(
-                        tooltip: 'More actions',
-                        visualDensity:
-                            VisualDensity(horizontal: -4, vertical: -4),
-                        padding: EdgeInsets.zero,
-                        onPressed: () async {
-                          await showModalBottomSheet(
-                              context: context,
-                              builder: (context) {
-                                return CallLogActionWidget(
-                                  onTapWaiting: onTapWaiting,
-                                  onTapCancel: onTapCancel,
-                                  onTapComplete: onTapComplete,
-                                  onTapPending: onTapPending,
-                                );
-                              });
-                        },
-                        icon: const Icon(Icons.more_vert))
-                  ],
-                  // PopupMenuButton(
-                  //   padding: EdgeInsets.zero,
-                  //   style: ButtonStyle(
-                  //     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  //     visualDensity:
-                  //         VisualDensity(vertical: -4, horizontal: -4),
-                  //   ),
-                  //   itemBuilder: (context) {
-                  //     return [
-                  //       PopupMenuItem(
-                  //           child: Row(
-                  //             children: [
-                  //               const Icon(Icons.cancel),
-                  //               const SizedBox(width: 8.0),
-                  //               const Text('Cancel'),
-                  //             ],
-                  //           ),
-                  //           onTap: onTapCancel),
-                  //       PopupMenuItem(
-                  //           child: Row(
-                  //             children: [
-                  //               const Icon(Icons.timelapse),
-                  //               const SizedBox(width: 8.0),
-                  //               const Text('Add to waiting list'),
-                  //             ],
-                  //           ),
-                  //           onTap: onTapWaiting),
-                  //     ];
-                  //   },
-                  // ),
+                  IconButton(
+                      tooltip: 'More actions',
+                      visualDensity:
+                          VisualDensity(horizontal: -4, vertical: -4),
+                      padding: EdgeInsets.zero,
+                      onPressed: () async {
+                        await showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              return CallLogActionWidget(
+                                onTapWaiting: onTapWaiting,
+                                onTapCancel: onTapCancel,
+                                onTapComplete: onTapComplete,
+                                onTapPending: onTapPending,
+                              );
+                            });
+                      },
+                      icon: const Icon(Icons.more_vert))
                 ],
               )
             ],
@@ -567,67 +548,14 @@ class StaffCallLogDetails extends StatelessWidget {
               Text(callLog?.call?.user?.name?.capitalizeFirst ?? '',
                   style: textTheme.titleLarge!
                       .copyWith(fontWeight: FontWeight.bold)),
-              Row(
-                children: [
-                  InputChip(
-                      tooltip: 'Status',
-                      label: Text(callLog?.call?.status?.capitalizeFirst ?? ''),
-                      padding: EdgeInsets.zero,
-                      onPressed: () {},
-                      visualDensity: VisualDensity(vertical: -4),
-                      shape: StadiumBorder(),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  const SizedBox(width: 6.0),
-                  IconButton(
-                      tooltip: 'More actions',
-                      visualDensity:
-                          VisualDensity(horizontal: -4, vertical: -4),
-                      padding: EdgeInsets.zero,
-                      onPressed: () async {
-                        await showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return CallLogActionWidget(
-                                onTapWaiting: onTapWaiting,
-                                onTapCancel: onTapCancel,
-                                onTapComplete: onTapComplete,
-                                onTapPending: onTapPending,
-                              );
-                            });
-                      },
-                      icon: const Icon(Icons.more_vert))
-                  // PopupMenuButton(
-                  //   padding: EdgeInsets.zero,
-                  //   style: ButtonStyle(
-                  //     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  //     visualDensity:
-                  //         VisualDensity(vertical: -4, horizontal: -4),
-                  //   ),
-                  //   itemBuilder: (context) {
-                  //     return [
-                  //       PopupMenuItem(
-                  //           child: Row(
-                  //             children: [
-                  //               const Icon(Icons.cancel),
-                  //               const SizedBox(width: 8.0),
-                  //               const Text('Cancel'),
-                  //             ],
-                  //           ),
-                  //           onTap: onTapCancel),
-                  //       PopupMenuItem(
-                  //           child: Row(
-                  //             children: [
-                  //               const Icon(Icons.timelapse),
-                  //               const SizedBox(width: 8.0),
-                  //               const Text('Add to waiting list'),
-                  //             ],
-                  //           ),
-                  //           onTap: onTapWaiting),
-                  //     ];
-                  //   },
-                  // ),
-                ],
-              )
+              InputChip(
+                  tooltip: 'Status',
+                  label: Text(callLog?.call?.status?.capitalizeFirst ?? ''),
+                  padding: EdgeInsets.zero,
+                  onPressed: () {},
+                  visualDensity: VisualDensity(vertical: -4),
+                  shape: StadiumBorder(),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap)
             ],
           ),
           const SizedBox(height: 10.0),
@@ -678,7 +606,8 @@ class StaffCallLogDetails extends StatelessWidget {
               Icon(Icons.watch_later_outlined),
               const SizedBox(width: 6.0),
               Expanded(
-                  child: Text(callLog?.slot?.capitalizeFirst ?? '', style: textTheme.bodyLarge)),
+                  child: Text(callLog?.slot?.capitalizeFirst ?? '',
+                      style: textTheme.bodyLarge)),
             ],
           ),
           const SizedBox(height: 10.0),

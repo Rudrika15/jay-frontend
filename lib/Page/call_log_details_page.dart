@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/provider/call_status_provider.dart';
 import 'package:flipcodeattendence/provider/login_provider.dart';
@@ -30,13 +32,17 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
   final teamController = TextEditingController();
   final timeSlotController = TextEditingController();
   final chargeController = TextEditingController();
+  final extraChargeController = TextEditingController();
   final dateController = TextEditingController();
   final partsController = TextEditingController();
+  final paymentMethodController = TextEditingController();
   List<Members> selectedMembers = [];
   List<dynamic> selectedParts = [];
   late final isAdmin, isUser, isClient;
   late final CallLogProvider provider;
   late final CallStatusEnum callStatus;
+  late double totalCharge;
+  Timer? debounce;
 
   @override
   void initState() {
@@ -50,6 +56,20 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
     (callStatus == CallStatusEnum.allocated)
         ? provider.getAllocatedCallLogDetails(context: context, id: widget.id)
         : null;
+    totalCharge = countTotal();
+  }
+
+  @override
+  void dispose() {
+    teamController.dispose();
+    timeSlotController.dispose();
+    chargeController.dispose();
+    extraChargeController.dispose();
+    dateController.dispose();
+    partsController.dispose();
+    paymentMethodController.dispose();
+    debounce?.cancel();
+    super.dispose();
   }
 
   resetValues() {
@@ -60,17 +80,21 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
       partsController.clear();
       selectedMembers.clear();
       selectedParts.clear();
+      extraChargeController.clear();
+      paymentMethodController.clear();
     });
   }
 
-  @override
-  void dispose() {
-    teamController.dispose();
-    timeSlotController.dispose();
-    chargeController.dispose();
-    dateController.dispose();
-    partsController.dispose();
-    super.dispose();
+  double countTotal() {
+    double initialCharge = 0.0;
+    double extraCharge = 0.0;
+    double totalCharge = 0.0;
+    final callCharge = provider.staffCallLogData?.charge;
+    if (callCharge != null) initialCharge = double.parse(callCharge);
+    if (extraChargeController.text.trim().isNotEmpty)
+      extraCharge = double.parse(extraChargeController.text.trim());
+    totalCharge = (initialCharge + extraCharge).toPrecision(2);
+    return totalCharge;
   }
 
   @override
@@ -82,18 +106,20 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
             onPressed: () => Navigator.pop(context),
             icon: Icon(CupertinoIcons.clear)),
         actions: [
-          IconButton(
-              onPressed: () async {
-                await showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return CallLogActionWidget(
-                        onTapWaiting: null,
-                        onTapCancel: null,
-                      );
-                    });
-              },
-              icon: const Icon(Icons.more_vert))
+          if (!isUser) ...[
+            IconButton(
+                onPressed: () async {
+                  await showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return CallLogActionWidget(
+                          onTapWaiting: null,
+                          onTapCancel: null,
+                        );
+                      });
+                },
+                icon: const Icon(Icons.more_vert))
+          ]
         ],
       ),
       body: SingleChildScrollView(
@@ -108,9 +134,12 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (callStatus == CallStatusEnum.allocated) ...[
+                        if (callStatus == CallStatusEnum.allocated ||
+                            callStatus == CallStatusEnum.completed) ...[
                           Text(
-                              provider.staffCallLogData?.call?.user?.name?.capitalizeFirst ?? '',
+                              provider.staffCallLogData?.call?.user?.name
+                                      ?.capitalizeFirst ??
+                                  '',
                               style: textTheme.titleLarge!
                                   .copyWith(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12.0),
@@ -131,8 +160,8 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                               const SizedBox(width: 6.0),
                               Expanded(
                                   child: Text(
-                                      provider.staffCallLogData?.call
-                                              ?.address?.capitalizeFirst ??
+                                      provider.staffCallLogData?.call?.address
+                                              ?.capitalizeFirst ??
                                           'N/A',
                                       style: textTheme.bodyLarge)),
                             ],
@@ -171,7 +200,9 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                               const SizedBox(width: 6.0),
                               Expanded(
                                   child: Text(
-                                      provider.staffCallLogData?.slot?.capitalizeFirst ?? '',
+                                      provider.staffCallLogData?.slot
+                                              ?.capitalizeFirst ??
+                                          '',
                                       style: textTheme.bodyLarge)),
                             ],
                           ),
@@ -189,7 +220,10 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                           ),
                           const SizedBox(height: 24.0),
                         ],
-                        if (context.read<CallStatusProvider>().callStatusEnum != CallStatusEnum.allocated && isAdmin) ...[
+                        if (callStatus != CallStatusEnum.allocated &&
+                            callStatus !=
+                                CallStatusEnum.completed &&
+                            isAdmin) ...[
                           TextFormFieldWidget(
                             labelText: 'Select time slot',
                             controller: timeSlotController,
@@ -214,7 +248,8 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                                       builder: (context) =>
                                           TimeSlotBottomSheet());
                               if (timeSlot != null) {
-                                timeSlotController.text = timeSlot.name.capitalizeFirst!;
+                                timeSlotController.text =
+                                    timeSlot.name.capitalizeFirst!;
                                 setState(() {});
                               }
                             },
@@ -347,6 +382,129 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                             },
                           ),
                           const SizedBox(height: 16.0),
+                          TextFormFieldWidget(
+                            labelText: 'Select payment method',
+                            controller: paymentMethodController,
+                            readOnly: true,
+                            suffixIcon: (paymentMethodController.text
+                                    .trim()
+                                    .isEmpty)
+                                ? Icon(Icons.arrow_drop_down_circle_outlined)
+                                : IconButton(
+                                    onPressed: () => setState(() {
+                                          paymentMethodController.clear();
+                                          extraChargeController.clear();
+                                          totalCharge = countTotal();
+                                        }),
+                                    icon: Icon(Icons.close)),
+                            validator: (value) {
+                              return (value == null || value.trim().isEmpty)
+                                  ? 'Please select payment method'
+                                  : null;
+                            },
+                            onTap: () async {
+                              final PaymentMethod? selectedPaymentMethod =
+                                  await showModalBottomSheet(
+                                      context: context,
+                                      builder: (context) =>
+                                          PaymentMethodBottomSheet());
+                              if (selectedPaymentMethod != null) {
+                                paymentMethodController.text =
+                                    selectedPaymentMethod.name.capitalizeFirst!;
+                                extraChargeController.clear();
+                                totalCharge = countTotal();
+                                setState(() {});
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 16.0),
+                          if (paymentMethodController.text
+                                  .trim()
+                                  .toLowerCase() ==
+                              PaymentMethod.cash.name.toLowerCase()) ...[
+                            TextFormFieldWidget(
+                              labelText: 'Enter extra charge',
+                              controller: extraChargeController,
+                              suffixIcon: Icon(Icons.currency_rupee),
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              onChanged: (value) async {
+                                if (debounce?.isActive ?? false)
+                                  debounce?.cancel();
+                                Timer(
+                                    Duration(milliseconds: 1000),
+                                    () => setState(
+                                        () => totalCharge = countTotal()));
+                              },
+                            ),
+                            const SizedBox(height: 16.0),
+                          ],
+                          if (paymentMethodController.text
+                                  .trim()
+                                  .toLowerCase() ==
+                              PaymentMethod.QR.name.toLowerCase()) ...[
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                          context: context,
+                                          isDismissible: false,
+                                          builder: (context) => Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.qr_code_2,
+                                                    size: 300,
+                                                  ),
+                                                  const SizedBox(height: 12.0),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text('QR 1',
+                                                          style: textTheme
+                                                              .titleLarge!
+                                                              .copyWith(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold)),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 12.0),
+                                                ],
+                                              ));
+                                    },
+                                    label: Text('QR 1'),
+                                    icon: Icon(Icons.qr_code_2),
+                                    style: OutlinedButton.styleFrom(
+                                        fixedSize: const Size.fromHeight(56.0),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0))),
+                                  ),
+                                ),
+                                const SizedBox(width: 12.0),
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () {},
+                                    label: Text('QR 2'),
+                                    icon: Icon(Icons.qr_code_2),
+                                    style: OutlinedButton.styleFrom(
+                                        fixedSize: const Size.fromHeight(56.0),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0))),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16.0),
+                          ]
                         ],
                       ],
                     ),
@@ -354,8 +512,10 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
           );
         }),
       ),
-      bottomNavigationBar: (context.read<CallStatusProvider>().callStatusEnum !=
+      bottomNavigationBar: (callStatus !=
                   CallStatusEnum.allocated &&
+          callStatus !=
+                  CallStatusEnum.completed &&
               isAdmin)
           ? Padding(
               padding:
@@ -387,7 +547,24 @@ class _CallLogDetailsPageState extends State<CallLogDetailsPage> {
                 ],
               ),
             )
-          : const SizedBox.shrink(),
+          : (isUser)
+              ? Padding(
+                  padding: const EdgeInsets.only(
+                      left: 16.0, right: 16.0, bottom: 16.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: Text('Total : ₹$totalCharge',
+                              style: textTheme.titleLarge!
+                                  .copyWith(fontWeight: FontWeight.bold))),
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                          child: CustomElevatedButton(
+                              buttonText: 'Complete call', onPressed: () {}))
+                    ],
+                  ),
+                )
+              : const SizedBox.shrink(),
     );
   }
 }
@@ -756,5 +933,114 @@ class _PartsBottomSheetState extends State<PartsBottomSheet> {
                   ),
                 );
     });
+  }
+}
+
+class PaymentMethodBottomSheet extends StatefulWidget {
+  const PaymentMethodBottomSheet({super.key});
+
+  @override
+  State<PaymentMethodBottomSheet> createState() => _PaymentMethodBottomSheet();
+}
+
+class _PaymentMethodBottomSheet extends State<PaymentMethodBottomSheet> {
+  PaymentMethod? selectedPaymentMethod;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      padding: EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Select payment method',
+                  style: textTheme.titleLarge!
+                      .copyWith(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 12.0),
+          GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12.0,
+                  crossAxisSpacing: 12.0,
+                  childAspectRatio: 2.5),
+              itemCount: PaymentMethod.values.length,
+              itemBuilder: (context, index) => InkWell(
+                    borderRadius: BorderRadius.circular(12.0),
+                    onTap: () {
+                      setState(() {
+                        selectedPaymentMethod = PaymentMethod.values[index];
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                          border: Border.all(color: AppColors.aPrimary),
+                          color: selectedPaymentMethod ==
+                                  PaymentMethod.values[index]
+                              ? AppColors.aPrimary
+                              : AppColors.onPrimaryLight),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          PaymentMethod.values[index] == PaymentMethod.cash
+                              ? Icon(Icons.currency_rupee,
+                                  color: (selectedPaymentMethod ==
+                                          PaymentMethod.cash)
+                                      ? AppColors.onPrimaryLight
+                                      : AppColors.aPrimary)
+                              : Icon(Icons.qr_code,
+                                  color: (selectedPaymentMethod ==
+                                          PaymentMethod.QR)
+                                      ? AppColors.onPrimaryLight
+                                      : AppColors.aPrimary),
+                          const SizedBox(width: 12.0),
+                          Text(
+                              PaymentMethod.values[index].name.capitalizeFirst!,
+                              style: TextStyle(
+                                  color: selectedPaymentMethod ==
+                                          PaymentMethod.values[index]
+                                      ? AppColors.onPrimaryLight
+                                      : AppColors.aPrimary)),
+                        ],
+                      ),
+                    ),
+                  )),
+          const SizedBox(height: 12.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              CustomOutlinedButton(
+                  buttonText: 'Clear',
+                  onPressed: (selectedPaymentMethod != null)
+                      ? () {
+                          setState(() {
+                            selectedPaymentMethod = null;
+                          });
+                        }
+                      : null),
+              const SizedBox(width: 16.0),
+              CustomElevatedButton(
+                  buttonText: 'Ok',
+                  onPressed: (selectedPaymentMethod != null)
+                      ? () {
+                          Navigator.pop(context, selectedPaymentMethod);
+                        }
+                      : null),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

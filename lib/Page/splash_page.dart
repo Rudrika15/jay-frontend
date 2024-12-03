@@ -1,4 +1,7 @@
 import 'package:flipcodeattendence/Page/login_page.dart';
+import 'package:flipcodeattendence/featuers/Admin/page/admin_nav_bar.dart';
+import 'package:flipcodeattendence/featuers/Client/page/client_nav_bar.dart';
+import 'package:flipcodeattendence/featuers/User/page/user_nav_bar.dart';
 import 'package:flipcodeattendence/provider/call_status_provider.dart';
 import 'package:flipcodeattendence/provider/login_provider.dart';
 import 'package:provider/provider.dart';
@@ -8,14 +11,13 @@ import '/mixins/navigator_mixin.dart';
 import '/service/shared_preferences_service.dart';
 import 'package:flutter/material.dart';
 
-import 'navbar.dart';
-
 class SplashPage extends StatefulWidget {
   @override
   _SplashPageState createState() => _SplashPageState();
 }
 
 class _SplashPageState extends State<SplashPage> with NavigatorMixin {
+
   @override
   void initState() {
     super.initState();
@@ -28,9 +30,19 @@ class _SplashPageState extends State<SplashPage> with NavigatorMixin {
     Future.delayed(
       Duration(seconds: 2),
       () {
-        (token == null || token.isEmpty)
-            ? pushReplacement(context, LoginPage())
-            : pushReplacement(context, Navbar());
+        if(token == null || token.isEmpty) {
+          pushReplacement(context, LoginPage());
+        } else {
+          Provider.of<LoginProvider>(context, listen: false).getUserRole().then((value) {
+            final isAdmin = context.read<LoginProvider>().isAdmin;
+            final isUser = context.read<LoginProvider>().isUser;
+            (isAdmin)
+                ? pushReplacement(context, AdminNavbar())
+                : (isUser)
+                ? pushReplacement(context, UserNavbar())
+                : pushReplacement(context, ClientNavbar());
+          });
+        }
       },
     );
   }

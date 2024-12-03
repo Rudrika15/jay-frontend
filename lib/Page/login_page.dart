@@ -1,8 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import '../featuers/Admin/page/admin_nav_bar.dart';
+import '../featuers/Client/page/client_nav_bar.dart';
+import '../featuers/User/page/user_nav_bar.dart';
 import '../helper/enum_helper.dart';
 import '../provider/login_provider.dart';
 import '/helper/height_width_helper.dart';
@@ -10,7 +12,6 @@ import '/helper/string_helper.dart';
 import '/mixins/navigator_mixin.dart';
 import '/widget/text_form_field_custom.dart';
 import '../theme/app_colors.dart';
-import 'navbar.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -199,9 +200,15 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                                                 password: _passwordController.text)
                                                 .then(
                                                   (value) {
-                                                if (value)
-                                                  pushReplacement(
-                                                      context, Navbar());
+                                                    if(value) {
+                                                      final isAdmin = context.read<LoginProvider>().isAdmin;
+                                                      final isUser = context.read<LoginProvider>().isUser;
+                                                      (isAdmin)
+                                                          ? pushReplacement(context, AdminNavbar())
+                                                          : (isUser)
+                                                            ? pushReplacement(context, UserNavbar())
+                                                            : pushReplacement(context, ClientNavbar());
+                                                    }
                                               },
                                             );
                                           }

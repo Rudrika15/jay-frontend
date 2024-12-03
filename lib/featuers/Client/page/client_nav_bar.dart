@@ -2,28 +2,23 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flipcodeattendence/Page/call_log_page.dart';
 import 'package:flipcodeattendence/Page/profile_page.dart';
-import 'package:flipcodeattendence/featuers/Admin/page/admin_home_page.dart';
-import 'package:flipcodeattendence/featuers/Admin/page/admin_leave_page.dart';
-import 'package:flipcodeattendence/featuers/User/page/user_attendance_page.dart';
-import 'package:flipcodeattendence/featuers/User/page/user_leave_page.dart';
-import 'package:flipcodeattendence/helper/app_version_checker.dart';
 import 'package:flipcodeattendence/helper/connectivity_service.dart';
 import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
+import '../../../widget/dialog_widget.dart';
 import '/provider/login_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../widget/dialog_widget.dart';
 
-class Navbar extends StatefulWidget {
+class ClientNavbar extends StatefulWidget {
   @override
-  _NavbarState createState() => _NavbarState();
+  _ClientNavbarState createState() => _ClientNavbarState();
 }
 
-class _NavbarState extends State<Navbar> with NavigatorMixin {
+class _ClientNavbarState extends State<ClientNavbar> with NavigatorMixin {
   int _selectedIndex = 0;
   final _connectivityService = ConnectivityService();
 
@@ -31,7 +26,6 @@ class _NavbarState extends State<Navbar> with NavigatorMixin {
   void initState() {
     super.initState();
     // Provider.of<LoginProvider>(context, listen: false).updateToken();
-    Provider.of<LoginProvider>(context, listen: false).getUserRole();
   }
 
   @override
@@ -93,7 +87,6 @@ class _NavbarState extends State<Navbar> with NavigatorMixin {
     return Scaffold(
       body: Consumer<LoginProvider>(
         builder: (context, loginValue, child) {
-          final userRole = loginValue.userRole?.trim().toLowerCase();
           return PopScope(
             canPop: false,
             onPopInvoked: (didPop) async {
@@ -119,33 +112,27 @@ class _NavbarState extends State<Navbar> with NavigatorMixin {
                     result.first == ConnectivityResult.none;
                 return (isDisconnected)
                     ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(CupertinoIcons.wifi_exclamationmark,
-                                color: AppColors.aPrimary, size: 100),
-                            Text(
-                              'No connection',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ],
-                        ),
-                      )
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(CupertinoIcons.wifi_exclamationmark,
+                          color: AppColors.aPrimary, size: 100),
+                      Text(
+                        'No connection',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ],
+                  ),
+                )
                     : loginValue.isLoading
-                        ? Center(
-                            child: CircularProgressIndicator(),
-                          )
-                        : [
-                            userRole == 'admin'
-                                ? AdminHomePage()
-                                : UserAttendancePage(),
-                            userRole == 'admin'
-                                ? AdminLeavePage()
-                                : UserLeavePage(),
-                            CallLogPage(),
-                            ProfilePage(),
-                          ][_selectedIndex];
+                    ? Center(
+                  child: CircularProgressIndicator(),
+                )
+                    : [
+                  CallLogPage(),
+                  ProfilePage(),
+                ][_selectedIndex];
               },
             ),
           );
@@ -159,9 +146,6 @@ class _NavbarState extends State<Navbar> with NavigatorMixin {
           });
         },
         destinations: [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(
-              icon: Icon(CupertinoIcons.arrow_up_right), label: 'Leave'),
           NavigationDestination(
               icon: Icon(Icons.list_alt_rounded), label: 'Call log'),
           NavigationDestination(

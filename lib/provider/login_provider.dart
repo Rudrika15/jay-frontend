@@ -23,7 +23,7 @@ class LoginProvider extends ChangeNotifier {
     notifyListeners();
     final value =
         await loginService.userLogin(phone: phone, password: password);
-    setUserRole();
+    await setUserRole();
     _isLoading = false;
     notifyListeners();
     return value;
