@@ -1,3 +1,4 @@
+import 'package:flipcodeattendence/featuers/User/staff_provider.dart';
 import 'package:flipcodeattendence/provider/app_provider.dart';
 import 'package:flipcodeattendence/provider/call_log_provider.dart';
 import 'package:flipcodeattendence/provider/call_status_provider.dart';
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => CallLogProvider()),
         ChangeNotifierProvider(create: (context) => TeamProvider()),
         ChangeNotifierProvider(create: (context) => CallStatusProvider()),
+        ChangeNotifierProvider(create: (context) => StaffProvider()),
       ],
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,

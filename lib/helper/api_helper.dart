@@ -1,5 +1,6 @@
 class ApiHelper {
   static String baseUrl = 'https://dev.jayinfotech.org/';
+  static String imageBaseUrl = 'https://dev.jayinfotech.org/images/';
   static String loginUrl = '${baseUrl}api/auth/login';
   static String changePasswordUrl = '${baseUrl}change-password';
   static String attendance = '${baseUrl}api/attendance';
@@ -21,6 +22,7 @@ class ApiHelper {
   // Staff
   static String staffCallLogList = '${baseUrl}api/call-list';
   static String getParts = '${baseUrl}api/parts-list';
+  static String qrList = '${baseUrl}api/qr-list';
 
 
   static String dailyAttendence = '${baseUrl}api/daily';
