@@ -2,7 +2,6 @@ import 'package:flipcodeattendence/Page/login_page.dart';
 import 'package:flipcodeattendence/featuers/Admin/page/admin_nav_bar.dart';
 import 'package:flipcodeattendence/featuers/Client/page/client_nav_bar.dart';
 import 'package:flipcodeattendence/featuers/User/page/user_nav_bar.dart';
-import 'package:flipcodeattendence/provider/call_status_provider.dart';
 import 'package:flipcodeattendence/provider/login_provider.dart';
 import 'package:provider/provider.dart';
 

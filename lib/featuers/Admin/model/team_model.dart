@@ -106,7 +106,7 @@ class User {
   String? name;
   String? phone;
   String? email;
-  Null? token;
+  Null token;
   String? birthdate;
   String? createdAt;
   String? updatedAt;

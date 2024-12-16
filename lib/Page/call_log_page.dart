@@ -1,4 +1,5 @@
 import 'package:flipcodeattendence/Page/create_call_page.dart';
+import 'package:flipcodeattendence/helper/api_helper.dart';
 import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flipcodeattendence/models/call_logs_model.dart';
@@ -10,8 +11,8 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
 import '../featuers/User/model/staff_allocated_call_model.dart';
+import '../featuers/Client/model/client_call_log_model.dart' as ClientModel;
 import '../provider/call_log_provider.dart';
 import '../provider/login_provider.dart';
 import '../theme/app_colors.dart';
@@ -63,11 +64,16 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
   }
 
   Future<void> getCallLogs() async {
-    (isUser)
-        ? provider.getStaffCallLogs(context: context, date: dateController.text)
-        : provider.getCallLogs(
+    isAdmin
+        ? provider.getCallLogs(
             context: context,
-            status: context.read<CallStatusProvider>().callStatusEnum);
+            status: context.read<CallStatusProvider>().callStatusEnum)
+        : isUser
+            ? provider.getStaffCallLogs(
+                context: context, date: dateController.text)
+            : provider.getClientsCallLogs(context,
+                date: dateController.text,
+                status: context.read<CallStatusProvider>().callStatusEnum);
   }
 
   Future<void> changeStatus(
@@ -191,25 +197,44 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                         .allocatedStaffCallLogList[index];
                                     return InkWell(
                                       onTap: () {
-                                          Navigator.of(context)
-                                              .push(MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CallDetailsUserPage(
-                                                      id: callLog.call!.id
-                                                          .toString())))
-                                              .then((value) {
-                                            if (value == true) getCallLogs();
-                                          });
+                                        Navigator.of(context)
+                                            .push(MaterialPageRoute(
+                                                builder: (context) =>
+                                                    CallDetailsUserPage(
+                                                        id: callLog.call!.id
+                                                            .toString())))
+                                            .then((value) {
+                                          if (value == true) getCallLogs();
+                                        });
                                       },
                                       child: StaffCallLogDetails(
-                                        callLog: callLog,
-                                        onTapComplete: () {
-                                          pop(context);
-                                          changeStatus(
-                                              id: callLog.id.toString(),
-                                              status: CallStatusEnum.completed);
-                                        },
-                                      ),
+                                          callLog: callLog,
+                                          onTapComplete: () {
+                                            pop(context);
+                                            changeStatus(
+                                                id: callLog.id.toString(),
+                                                status:
+                                                    CallStatusEnum.completed);
+                                          },
+                                          onPressImageChip: () {
+                                            showDialog(
+                                                context: context,
+                                                builder: (context) => Dialog(
+                                                      child: Container(
+                                                        height: 300,
+                                                        decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12.0),
+                                                            image: DecorationImage(
+                                                                image: NetworkImage(
+                                                                    "${ApiHelper.imageBaseUrl + callLog.call!.photo!}"),
+                                                                fit: BoxFit
+                                                                    .cover)),
+                                                      ),
+                                                    ));
+                                          }),
                                     );
                                   },
                                   separatorBuilder: (context, index) =>
@@ -217,7 +242,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                 ),
                               )
                             ]
-                          ] else ...[
+                          ] else if (isAdmin) ...[
                             if (provider.callLogsModel?.data?.isEmpty ??
                                 false) ...[
                               Expanded(
@@ -233,37 +258,18 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                   itemBuilder: (context, index) {
                                     final callLog =
                                         provider.callLogsModel?.data?[index];
-                                    final bool cannotTap = (isClient &&
-                                        (context
-                                                    .read<CallStatusProvider>()
-                                                    .callStatusEnum ==
-                                                CallStatusEnum.pending ||
-                                            context
-                                                    .read<CallStatusProvider>()
-                                                    .callStatusEnum ==
-                                                CallStatusEnum.cancelled ||
-                                            context
-                                                    .read<CallStatusProvider>()
-                                                    .callStatusEnum ==
-                                                CallStatusEnum.waiting));
                                     return InkWell(
-                                      onTap: cannotTap
-                                          ? null
-                                          : () {
-                                        if(isAdmin) {
-                                          Navigator.of(context)
-                                              .push(MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CallDetailsAdminPage(
-                                                    id: callLog!.id.toString())))
-                                              .then((value) {
-                                            if (value == true) getCallLogs();
-                                          });
-                                        } else {
-                                          push(context, CallDetailsClientPage(
-                                              id: callLog!.id
-                                                  .toString()));
-                                        }},
+                                      onTap: () {
+                                        Navigator.of(context)
+                                            .push(MaterialPageRoute(
+                                                builder: (context) =>
+                                                    CallDetailsAdminPage(
+                                                        id: callLog!.id
+                                                            .toString())))
+                                            .then((value) {
+                                          if (value == true) getCallLogs();
+                                        });
+                                      },
                                       child: CallLogDetails(
                                         callLog: callLog,
                                         onTapCancel: () {
@@ -289,6 +295,101 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                           changeStatus(
                                               id: callLog?.id.toString() ?? '',
                                               status: CallStatusEnum.pending);
+                                        },
+                                        onPressImageChip: () {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) => Dialog(
+                                                    child: Container(
+                                                      height: 300,
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      12.0),
+                                                          image: DecorationImage(
+                                                              image: NetworkImage(
+                                                                  "${ApiHelper.imageBaseUrl + callLog!.photo!}"),
+                                                              fit: BoxFit
+                                                                  .cover)),
+                                                    ),
+                                                  ));
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  separatorBuilder: (context, index) =>
+                                      const Divider(color: AppColors.grey),
+                                ),
+                              )
+                            ]
+                          ] else ...[
+                            if (provider.clientCallLogModel?.data?.isEmpty ??
+                                false) ...[
+                              Expanded(
+                                  child: const Center(
+                                      child: Text('No call logs found')))
+                            ] else ...[
+                              Expanded(
+                                child: ListView.separated(
+                                  shrinkWrap: true,
+                                  controller: _scrollController,
+                                  itemCount: provider
+                                          .clientCallLogModel?.data?.length ??
+                                      0,
+                                  itemBuilder: (context, index) {
+                                    final callLog = provider
+                                        .clientCallLogModel?.data?[index];
+                                    final bool canTap = (context
+                                                .read<CallStatusProvider>()
+                                                .callStatusEnum ==
+                                            CallStatusEnum.allocated ||
+                                        context
+                                                .read<CallStatusProvider>()
+                                                .callStatusEnum ==
+                                            CallStatusEnum.completed);
+                                    return InkWell(
+                                      onTap: canTap
+                                          ? () {
+                                              push(
+                                                  context,
+                                                  CallDetailsClientPage(
+                                                      id: callLog!.id
+                                                          .toString()));
+                                            }
+                                          : null,
+                                      child: ClientCallDetails(
+                                        callLog: callLog,
+                                        onTapCancel: () {
+                                          pop(context);
+                                          changeStatus(
+                                              id: callLog?.id.toString() ?? '',
+                                              status: CallStatusEnum.cancelled);
+                                        },
+                                        onTapComplete: () {
+                                          pop(context);
+                                          changeStatus(
+                                              id: callLog?.id.toString() ?? '',
+                                              status: CallStatusEnum.completed);
+                                        },
+                                        onPressImageChip: () {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) => Dialog(
+                                                    child: Container(
+                                                      height: 300,
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      12.0),
+                                                          image: DecorationImage(
+                                                              image: NetworkImage(
+                                                                  "${ApiHelper.imageBaseUrl + callLog!.photo!}"),
+                                                              fit: BoxFit
+                                                                  .cover)),
+                                                    ),
+                                                  ));
                                         },
                                       ),
                                     );
@@ -407,7 +508,11 @@ class _CallTypeRadioListTileWidget extends State<CallTypeRadioListTileWidget> {
 
 class CallLogDetails extends StatelessWidget {
   final CallLog? callLog;
-  final void Function()? onTapCancel, onTapWaiting, onTapComplete, onTapPending;
+  final void Function()? onTapCancel,
+      onTapWaiting,
+      onTapComplete,
+      onTapPending,
+      onPressImageChip;
 
   const CallLogDetails(
       {super.key,
@@ -415,13 +520,13 @@ class CallLogDetails extends StatelessWidget {
       this.onTapCancel,
       this.onTapWaiting,
       this.onTapComplete,
-      this.onTapPending});
+      this.onTapPending,
+      this.onPressImageChip});
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Container(
-      margin: EdgeInsets.only(bottom: 16.0),
       padding: EdgeInsets.all(12.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -467,6 +572,17 @@ class CallLogDetails extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10.0),
+          if (callLog?.photo != null) ...[
+            ActionChip(
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity(vertical: -4),
+              tooltip: 'Image',
+              onPressed: onPressImageChip,
+              label: Text(callLog?.photo ?? 'photo.jpg'),
+              avatar: Icon(Icons.image),
+            ),
+            const SizedBox(height: 10.0),
+          ],
           Row(
             children: [
               Icon(Icons.call),
@@ -506,9 +622,110 @@ class CallLogDetails extends StatelessWidget {
                   child: Text(callLog?.date ?? '', style: textTheme.bodyLarge)),
             ],
           ),
-          if(callLog?.photo != null) ...[
+        ],
+      ),
+    );
+  }
+}
+
+class ClientCallDetails extends StatelessWidget {
+  final ClientModel.Call? callLog;
+  final void Function()? onTapCancel, onTapComplete, onPressImageChip;
+
+  const ClientCallDetails(
+      {super.key,
+      this.callLog,
+      this.onTapCancel,
+      this.onTapComplete,
+      this.onPressImageChip});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      padding: EdgeInsets.all(12.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InputChip(
+                  tooltip: 'Status',
+                  label: Text(callLog?.status?.capitalizeFirst ?? ''),
+                  padding: EdgeInsets.zero,
+                  onPressed: () {},
+                  visualDensity: VisualDensity(vertical: -4),
+                  shape: StadiumBorder(),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+              const SizedBox(width: 6.0),
+              if (context.read<CallStatusProvider>().callStatusEnum !=
+                      CallStatusEnum.completed &&
+                  context.read<CallStatusProvider>().callStatusEnum !=
+                      CallStatusEnum.cancelled) ...[
+                IconButton(
+                    tooltip: 'More actions',
+                    visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                    padding: EdgeInsets.zero,
+                    onPressed: () async {
+                      await showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return CallLogActionWidget(
+                              onTapWaiting: null,
+                              onTapCancel: onTapCancel,
+                              onTapComplete: onTapComplete,
+                              onTapPending: null,
+                            );
+                          });
+                    },
+                    icon: const Icon(Icons.more_vert))
+              ]
+            ],
+          ),
+          const SizedBox(height: 10.0),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.location_on_outlined),
+              const SizedBox(width: 6.0),
+              Expanded(
+                  child: Text(callLog?.address?.capitalizeFirst ?? 'N/A',
+                      style: textTheme.bodyLarge)),
+            ],
+          ),
+          const SizedBox(height: 10.0),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.message_outlined),
+              const SizedBox(width: 6.0),
+              Expanded(
+                  child: Text(callLog?.description?.capitalizeFirst ?? '',
+                      style: textTheme.bodyLarge)),
+            ],
+          ),
+          const SizedBox(height: 10.0),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.date_range),
+              const SizedBox(width: 6.0),
+              Expanded(
+                  child: Text(callLog?.date ?? '', style: textTheme.bodyLarge)),
+            ],
+          ),
+          if (callLog?.photo == null) ...[
             const SizedBox(height: 10.0),
-            Chip(label: Text(callLog?.photo ?? 'photo.jpg'), avatar: Icon(Icons.image))
+            ActionChip(
+              visualDensity: VisualDensity(vertical: -4),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              tooltip: 'Image',
+              onPressed: onPressImageChip,
+              label: Text(callLog?.photo ?? 'photo.jpg'),
+              avatar: Icon(Icons.image),
+            ),
           ],
         ],
       ),
@@ -518,7 +735,11 @@ class CallLogDetails extends StatelessWidget {
 
 class StaffCallLogDetails extends StatelessWidget {
   final StaffCallLogData? callLog;
-  final void Function()? onTapCancel, onTapWaiting, onTapComplete, onTapPending;
+  final void Function()? onTapCancel,
+      onTapWaiting,
+      onTapComplete,
+      onTapPending,
+      onPressImageChip;
 
   const StaffCallLogDetails(
       {super.key,
@@ -526,7 +747,8 @@ class StaffCallLogDetails extends StatelessWidget {
       this.onTapCancel,
       this.onTapWaiting,
       this.onTapComplete,
-      this.onTapPending});
+      this.onTapPending,
+      this.onPressImageChip});
 
   @override
   Widget build(BuildContext context) {
@@ -555,6 +777,14 @@ class StaffCallLogDetails extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10.0),
+          if (callLog?.call?.photo != null) ...[
+            ActionChip(
+                tooltip: 'Image',
+                onPressed: onPressImageChip,
+                label: Text(callLog?.call?.photo ?? 'photo.jpg'),
+                avatar: Icon(Icons.image)),
+            const SizedBox(height: 10.0),
+          ],
           Row(
             children: [
               Icon(Icons.call),
@@ -617,10 +847,6 @@ class StaffCallLogDetails extends StatelessWidget {
                       Text(callLog?.charge ?? '', style: textTheme.bodyLarge)),
             ],
           ),
-          if(callLog?.call?.photo != null) ...[
-            const SizedBox(height: 10.0),
-            Chip(label: Text(callLog?.call?.photo ?? 'photo.jpg'), avatar: Icon(Icons.image))
-          ],
         ],
       ),
     );

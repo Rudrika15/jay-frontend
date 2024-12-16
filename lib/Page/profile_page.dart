@@ -2,7 +2,6 @@ import 'package:flipcodeattendence/featuers/Admin/page/admin_report_page.dart';
 import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../featuers/Admin/page/admin_home_page.dart';
 import '/mixins/navigator_mixin.dart';
 import '/provider/login_provider.dart';
 import '/widget/dialog_widget.dart';

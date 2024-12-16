@@ -10,14 +10,19 @@ class ApiHelper {
   static String applyLeave = '${baseUrl}api/leave/request';
   static String updateToken = '${baseUrl}api/save-token';
 
+  // common
+  static String changeStatus = '${baseUrl}api/chage-status';
+
   // Admin
   static String getClients = '${baseUrl}api/client-list';
-  static String createCall = '${baseUrl}api/create-call';
   static String callLogList = '${baseUrl}api/list-call';
   static String teamList = '${baseUrl}api/team-list';
   static String assignTask = '${baseUrl}api/assign-task';
   static String getCallDetail = '${baseUrl}api/get-call-detail';
-  static String changeStatus = '${baseUrl}api/chage-status';
+
+  // Admin & Client
+  static String createCall = '${baseUrl}api/create-call';
+  static String clientCallLogList = '${baseUrl}api/client-call-list';
 
   // Staff
   static String staffCallLogList = '${baseUrl}api/call-list';

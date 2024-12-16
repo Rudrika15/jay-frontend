@@ -150,14 +150,16 @@ class ClientActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (callStatus != CallStatusEnum.cancelled) ...[
+        if (callStatus == CallStatusEnum.pending ||
+            callStatus == CallStatusEnum.waiting ||
+            callStatus == CallStatusEnum.allocated) ...[
           ListTile(
             leading: const Icon(Icons.cancel),
             title: const Text('Cancel call log'),
             onTap: onTapCancel,
           ),
         ],
-        if (callStatus != CallStatusEnum.completed) ...[
+        if (callStatus == CallStatusEnum.allocated) ...[
           ListTile(
             leading: const Icon(Icons.done_all),
             title: const Text('Mark as completed'),

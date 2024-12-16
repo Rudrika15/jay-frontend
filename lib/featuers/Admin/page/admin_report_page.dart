@@ -2,7 +2,6 @@ import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flipcodeattendence/provider/report_provider.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:flipcodeattendence/widget/date_selection_widget.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

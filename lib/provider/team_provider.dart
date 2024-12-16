@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 
 import '../helper/api_helper.dart';
 import '../service/rest_api_service.dart';
-import '../service/shared_preferences_service.dart';
 import '../widget/common_widgets.dart';
 
 class TeamProvider extends ChangeNotifier {

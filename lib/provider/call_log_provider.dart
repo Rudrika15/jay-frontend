@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flipcodeattendence/featuers/Client/model/client_call_log_model.dart';
 import 'package:flipcodeattendence/featuers/User/model/staff_allocated_call_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
@@ -9,9 +10,7 @@ import '../helper/api_helper.dart';
 import '../helper/enum_helper.dart';
 import '../models/call_logs_model.dart';
 import '../service/rest_api_service.dart';
-import '../service/shared_preferences_service.dart';
 import '../widget/common_widgets.dart';
-import 'call_status_provider.dart';
 
 class CallLogProvider extends ChangeNotifier {
   final apiService = RestApiService();
@@ -19,9 +18,11 @@ class CallLogProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  CallLogsModel? _callLogsModel = CallLogsModel();
-
+  CallLogsModel? _callLogsModel;
   CallLogsModel? get callLogsModel => _callLogsModel;
+
+  ClientCallLogModel? _clientCallLogModel;
+  ClientCallLogModel? get clientCallLogModel => _clientCallLogModel;
 
   StaffAllocatedCallModel? _staffCallLogs;
   StaffAllocatedCallModel? get staffCallLogs => _staffCallLogs;
@@ -34,11 +35,9 @@ class CallLogProvider extends ChangeNotifier {
       _allocatedStaffCallLogList;
 
   CallLog? _callLog = CallLog();
-
   CallLog? get callLog => _callLog;
 
   List<dynamic> _parts = [];
-
   List<dynamic> get parts => _parts;
 
   Future<void> getCallLogs(
@@ -186,6 +185,21 @@ class CallLogProvider extends ChangeNotifier {
       final responseData = decodedResponse['data'];
       _parts = responseData;
       print(responseData);
+    } catch (e) {
+      CommonWidgets.customSnackBar(context: context, title: e.toString());
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getClientsCallLogs(BuildContext context,{CallStatusEnum? status, String? date}) async {
+    var url = ApiHelper.clientCallLogList + '?status=${status?.name.toString().toLowerCase() ?? ''}&date=$date';
+    _isLoading = true;
+    try {
+      final response = await apiService.invokeApi(
+          url: url, requestType: HttpRequestType.get);
+      _clientCallLogModel = ClientCallLogModel.fromJson(jsonDecode(response.body));
     } catch (e) {
       CommonWidgets.customSnackBar(context: context, title: e.toString());
     } finally {

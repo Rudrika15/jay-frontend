@@ -154,11 +154,12 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                   labelText: 'Select client',
                   controller: _clientController,
                   readOnly: true,
-                  suffixIcon: IconButton(
-                      onPressed: () => setState(() => _clientController.clear()),
-                      icon: _clientController.text.trim().isEmpty
-                          ? Icon(Icons.arrow_drop_down_circle_outlined)
-                          : Icon(Icons.close)),
+                  suffixIcon: _clientController.text.trim().isEmpty
+                      ? const Icon(Icons.arrow_drop_down_circle_outlined)
+                      : IconButton(
+                          onPressed: () =>
+                              setState(() => _clientController.clear()),
+                          icon: Icon(Icons.close)),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please select client';
@@ -205,8 +206,8 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                     buttonText: 'Submit',
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        final date =
-                            DateFormat('dd-MM-yyyy').parse(_dateController.text);
+                        final date = DateFormat('dd-MM-yyyy')
+                            .parse(_dateController.text);
                         final formattedDate =
                             DateFormat('yyyy-MM-dd').format(date);
                         final result = await Provider.of<ClientProvider>(

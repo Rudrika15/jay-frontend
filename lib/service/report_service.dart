@@ -5,8 +5,6 @@ import 'package:flipcodeattendence/featuers/Admin/model/employee_report_model.da
 import 'package:flipcodeattendence/service/shared_preferences_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/snackbar/snackbar.dart';
 import 'package:http/http.dart' as http;
 
 import '../helper/api_helper.dart';

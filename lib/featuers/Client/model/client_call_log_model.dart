@@ -1,17 +1,17 @@
-class ClientModel {
+class ClientCallLogModel {
   bool? status;
   String? message;
-  List<Data>? data;
+  List<Call>? data;
 
-  ClientModel({this.status, this.message, this.data});
+  ClientCallLogModel({this.status, this.message, this.data});
 
-  ClientModel.fromJson(Map<String, dynamic> json) {
+  ClientCallLogModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = <Data>[];
+      data = <Call>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(new Call.fromJson(v));
       });
     }
   }
@@ -27,33 +27,36 @@ class ClientModel {
   }
 }
 
-class Data {
+class Call {
   int? id;
-  String? name;
-  String? phone;
-  String? email;
-  Null token;
-  String? birthdate;
+  String? date;
+  int? userId;
+  String? photo;
+  String? description;
+  String? address;
+  String? status;
   String? createdAt;
   String? updatedAt;
 
-  Data(
+  Call(
       {this.id,
-        this.name,
-        this.phone,
-        this.email,
-        this.token,
-        this.birthdate,
+        this.date,
+        this.userId,
+        this.photo,
+        this.description,
+        this.address,
+        this.status,
         this.createdAt,
         this.updatedAt});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  Call.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    name = json['name'];
-    phone = json['phone'];
-    email = json['email'];
-    token = json['token'];
-    birthdate = json['birthdate'];
+    date = json['date'];
+    userId = json['userId'];
+    photo = json['photo'];
+    description = json['description'];
+    address = json['address'];
+    status = json['status'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
@@ -61,11 +64,12 @@ class Data {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
-    data['name'] = this.name;
-    data['phone'] = this.phone;
-    data['email'] = this.email;
-    data['token'] = this.token;
-    data['birthdate'] = this.birthdate;
+    data['date'] = this.date;
+    data['userId'] = this.userId;
+    data['photo'] = this.photo;
+    data['description'] = this.description;
+    data['address'] = this.address;
+    data['status'] = this.status;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
