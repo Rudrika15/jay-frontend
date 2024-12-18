@@ -245,12 +245,16 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                                   .then((value) {
                                 if (value != null) {
                                   this.selectedMembers = value;
-                                  if (selectedMembers.isNotEmpty) {
-                                    setState(() {
-                                      teamController.text =
-                                          "${selectedMembers[0].user!.name}, ${selectedMembers[1].user!.name}";
-                                    });
+                                  final stringBuffer = StringBuffer();
+                                  for (var member in selectedMembers) {
+                                    stringBuffer.write(member.user!.name);
+                                    if(selectedMembers.length >1)
+                                      stringBuffer.write(",");
                                   }
+                                  setState(() {
+                                    teamController.text =
+                                        stringBuffer.toString();
+                                  });
                                 }
                               });
                             },
@@ -500,11 +504,9 @@ class _TeamBottomSheetState extends State<TeamBottomSheet> {
                                     style: TextStyle(
                                         color: AppColors.onPrimaryLight)),
                                 onPressed: () {},
-                                onDeleted: () {
-                                  setState(() {
-                                    members.removeAt(index);
-                                  });
-                                });
+                                onDeleted: () =>
+                                  setState(() =>
+                                    members.removeAt(index)));
                           }),
                         ),
                       ),
@@ -540,9 +542,7 @@ class _TeamBottomSheetState extends State<TeamBottomSheet> {
                                                   member!.userId)) {
                                                 members.remove(member!);
                                               } else {
-                                                if (members.length != 2) {
-                                                  members.add(member!);
-                                                }
+                                                members.add(member!);
                                               }
                                               // if (selectedId
                                               //     .contains(member?.userId)) {
@@ -571,21 +571,18 @@ class _TeamBottomSheetState extends State<TeamBottomSheet> {
                           children: [
                             CustomOutlinedButton(
                                 buttonText: 'Clear all',
-                                onPressed: (members.isNotEmpty)
-                                    ? () {
-                                        setState(() {
-                                          members.clear();
-                                        });
-                                      }
+                                onPressed: members.isNotEmpty
+                                    ? () =>
+                                        setState(() =>
+                                          members.clear())
                                     : null),
                             const SizedBox(width: 16.0),
                             CustomElevatedButton(
                                 buttonText: 'Ok',
                                 onPressed:
-                                    (members.isNotEmpty && members.length > 1)
-                                        ? () {
-                                            Navigator.pop(context, members);
-                                          }
+                                    members.isNotEmpty
+                                        ? () =>
+                                            Navigator.pop(context, members)
                                         : null),
                           ],
                         ),

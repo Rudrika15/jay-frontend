@@ -40,10 +40,9 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
     super.initState();
     provider = Provider.of<CallLogProvider>(context, listen: false);
     callStatus = context.read<CallStatusProvider>().callStatusEnum;
-    (callStatus == CallStatusEnum.allocated)
-        ? provider.getAllocatedCallLogDetails(context: context, id: widget.id)
-        : null;
+    provider.getAllocatedCallLogDetails(context: context, id: widget.id);
     totalCharge = countTotal();
+    Future.delayed(Duration.zero, () => setState(() {}));
   }
 
   @override
@@ -261,27 +260,23 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
                           },
                         ),
                         const SizedBox(height: 16.0),
-                        if (paymentMethodController.text.trim().toLowerCase() ==
-                            PaymentMethod.cash.name.toLowerCase()) ...[
-                          TextFormFieldWidget(
-                            labelText: 'Enter extra charge',
-                            controller: extraChargeController,
-                            suffixIcon: Icon(Icons.currency_rupee),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            onChanged: (value) async {
-                              if (debounce?.isActive ?? false)
-                                debounce?.cancel();
-                              Timer(
-                                  Duration(milliseconds: 1000),
-                                  () => setState(
-                                      () => totalCharge = countTotal()));
-                            },
-                          ),
-                          const SizedBox(height: 16.0),
-                        ],
+                        TextFormFieldWidget(
+                          labelText: 'Enter extra charge',
+                          controller: extraChargeController,
+                          suffixIcon: Icon(Icons.currency_rupee),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (value) async {
+                            if (debounce?.isActive ?? false) debounce?.cancel();
+                            Timer(
+                                Duration(milliseconds: 1000),
+                                () =>
+                                    setState(() => totalCharge = countTotal()));
+                          },
+                        ),
+                        const SizedBox(height: 16.0),
                         if (paymentMethodController.text.trim().toLowerCase() ==
                             PaymentMethod.QR.name.toLowerCase()) ...[
                           Consumer<StaffProvider>(
@@ -315,7 +310,7 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
                                                           image: DecorationImage(
                                                               fit: BoxFit.fill,
                                                               image: NetworkImage(
-                                                                  "${ApiHelper.imageBaseUrl  + provider.qrCodes[index]?['image']}"))),
+                                                                  "${ApiHelper.imageBaseUrl + provider.qrCodes[index]?['image']}"))),
                                                     ),
                                                     const SizedBox(
                                                         height: 12.0),

@@ -31,14 +31,6 @@ class _AdminReportPageState extends State<AdminReportPage>
         endDate: endDate);
   }
 
-  int countPendingTasks(
-      {required String totalAttendance, required String totalTask}) {
-    final totalAttendanceCount = double.parse(totalAttendance);
-    final totalTaskCount = int.parse(totalTask);
-    final totalPendingTask = totalAttendanceCount - totalTaskCount;
-    return totalPendingTask.toInt();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,18 +99,6 @@ class _AdminReportPageState extends State<AdminReportPage>
                         const SizedBox(height: 6.0),
                         Text(
                           "Working Hours : ${data?.totalHours}",
-                          style: TextStyle(
-                            fontSize: 17,
-                            color: AppColors.onPrimaryBlack,
-                          ),
-                        ),
-                        const SizedBox(height: 6.0),
-                        Text(
-                          "No tasks : ${countPendingTasks(
-                            totalAttendance:
-                                data?.attendanceCount?.toString() ?? '0',
-                            totalTask: data?.taskCount?.toString() ?? '0'
-                          )}",
                           style: TextStyle(
                             fontSize: 17,
                             color: AppColors.onPrimaryBlack,

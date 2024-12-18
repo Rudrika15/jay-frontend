@@ -15,10 +15,10 @@ import '../helper/api_helper.dart';
 class LeaveService {
   Future<bool> applyLeave(BuildContext context, dynamic body) async {
     try {
+      print(body);
       final token = await SharedPreferencesService.getUserToken();
       final response = await http.post(Uri.parse(ApiHelper.applyLeave),
           body: body, headers: {'Authorization': 'Bearer $token'});
-      print('leave');
       print(response.body);
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {

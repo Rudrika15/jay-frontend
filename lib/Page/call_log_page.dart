@@ -716,6 +716,16 @@ class ClientCallDetails extends StatelessWidget {
                   child: Text(callLog?.date ?? '', style: textTheme.bodyLarge)),
             ],
           ),
+          const SizedBox(height: 10.0),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.currency_rupee),
+              const SizedBox(width: 6.0),
+              Expanded(
+                  child: Text(callLog?.date ?? '', style: textTheme.bodyLarge)),
+            ],
+          ),
           if (callLog?.photo == null) ...[
             const SizedBox(height: 10.0),
             ActionChip(
