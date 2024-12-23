@@ -14,7 +14,8 @@ class StringHelper {
   static const String search = 'Search';
   static const String leave = 'Leave';
   static const String logOut = 'Log out';
-  static const String appLogo = 'assets/flipcode_logo.png';
+  static const String appIcon = 'assets/jay_infotech_app_icon.png';
+  static const String appLogo = 'assets/jay_infotech_logo.jpg';
   static const String appExitWarning = 'Are you sure you want to exit?';
   static const String logoutWarning = 'Are you sure you want to logout?';
   static const String update = 'Update';

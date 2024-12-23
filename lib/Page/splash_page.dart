@@ -51,7 +51,7 @@ class _SplashPageState extends State<SplashPage> with NavigatorMixin {
     return Scaffold(
         body: Center(
       child: Image.asset(
-        StringHelper.appLogo,
+        StringHelper.appIcon,
         width: 250,
       ),
     ));

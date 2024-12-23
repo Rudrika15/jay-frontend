@@ -59,15 +59,7 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                 key: _formKey,
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Text('Login',
-                            style: Theme.of(context)
-                                .textTheme
-                                .displayMedium!
-                                .copyWith(fontWeight: FontWeight.w600)),
-                      ],
-                    ),
+                    Image.asset(StringHelper.appLogo),
                     const SizedBox(height: 24.0),
                     TextFormFieldWidget(
                         isFilled: true,
