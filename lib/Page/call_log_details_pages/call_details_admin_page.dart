@@ -248,7 +248,7 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                                   final stringBuffer = StringBuffer();
                                   for (var member in selectedMembers) {
                                     stringBuffer.write(member.user!.name);
-                                    if(selectedMembers.length >1)
+                                    if (selectedMembers.length > 1)
                                       stringBuffer.write(",");
                                   }
                                   setState(() {
@@ -497,6 +497,7 @@ class _TeamBottomSheetState extends State<TeamBottomSheet> {
                           spacing: 8.0,
                           children: List.generate(members.length, (index) {
                             return InputChip(
+                                side: BorderSide(color: Colors.transparent),
                                 backgroundColor: AppColors.aPrimary,
                                 deleteIconColor: AppColors.onPrimaryLight,
                                 visualDensity: VisualDensity.compact,
@@ -505,8 +506,7 @@ class _TeamBottomSheetState extends State<TeamBottomSheet> {
                                         color: AppColors.onPrimaryLight)),
                                 onPressed: () {},
                                 onDeleted: () =>
-                                  setState(() =>
-                                    members.removeAt(index)));
+                                    setState(() => members.removeAt(index)));
                           }),
                         ),
                       ),
@@ -572,18 +572,14 @@ class _TeamBottomSheetState extends State<TeamBottomSheet> {
                             CustomOutlinedButton(
                                 buttonText: 'Clear all',
                                 onPressed: members.isNotEmpty
-                                    ? () =>
-                                        setState(() =>
-                                          members.clear())
+                                    ? () => setState(() => members.clear())
                                     : null),
                             const SizedBox(width: 16.0),
                             CustomElevatedButton(
                                 buttonText: 'Ok',
-                                onPressed:
-                                    members.isNotEmpty
-                                        ? () =>
-                                            Navigator.pop(context, members)
-                                        : null),
+                                onPressed: members.isNotEmpty
+                                    ? () => Navigator.pop(context, members)
+                                    : null),
                           ],
                         ),
                       ),

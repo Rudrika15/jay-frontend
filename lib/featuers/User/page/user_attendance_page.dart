@@ -145,12 +145,12 @@ class _UserAttendancePageState extends State<UserAttendancePage> with NavigatorM
     }
   }
 
-  Stream<DateTime> currentTime() async* {
-    while (true) {
-      await Future.delayed(Duration.zero);
-      yield DateTime.now();
-    }
-  }
+  // Stream<DateTime> currentTime() async* {
+  //   while (true) {
+  //     await Future.delayed(Duration.zero);
+  //     yield DateTime.now();
+  //   }
+  // }
 
   Future<void> _toggleCheckInOut() async {
     try {
@@ -215,24 +215,24 @@ class _UserAttendancePageState extends State<UserAttendancePage> with NavigatorM
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Image.asset(StringHelper.appLogo, width: 150),
-              StreamBuilder(
-                stream: currentTime(),
-                builder: (context, snapShot) {
-                  return Column(
-                    children: [
-                      Text(
-                        snapShot.data != null
-                            ? DateFormat.yMMMEd().format(snapShot.data!)
-                            : '',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  );
-                },
-              ),
+              // StreamBuilder(
+              //   stream: currentTime(),
+              //   builder: (context, snapShot) {
+              //     return Column(
+              //       children: [
+              //         Text(
+              //           snapShot.data != null
+              //               ? DateFormat.yMMMEd().format(snapShot.data!)
+              //               : '',
+              //           style: Theme.of(context)
+              //               .textTheme
+              //               .bodyMedium!
+              //               .copyWith(fontWeight: FontWeight.w500),
+              //         ),
+              //       ],
+              //     );
+              //   },
+              // ),
             ],
           ),
           actions: [

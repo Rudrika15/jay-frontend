@@ -1,6 +1,6 @@
 class ApiHelper {
   static String baseUrl = 'https://dev.jayinfotech.org/';
-  static String imageBaseUrl = 'https://dev.jayinfotech.org/images/';
+  static String imageBaseUrl = '${baseUrl}images/';
   static String loginUrl = '${baseUrl}api/auth/login';
   static String changePasswordUrl = '${baseUrl}change-password';
   static String attendance = '${baseUrl}api/attendance';
@@ -23,6 +23,10 @@ class ApiHelper {
   // Admin & Client
   static String createCall = '${baseUrl}api/create-call';
   static String clientCallLogList = '${baseUrl}api/client-call-list';
+
+  // client
+  static String updateCallLog = '${baseUrl}api/update-call';
+
 
   // Staff
   static String staffCallLogList = '${baseUrl}api/call-list';

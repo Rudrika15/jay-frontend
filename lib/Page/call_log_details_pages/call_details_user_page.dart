@@ -5,11 +5,13 @@ import 'package:flipcodeattendence/helper/api_helper.dart';
 import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/provider/call_status_provider.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
+import 'package:flipcodeattendence/widget/common_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import '../../models/parts_model.dart';
 import '../../provider/call_log_provider.dart';
 import '../../widget/custom_elevated_button.dart';
 import '../../widget/custom_outlined_button.dart';
@@ -29,7 +31,8 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
   final extraChargeController = TextEditingController();
   final partsController = TextEditingController();
   final paymentMethodController = TextEditingController();
-  List<dynamic> selectedParts = [];
+  List<Parts> selectedParts = [];
+  String? qrId = null;
   late final CallLogProvider provider;
   late final CallStatusEnum callStatus;
   late double totalCharge;
@@ -56,10 +59,12 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
 
   resetValues() {
     setState(() {
+      selectedParts.clear();
       partsController.clear();
       selectedParts.clear();
       extraChargeController.clear();
       paymentMethodController.clear();
+      qrId = null;
     });
   }
 
@@ -77,6 +82,53 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
 
   void fetchQRCodeList() {
     Provider.of<StaffProvider>(context, listen: false).getQRCodeList(context);
+  }
+
+  bool isQrSelected(String id) {
+    return id == qrId;
+  }
+
+  Color getForegroundColor(String id) {
+    return isQrSelected(id)
+        ? AppColors.onPrimaryLight
+        : AppColors.backgroundBlack;
+  }
+
+  Color getBackgroundColor(String id) {
+    return isQrSelected(id)
+        ? AppColors.backgroundBlack
+        : AppColors.backgroundLight;
+  }
+
+  void showSnackBar(BuildContext context, String message) {
+    CommonWidgets.customSnackBar(context: context, title: message);
+  }
+
+  bool isQr() {
+    return paymentMethodController.text.trim().toLowerCase() ==
+        PaymentMethod.QR.name.toString().toLowerCase();
+  }
+
+  Future<void> completeCallLog() async {
+    final partsList = <String>[];
+    for (final part in selectedParts) {
+      partsList.add(part.name.toString());
+    }
+    Provider.of<CallLogProvider>(context, listen: false)
+        .completeCall(context,
+            callId: widget.id,
+            partsList: partsList,
+            paymentMethod: paymentMethodController.text.trim().toLowerCase(),
+            totalCharge: totalCharge.toString(),
+            qrId: qrId)
+        .then((value) {
+      if (value) {
+        resetValues();
+        Navigator.pop(context, true);
+      } else {
+        showSnackBar(context, 'Something went Wrong');
+      }
+    });
   }
 
   @override
@@ -197,7 +249,10 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
                               : IconButton(
                                   icon: Icon(Icons.close),
                                   onPressed: () =>
-                                      setState(() => partsController.clear())),
+                                      setState(() {
+                                        partsController.clear();
+                                        this.selectedParts.clear();
+                                      })),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Please select parts';
@@ -212,11 +267,15 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
                                 .then((value) {
                               if (value != null) {
                                 this.selectedParts = value;
-                                if (selectedParts.isNotEmpty) {
-                                  setState(() {
-                                    partsController.text =
-                                        "${selectedParts[0]['name']}";
-                                  });
+                                if (selectedParts.length == 1) {
+                                  partsController.text =
+                                      "${selectedParts[0].name}";
+                                } else {
+                                  final buffer = StringBuffer();
+                                  for (final part in selectedParts) {
+                                    buffer.write("${part.name}, ");
+                                  }
+                                  partsController.text = buffer.toString();
                                 }
                               }
                             });
@@ -235,6 +294,7 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
                                             paymentMethodController.clear();
                                             extraChargeController.clear();
                                             totalCharge = countTotal();
+                                            qrId = null;
                                           }),
                                       icon: Icon(Icons.close)),
                           validator: (value) {
@@ -293,8 +353,8 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
                                 itemCount: provider.qrCodes.length,
                                 itemBuilder: (context, index) {
                                   return OutlinedButton.icon(
-                                    onPressed: () {
-                                      showModalBottomSheet(
+                                    onPressed: () async {
+                                      await showModalBottomSheet(
                                           context: context,
                                           builder: (context) => Padding(
                                                 padding:
@@ -332,15 +392,41 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
                                                     ),
                                                     const SizedBox(
                                                         height: 12.0),
+                                                    OutlinedButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context,
+                                                              provider.qrCodes[
+                                                                      index]
+                                                                      ?['id']
+                                                                  .toString());
+                                                        },
+                                                        child: const Text('Ok'))
                                                   ],
                                                 ),
-                                              ));
+                                              )).then((value) {
+                                        if (value != null) {
+                                          qrId = value;
+                                          setState(() {});
+                                        }
+                                      });
                                     },
-                                    label:
-                                        Text(provider.qrCodes[index]?['name']),
-                                    icon: Icon(Icons.qr_code_2),
+                                    label: Text(
+                                        provider.qrCodes[index]?['name'],
+                                        style: TextStyle(
+                                            color: getForegroundColor(provider
+                                                .qrCodes[index]['id']
+                                                .toString()))),
+                                    icon: Icon(Icons.qr_code_2_outlined,
+                                        color: getForegroundColor(provider
+                                            .qrCodes[index]['id']
+                                            .toString())),
                                     style: OutlinedButton.styleFrom(
                                         fixedSize: const Size.fromHeight(56.0),
+                                        backgroundColor: getBackgroundColor(
+                                            provider.qrCodes[index]['id']
+                                                    .toString() ??
+                                                ''),
                                         shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(12.0))),
@@ -366,7 +452,19 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
             const SizedBox(width: 12.0),
             Expanded(
                 child: CustomElevatedButton(
-                    buttonText: 'Complete call', onPressed: () {}))
+                    buttonText: 'Complete call',
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        if (isQr()) {
+                          if (qrId == null)
+                            showSnackBar(context, 'Please select QR code');
+                          else
+                            completeCallLog();
+                        } else {
+                          completeCallLog();
+                        }
+                      }
+                    }))
           ],
         ),
       ),
@@ -382,7 +480,7 @@ class PartsBottomSheet extends StatefulWidget {
 }
 
 class _PartsBottomSheetState extends State<PartsBottomSheet> {
-  List<dynamic> parts = [];
+  List<Parts> parts = [];
 
   @override
   void initState() {
@@ -422,18 +520,16 @@ class _PartsBottomSheetState extends State<PartsBottomSheet> {
                           spacing: 8.0,
                           children: List.generate(parts.length, (index) {
                             return InputChip(
+                                side: BorderSide(color: Colors.transparent),
                                 backgroundColor: AppColors.aPrimary,
                                 deleteIconColor: AppColors.onPrimaryLight,
                                 visualDensity: VisualDensity.compact,
-                                label: Text(parts[index]['name'] ?? '',
+                                label: Text(parts[index].name ?? '',
                                     style: TextStyle(
                                         color: AppColors.onPrimaryLight)),
                                 onPressed: () {},
-                                onDeleted: () {
-                                  setState(() {
-                                    parts.removeAt(index);
-                                  });
-                                });
+                                onDeleted: () =>
+                                    setState(() => parts.removeAt(index)));
                           }),
                         ),
                       ),
@@ -446,20 +542,22 @@ class _PartsBottomSheetState extends State<PartsBottomSheet> {
                               final partItem = provider.parts[index];
                               return CheckboxListTile(
                                 value: parts.any((element) =>
-                                        element['id'] == partItem['id'])
+                                        element.id.toString() ==
+                                        partItem.id.toString())
                                     ? true
                                     : false,
                                 onChanged: (value) {
                                   setState(() {
                                     if (parts.any((element) =>
-                                        element['id'] == partItem['id'])) {
+                                        element.id.toString() ==
+                                        partItem.id.toString())) {
                                       parts.remove(partItem);
                                     } else {
                                       parts.add(partItem);
                                     }
                                   });
                                 },
-                                title: Text(partItem['name'] ?? ''),
+                                title: Text(partItem.name ?? ''),
                                 controlAffinity:
                                     ListTileControlAffinity.leading,
                               );
@@ -556,11 +654,18 @@ class _PaymentMethodBottomSheet extends State<PaymentMethodBottomSheet> {
                                           PaymentMethod.cash)
                                       ? AppColors.onPrimaryLight
                                       : AppColors.aPrimary)
-                              : Icon(Icons.qr_code,
-                                  color: (selectedPaymentMethod ==
-                                          PaymentMethod.QR)
-                                      ? AppColors.onPrimaryLight
-                                      : AppColors.aPrimary),
+                              : PaymentMethod.values[index] ==
+                                      PaymentMethod.Debit
+                                  ? Icon(Icons.currency_rupee,
+                                      color: (selectedPaymentMethod ==
+                                              PaymentMethod.Debit)
+                                          ? AppColors.onPrimaryLight
+                                          : AppColors.aPrimary)
+                                  : Icon(Icons.qr_code,
+                                      color: (selectedPaymentMethod ==
+                                              PaymentMethod.QR)
+                                          ? AppColors.onPrimaryLight
+                                          : AppColors.aPrimary),
                           const SizedBox(width: 12.0),
                           Text(
                               PaymentMethod.values[index].name.capitalizeFirst!,

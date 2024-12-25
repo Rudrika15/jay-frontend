@@ -5,6 +5,7 @@ import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flipcodeattendence/models/call_logs_model.dart';
 import 'package:flipcodeattendence/provider/call_status_provider.dart';
 import 'package:flipcodeattendence/widget/call_log_action_widget.dart';
+import 'package:flipcodeattendence/widget/common_widgets.dart';
 import 'package:flipcodeattendence/widget/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -32,7 +33,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
   late ScrollController _scrollController;
   final dateController = TextEditingController();
   late final isAdmin, isUser, isClient;
-  late final provider;
+  late final CallLogProvider provider;
 
   @override
   void initState() {
@@ -83,6 +84,9 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
         .then((value) {
       if (value) getCallLogs();
     });
+  }
+  void showSnackBar(BuildContext context, String message) {
+    CommonWidgets.customSnackBar(context: context, title: message);
   }
 
   @override
@@ -197,14 +201,17 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                         .allocatedStaffCallLogList[index];
                                     return InkWell(
                                       onTap: () {
-                                        Navigator.of(context)
+                                        final value = Navigator.of(context)
                                             .push(MaterialPageRoute(
                                                 builder: (context) =>
                                                     CallDetailsUserPage(
                                                         id: callLog.call!.id
                                                             .toString())))
                                             .then((value) {
-                                          if (value == true) getCallLogs();
+                                          if (value == true) {
+                                            getCallLogs();
+                                            showSnackBar(context,'Call log completed successfully');
+                                          };
                                         });
                                       },
                                       child: StaffCallLogDetails(
@@ -723,7 +730,7 @@ class ClientCallDetails extends StatelessWidget {
               Icon(Icons.currency_rupee),
               const SizedBox(width: 6.0),
               Expanded(
-                  child: Text(callLog?.date ?? '', style: textTheme.bodyLarge)),
+                  child: Text(callLog?.assign?.charge ?? '', style: textTheme.bodyLarge)),
             ],
           ),
           if (callLog?.photo == null) ...[

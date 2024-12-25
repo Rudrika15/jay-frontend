@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flipcodeattendence/featuers/Client/model/client_call_log_model.dart';
 import 'package:flipcodeattendence/featuers/User/model/staff_allocated_call_model.dart';
+import 'package:flipcodeattendence/models/parts_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
@@ -19,26 +20,33 @@ class CallLogProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   CallLogsModel? _callLogsModel;
+
   CallLogsModel? get callLogsModel => _callLogsModel;
 
   ClientCallLogModel? _clientCallLogModel;
+
   ClientCallLogModel? get clientCallLogModel => _clientCallLogModel;
 
   StaffAllocatedCallModel? _staffCallLogs;
+
   StaffAllocatedCallModel? get staffCallLogs => _staffCallLogs;
 
   StaffCallLogData? _staffCallLogData;
+
   StaffCallLogData? get staffCallLogData => _staffCallLogData;
 
   List<StaffCallLogData> _allocatedStaffCallLogList = [];
+
   List<StaffCallLogData> get allocatedStaffCallLogList =>
       _allocatedStaffCallLogList;
 
   CallLog? _callLog = CallLog();
+
   CallLog? get callLog => _callLog;
 
-  List<dynamic> _parts = [];
-  List<dynamic> get parts => _parts;
+  List<Parts> _parts = [];
+
+  List<Parts> get parts => _parts;
 
   Future<void> getCallLogs(
       {CallStatusEnum status = CallStatusEnum.pending,
@@ -178,13 +186,12 @@ class CallLogProvider extends ChangeNotifier {
   Future<void> getParts(BuildContext context) async {
     final url = ApiHelper.getParts;
     _isLoading = true;
+    _parts.clear();
     try {
       final response = await apiService.invokeApi(
           url: url, requestType: HttpRequestType.get);
-      final decodedResponse = jsonDecode(response.body);
-      final responseData = decodedResponse['data'];
-      _parts = responseData;
-      print(responseData);
+      final decodedResponse = PartsModel.fromJson(jsonDecode(response.body));
+      _parts = decodedResponse.data ?? [];
     } catch (e) {
       CommonWidgets.customSnackBar(context: context, title: e.toString());
     } finally {
@@ -193,15 +200,45 @@ class CallLogProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getClientsCallLogs(BuildContext context,{CallStatusEnum? status, String? date}) async {
-    var url = ApiHelper.clientCallLogList + '?status=${status?.name.toString().toLowerCase() ?? ''}&date=$date';
+  Future<void> getClientsCallLogs(BuildContext context,
+      {CallStatusEnum? status, String? date}) async {
+    var url = ApiHelper.clientCallLogList +
+        '?status=${status?.name.toString().toLowerCase() ?? ''}&date=$date';
     _isLoading = true;
     try {
       final response = await apiService.invokeApi(
           url: url, requestType: HttpRequestType.get);
-      _clientCallLogModel = ClientCallLogModel.fromJson(jsonDecode(response.body));
+      _clientCallLogModel =
+          ClientCallLogModel.fromJson(jsonDecode(response.body));
     } catch (e) {
       CommonWidgets.customSnackBar(context: context, title: e.toString());
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> completeCall(BuildContext context,
+      {required String callId,
+      required List<String> partsList,
+      required String paymentMethod,
+      required String totalCharge, String? qrId}) async {
+    var url = ApiHelper.updateCallLog;
+    _isLoading = true;
+    final _body = {
+      'id' : callId,
+      'part_name' : partsList,
+      'payment_method' : paymentMethod,
+      'total_charge' : totalCharge,
+      'qr_id' : qrId,
+    };
+    try {
+      await apiService.invokeApi(
+          url: url, requestType: HttpRequestType.post, body: jsonEncode(_body));
+      return true;
+    } catch (e) {
+      CommonWidgets.customSnackBar(context: context, title: e.toString());
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();
