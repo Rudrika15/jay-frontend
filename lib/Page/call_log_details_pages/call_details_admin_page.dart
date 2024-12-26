@@ -1,5 +1,6 @@
 import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/provider/call_status_provider.dart';
+import 'package:flipcodeattendence/provider/login_provider.dart';
 import 'package:flipcodeattendence/provider/team_provider.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
@@ -40,8 +41,8 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
     provider = Provider.of<CallLogProvider>(context, listen: false);
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     callStatus = context.read<CallStatusProvider>().callStatusEnum;
-    (callStatus == CallStatusEnum.allocated)
-        ? provider.getAllocatedCallLogDetails(context: context, id: widget.id)
+    (callStatus == CallStatusEnum.allocated || callStatus == CallStatusEnum.completed)
+        ? provider.getCallLogDetail(context: context, id: widget.id)
         : null;
   }
 
@@ -72,18 +73,20 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
             onPressed: () => Navigator.pop(context),
             icon: Icon(CupertinoIcons.clear)),
         actions: [
-          IconButton(
-              onPressed: () async {
-                await showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return CallLogActionWidget(
-                        onTapWaiting: null,
-                        onTapCancel: null,
-                      );
-                    });
-              },
-              icon: const Icon(Icons.more_vert))
+          if(context.read<LoginProvider>().isAdmin)...[
+            IconButton(
+                onPressed: () async {
+                  await showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return CallLogActionWidget(
+                          onTapWaiting: null,
+                          onTapCancel: null,
+                        );
+                      });
+                },
+                icon: const Icon(Icons.more_vert))
+          ],
         ],
       ),
       body: SingleChildScrollView(
@@ -101,7 +104,7 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                         if (callStatus == CallStatusEnum.allocated ||
                             callStatus == CallStatusEnum.completed) ...[
                           Text(
-                              provider.staffCallLogData?.call?.user?.name
+                              provider.callLog?.call?.user?.name
                                       ?.capitalizeFirst ??
                                   '',
                               style: textTheme.titleLarge!
@@ -112,7 +115,7 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               Icon(Icons.call),
                               const SizedBox(width: 6.0),
                               Text(
-                                  '${provider.staffCallLogData?.call?.user?.phone}',
+                                  '${provider.callLog?.call?.user?.phone}',
                                   style: textTheme.bodyLarge),
                             ],
                           ),
@@ -124,7 +127,7 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               const SizedBox(width: 6.0),
                               Expanded(
                                   child: Text(
-                                      provider.staffCallLogData?.call?.address
+                                      provider.callLog?.call?.address
                                               ?.capitalizeFirst ??
                                           'N/A',
                                       style: textTheme.bodyLarge)),
@@ -138,8 +141,7 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               const SizedBox(width: 6.0),
                               Expanded(
                                   child: Text(
-                                      provider.staffCallLogData?.call
-                                              ?.description?.capitalizeFirst ??
+                                      provider.callLog?.call?.description?.capitalizeFirst ??
                                           '',
                                       style: textTheme.bodyLarge)),
                             ],
@@ -152,7 +154,7 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               const SizedBox(width: 6.0),
                               Expanded(
                                   child: Text(
-                                      provider.staffCallLogData?.date ?? '',
+                                      provider.callLog?.date ?? '',
                                       style: textTheme.bodyLarge)),
                             ],
                           ),
@@ -164,7 +166,7 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               const SizedBox(width: 6.0),
                               Expanded(
                                   child: Text(
-                                      provider.staffCallLogData?.slot
+                                      provider.callLog?.slot
                                               ?.capitalizeFirst ??
                                           '',
                                       style: textTheme.bodyLarge)),
@@ -178,11 +180,59 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               const SizedBox(width: 6.0),
                               Expanded(
                                   child: Text(
-                                      provider.staffCallLogData?.charge ?? '',
+                                      provider.callLog?.charge ?? '',
                                       style: textTheme.bodyLarge)),
                             ],
                           ),
                           const SizedBox(height: 24.0),
+                          if (callStatus == CallStatusEnum.completed)...[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Payment method :',style: textTheme.bodyLarge),
+                                const SizedBox(width: 6.0),
+                                Expanded(
+                                    child: Text(provider.callLog?.call?.paymentMethod ?? '',style: textTheme.bodyLarge)),
+                              ],
+                            ),
+                            const SizedBox(height: 8.0),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Payment status :',style: textTheme.bodyLarge),
+                                const SizedBox(width: 6.0),
+                                Expanded(
+                                    child: Text(
+                                        ((provider.callLog?.call?.paymentMethod?.trim().toLowerCase() ?? '') ==
+                                            'debit')
+                                            ? 'Unsettled'
+                                            : 'Settled',
+                                        style: textTheme.bodyLarge)),
+                              ],
+                            ),
+                            const SizedBox(height: 8.0),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Total charge :',style: textTheme.bodyLarge),
+                                const SizedBox(width: 6.0),
+                                Expanded(
+                                    child: Text(provider.callLog?.call?.totalCharge.toString() ?? '',
+                                        style: textTheme.bodyLarge)),
+                              ],
+                            ),
+                            const SizedBox(height: 8.0),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Parts :',style: textTheme.bodyLarge),
+                                const SizedBox(width: 6.0),
+                                Expanded(
+                                    child: Text(provider.callLog?.call?.partName.toString() ?? '',
+                                        style: textTheme.bodyLarge)),
+                              ],
+                            ),
+                          ]
                         ],
                         if (callStatus != CallStatusEnum.allocated &&
                             callStatus != CallStatusEnum.completed) ...[

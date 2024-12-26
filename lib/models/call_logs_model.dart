@@ -1,7 +1,7 @@
 class CallLogsModel {
   bool? status;
   String? message;
-  List<CallLog>? data;
+  List<Call>? data;
 
   CallLogsModel({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class CallLogsModel {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = <CallLog>[];
+      data = <Call>[];
       json['data'].forEach((v) {
-        data!.add(new CallLog.fromJson(v));
+        data!.add(new Call.fromJson(v));
       });
     }
   }
@@ -27,37 +27,49 @@ class CallLogsModel {
   }
 }
 
-class CallLog {
+class Call {
   int? id;
   String? date;
   int? userId;
   String? photo;
   String? description;
   String? address;
+  String? partName;
+  String? paymentMethod;
+  int? totalCharge;
+  int? qrId;
   String? status;
   String? createdAt;
   String? updatedAt;
   User? user;
 
-  CallLog(
+  Call(
       {this.id,
         this.date,
         this.userId,
         this.photo,
         this.description,
         this.address,
+        this.partName,
+        this.paymentMethod,
+        this.totalCharge,
+        this.qrId,
         this.status,
         this.createdAt,
         this.updatedAt,
         this.user});
 
-  CallLog.fromJson(Map<String, dynamic> json) {
+  Call.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     date = json['date'];
     userId = json['userId'];
     photo = json['photo'];
     description = json['description'];
     address = json['address'];
+    partName = json['part_name'];
+    paymentMethod = json['payment_method'];
+    totalCharge = json['total_charge'];
+    qrId = json['qr_id'];
     status = json['status'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
@@ -72,6 +84,10 @@ class CallLog {
     data['photo'] = this.photo;
     data['description'] = this.description;
     data['address'] = this.address;
+    data['part_name'] = this.partName;
+    data['payment_method'] = this.paymentMethod;
+    data['total_charge'] = this.totalCharge;
+    data['qr_id'] = this.qrId;
     data['status'] = this.status;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
@@ -87,7 +103,7 @@ class User {
   String? name;
   String? phone;
   String? email;
-  String? token;
+  Null? token;
   String? birthdate;
   String? createdAt;
   String? updatedAt;

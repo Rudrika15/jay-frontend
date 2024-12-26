@@ -18,7 +18,6 @@ import '../provider/call_log_provider.dart';
 import '../provider/login_provider.dart';
 import '../theme/app_colors.dart';
 import 'call_log_details_pages/call_details_admin_page.dart';
-import 'call_log_details_pages/call_details_client_page.dart';
 import 'call_log_details_pages/call_details_user_page.dart';
 
 class CallLogPage extends StatefulWidget {
@@ -85,6 +84,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
       if (value) getCallLogs();
     });
   }
+
   void showSnackBar(BuildContext context, String message) {
     CommonWidgets.customSnackBar(context: context, title: message);
   }
@@ -105,6 +105,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                     InputChip(
                         tooltip: 'Date',
                         padding: EdgeInsets.zero,
+                        shape: StadiumBorder(),
                         deleteIcon: Icon(
                             dateController.text.isEmpty
                                 ? Icons.calendar_month
@@ -143,6 +144,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                         }),
                     if (!isUser) ...[
                       ActionChip(
+                        shape: StadiumBorder(),
                         tooltip: 'Status',
                         padding: EdgeInsets.zero,
                         label: Row(
@@ -210,8 +212,10 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                             .then((value) {
                                           if (value == true) {
                                             getCallLogs();
-                                            showSnackBar(context,'Call log completed successfully');
-                                          };
+                                            showSnackBar(context,
+                                                'Call log completed successfully');
+                                          }
+                                          ;
                                         });
                                       },
                                       child: StaffCallLogDetails(
@@ -360,7 +364,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                           ? () {
                                               push(
                                                   context,
-                                                  CallDetailsClientPage(
+                                                  CallDetailsAdminPage(
                                                       id: callLog!.id
                                                           .toString()));
                                             }
@@ -514,7 +518,7 @@ class _CallTypeRadioListTileWidget extends State<CallTypeRadioListTileWidget> {
 }
 
 class CallLogDetails extends StatelessWidget {
-  final CallLog? callLog;
+  final Call? callLog;
   final void Function()? onTapCancel,
       onTapWaiting,
       onTapComplete,
@@ -629,6 +633,23 @@ class CallLogDetails extends StatelessWidget {
                   child: Text(callLog?.date ?? '', style: textTheme.bodyLarge)),
             ],
           ),
+          const SizedBox(height: 10.0),
+          if(context.read<CallStatusProvider>().callStatusEnum == CallStatusEnum.completed)...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.payments),
+                const SizedBox(width: 6.0),
+                Expanded(
+                    child: Text(
+                        ((callLog?.paymentMethod?.trim().toLowerCase() ?? '') ==
+                            'debit')
+                            ? 'Unsettled'
+                            : 'Settled',
+                        style: textTheme.bodyLarge)),
+              ],
+            ),
+          ]
         ],
       ),
     );
@@ -636,7 +657,7 @@ class CallLogDetails extends StatelessWidget {
 }
 
 class ClientCallDetails extends StatelessWidget {
-  final ClientModel.Call? callLog;
+  final ClientModel.ClientCall? callLog;
   final void Function()? onTapCancel, onTapComplete, onPressImageChip;
 
   const ClientCallDetails(
@@ -730,7 +751,8 @@ class ClientCallDetails extends StatelessWidget {
               Icon(Icons.currency_rupee),
               const SizedBox(width: 6.0),
               Expanded(
-                  child: Text(callLog?.assign?.charge ?? '', style: textTheme.bodyLarge)),
+                  child: Text(callLog?.assign?.charge ?? '',
+                      style: textTheme.bodyLarge)),
             ],
           ),
           if (callLog?.photo == null) ...[

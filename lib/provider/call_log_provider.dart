@@ -40,9 +40,9 @@ class CallLogProvider extends ChangeNotifier {
   List<StaffCallLogData> get allocatedStaffCallLogList =>
       _allocatedStaffCallLogList;
 
-  CallLog? _callLog = CallLog();
+  StaffCallLogData? _callLog = StaffCallLogData();
 
-  CallLog? get callLog => _callLog;
+  StaffCallLogData? get callLog => _callLog;
 
   List<Parts> _parts = [];
 
@@ -100,8 +100,7 @@ class CallLogProvider extends ChangeNotifier {
       final response = await apiService.invokeApi(
           url: url, requestType: HttpRequestType.get);
       final body = jsonDecode(response.body);
-      _callLog = CallLog.fromJson(body['data']);
-      print(_callLog?.user?.name);
+      _callLog = StaffCallLogData.fromJson(body['data']);
     } catch (e) {
       CommonWidgets.customSnackBar(context: context, title: e.toString());
     } finally {
@@ -160,8 +159,12 @@ class CallLogProvider extends ChangeNotifier {
     final url = ApiHelper.assignTask;
     final parsedDate = DateFormat("dd-MM-yyyy").parse(date);
     final formattedDate = DateFormat("yyyy-MM-dd").format(parsedDate);
+    final userIds = [];
+    for(final member in members) {
+      userIds.add(member.userId.toString());
+    }
     final dynamic _body = {
-      "userId": [members[0].userId!, members[1].userId!],
+      "userId": userIds,
       "callId": callId,
       "date": formattedDate,
       "charge": charge,

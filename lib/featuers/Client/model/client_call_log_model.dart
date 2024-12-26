@@ -1,7 +1,7 @@
 class ClientCallLogModel {
   bool? status;
   String? message;
-  List<Call>? data;
+  List<ClientCall>? data;
 
   ClientCallLogModel({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class ClientCallLogModel {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = <Call>[];
+      data = <ClientCall>[];
       json['data'].forEach((v) {
-        data!.add(new Call.fromJson(v));
+        data!.add(new ClientCall.fromJson(v));
       });
     }
   }
@@ -27,7 +27,7 @@ class ClientCallLogModel {
   }
 }
 
-class Call {
+class ClientCall {
   int? id;
   String? date;
   int? userId;
@@ -39,7 +39,7 @@ class Call {
   String? updatedAt;
   Assign? assign;
 
-  Call(
+  ClientCall(
       {this.id,
         this.date,
         this.userId,
@@ -51,7 +51,7 @@ class Call {
         this.updatedAt,
         this.assign});
 
-  Call.fromJson(Map<String, dynamic> json) {
+  ClientCall.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     date = json['date'];
     userId = json['userId'];
