@@ -70,8 +70,7 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                         validator: (value) {
                           if (value == null ||
                               value.length != 10 ||
-                              value == '' ||
-                              value.isEmpty) {
+                              value.trim().isEmpty) {
                             return StringHelper.incorrectMobileNoWarning;
                           }
                           return null;
@@ -80,9 +79,7 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(10),
                         ],
-                        onChanged: (p0) {
-                          _handleInputChange();
-                        },
+                        onChanged: (p0) => _handleInputChange(),
                         keyboardType: TextInputType.phone,
                         controller: _numberController),
                     SizedBox(height: 16),
@@ -90,11 +87,9 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                       obscureText: !showPassword,
                       controller: _passwordController,
                       // obscureText: _obscureText,
-                      onChanged: (p0) {
-                        _handleInputChange();
-                      },
+                      onChanged: (p0) => _handleInputChange(),
                       validator: (value) {
-                        if (value == null || value.isEmpty || value == '') {
+                        if (value == null || value.trim().isEmpty) {
                           return StringHelper.incorrectPasswordWarning;
                         }
                         return null;
@@ -192,7 +187,7 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                                                         _passwordController
                                                             .text)
                                                 .then(
-                                              (value) async{
+                                              (value) async {
                                                 if (value) {
                                                   final isAdmin = context
                                                       .read<LoginProvider>()

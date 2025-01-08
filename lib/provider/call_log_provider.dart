@@ -225,7 +225,7 @@ class CallLogProvider extends ChangeNotifier {
 
   Future<bool> completeCall(BuildContext context,
       {required String callId,
-      required List<String> partsList,
+      required List<String>? partsList,
       required String paymentMethod,
       required String totalCharge,
       String? qrId}) async {

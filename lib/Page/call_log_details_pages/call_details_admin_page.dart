@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/provider/call_status_provider.dart';
 import 'package:flipcodeattendence/provider/team_provider.dart';
@@ -61,6 +63,22 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
       chargeController.clear();
       selectedMembers.clear();
     });
+  }
+
+  String? getPartsName(dynamic partsList) {
+    var parts = jsonDecode(partsList);
+    var partsString = StringBuffer();
+    if (parts == null || parts.isEmpty) {
+      return null;
+    } else {
+      for (int i = 0; i < parts.length; i++) {
+        partsString.write(parts[i]);
+        if (i != (parts.length - 1)) {
+          partsString.write(", ");
+        }
+      }
+      return partsString.toString();
+    }
   }
 
   @override
@@ -182,14 +200,17 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               ],
                             ),
                             const SizedBox(height: 24.0),
-                          ] else...[
+                          ] else ...[
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Icon(Icons.currency_rupee),
                                 const SizedBox(width: 6.0),
                                 Expanded(
-                                    child: Text(provider.callLog?.call?.totalCharge.toString() ?? '',
+                                    child: Text(
+                                        provider.callLog?.call?.totalCharge
+                                                .toString() ??
+                                            '',
                                         style: textTheme.bodyLarge)),
                               ],
                             ),
@@ -229,19 +250,21 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               ],
                             ),
                             const SizedBox(height: 8.0),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Parts :', style: textTheme.bodyLarge),
-                                const SizedBox(width: 6.0),
-                                Expanded(
-                                    child: Text(
-                                        provider.callLog?.call?.partName
-                                                .toString() ??
-                                            '',
-                                        style: textTheme.bodyLarge)),
-                              ],
-                            ),
+                            if (provider.callLog?.call?.partName != null) ...[
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Parts :', style: textTheme.bodyLarge),
+                                  const SizedBox(width: 6.0),
+                                  Expanded(
+                                      child: Text(
+                                          getPartsName(provider
+                                                  .callLog?.call?.partName) ??
+                                              '',
+                                          style: textTheme.bodyLarge)),
+                                ],
+                              ),
+                            ]
                           ]
                         ],
                         if (callStatus != CallStatusEnum.allocated &&
@@ -357,10 +380,12 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               final pickedDate = await showDatePicker(
                                 context: context,
                                 firstDate: DateTime.now(),
-                                lastDate: DateTime.now().add(Duration(days: 365)),
+                                lastDate:
+                                    DateTime.now().add(Duration(days: 365)),
                                 initialDate: initialDate,
                                 currentDate: DateTime.now(),
-                                initialEntryMode: DatePickerEntryMode.calendarOnly,
+                                initialEntryMode:
+                                    DatePickerEntryMode.calendarOnly,
                               );
                               if (pickedDate != null) {
                                 dateController.text =
@@ -452,11 +477,8 @@ class _TimeSlotBottomSheetState extends State<TimeSlotBottomSheet> {
                   childAspectRatio: 2.5),
               itemBuilder: (context, index) => InkWell(
                     borderRadius: BorderRadius.circular(12.0),
-                    onTap: () {
-                      setState(() {
-                        selectedTimeSlot = TimeSlot.values[index];
-                      });
-                    },
+                    onTap: () => setState(
+                        () => selectedTimeSlot = TimeSlot.values[index]),
                     child: Container(
                       padding: EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
@@ -479,19 +501,13 @@ class _TimeSlotBottomSheetState extends State<TimeSlotBottomSheet> {
               CustomOutlinedButton(
                   buttonText: 'Clear',
                   onPressed: (selectedTimeSlot != null)
-                      ? () {
-                          setState(() {
-                            selectedTimeSlot = null;
-                          });
-                        }
+                      ? () => setState(() => selectedTimeSlot = null)
                       : null),
               const SizedBox(width: 16.0),
               CustomElevatedButton(
                   buttonText: 'Ok',
                   onPressed: (selectedTimeSlot != null)
-                      ? () {
-                          Navigator.pop(context, selectedTimeSlot);
-                        }
+                      ? () => Navigator.pop(context, selectedTimeSlot)
                       : null),
             ],
           ),
@@ -523,7 +539,7 @@ class _TeamBottomSheetState extends State<TeamBottomSheet> {
     return Consumer<TeamProvider>(builder: (context, provider, _) {
       return provider.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : (provider.teamModel?.data?.isEmpty ?? false)
+          : (provider.teamModel?.data?.isEmpty ?? true)
               ? const Center(child: Text('No data found'))
               : Container(
                   padding: EdgeInsets.symmetric(vertical: 16.0),

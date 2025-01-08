@@ -113,9 +113,13 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
   }
 
   Future<void> completeCallLog() async {
-    final partsList = <String>[];
-    for (final part in selectedParts) {
-      partsList.add(part.name.toString());
+    var partsList;
+    if(selectedParts.isEmpty) {
+      partsList = null;
+    } else {
+      for (final part in selectedParts) {
+        partsList.add(part.name.toString());
+      }
     }
     Provider.of<CallLogProvider>(context, listen: false)
         .completeCall(context,
@@ -251,13 +255,6 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
                                         partsController.clear();
                                         this.selectedParts.clear();
                                       })),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please select parts';
-                            } else {
-                              return null;
-                            }
-                          },
                           onTap: () async {
                             await showModalBottomSheet(
                                     context: context,
