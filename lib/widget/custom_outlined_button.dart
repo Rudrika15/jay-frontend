@@ -18,11 +18,7 @@ class CustomOutlinedButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
             fixedSize: size,
             shape: shape ??
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(10),
-                  ),
-                ),
+                StadiumBorder(),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap),
         onPressed: onPressed,
         child: Padding(

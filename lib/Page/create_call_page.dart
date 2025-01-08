@@ -138,7 +138,7 @@ class _CreateCallPageState extends State<CreateCallPage> with NavigatorMixin {
                   final pickedDate = await showDatePicker(
                     context: context,
                     firstDate: DateTime.now(),
-                    lastDate: DateTime(2025),
+                    lastDate: DateTime.now().add(Duration(days: 365)),
                     initialDate: initialDate,
                     currentDate: DateTime.now(),
                     initialEntryMode: DatePickerEntryMode.calendarOnly,

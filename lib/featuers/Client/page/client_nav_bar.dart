@@ -25,7 +25,7 @@ class _ClientNavbarState extends State<ClientNavbar> with NavigatorMixin {
   @override
   void initState() {
     super.initState();
-    // Provider.of<LoginProvider>(context, listen: false).updateToken();
+    Provider.of<LoginProvider>(context, listen: false).updateToken();
   }
 
   @override

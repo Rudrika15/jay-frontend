@@ -84,6 +84,7 @@ class _AdminLeavePageState extends State<AdminLeavePage> {
                         children: List<Widget>.generate(
                             LeaveType.values.length, (index) {
                           return ChoiceChip(
+                            shape: StadiumBorder(),
                             label: Text(LeaveType.values[index].name),
                             selected: _selectedChip == LeaveType.values[index],
                             labelStyle: TextStyle(

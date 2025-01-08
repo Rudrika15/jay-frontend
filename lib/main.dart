@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flipcodeattendence/featuers/User/staff_provider.dart';
 import 'package:flipcodeattendence/provider/app_provider.dart';
 import 'package:flipcodeattendence/provider/call_log_provider.dart';
@@ -18,8 +19,12 @@ import 'package:get/route_manager.dart';
 import 'package:provider/provider.dart';
 
 import 'Page/splash_page.dart';
+import 'helper/notification_helper.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await FirebaseMessagingUtils.initNotifications();
   runApp(MyApp());
 }
 

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flipcodeattendence/featuers/User/staff_provider.dart';
 import 'package:flipcodeattendence/helper/api_helper.dart';
 import 'package:flipcodeattendence/helper/enum_helper.dart';
-import 'package:flipcodeattendence/provider/call_status_provider.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:flipcodeattendence/widget/common_widgets.dart';
 import 'package:flutter/cupertino.dart';
@@ -34,7 +33,6 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
   List<Parts> selectedParts = [];
   String? qrId = null;
   late final CallLogProvider provider;
-  late final CallStatusEnum callStatus;
   late double totalCharge;
   Timer? debounce;
 
@@ -42,7 +40,6 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
   void initState() {
     super.initState();
     provider = Provider.of<CallLogProvider>(context, listen: false);
-    callStatus = context.read<CallStatusProvider>().callStatusEnum;
     provider.getAllocatedCallLogDetails(context: context, id: widget.id);
     totalCharge = countTotal();
     Future.delayed(Duration.zero, () => setState(() {}));
@@ -96,8 +93,14 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
 
   Color getBackgroundColor(String id) {
     return isQrSelected(id)
-        ? AppColors.backgroundBlack
+        ? AppColors.aPrimary
         : AppColors.backgroundLight;
+  }
+
+  Color getBorderColor(String id) {
+    return isQrSelected(id)
+        ? Colors.transparent
+        : AppColors.grey;
   }
 
   void showSnackBar(BuildContext context, String message) {
@@ -152,92 +155,88 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (callStatus == CallStatusEnum.allocated ||
-                            callStatus == CallStatusEnum.completed) ...[
-                          Text(
-                              provider.staffCallLogData?.call?.user?.name
-                                      ?.capitalizeFirst ??
-                                  '',
-                              style: textTheme.titleLarge!
-                                  .copyWith(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            children: [
-                              Icon(Icons.call),
-                              const SizedBox(width: 6.0),
-                              Text(
-                                  '${provider.staffCallLogData?.call?.user?.phone}',
-                                  style: textTheme.bodyLarge),
-                            ],
-                          ),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.location_on_outlined),
-                              const SizedBox(width: 6.0),
-                              Expanded(
-                                  child: Text(
-                                      provider.staffCallLogData?.call?.address
-                                              ?.capitalizeFirst ??
-                                          'N/A',
-                                      style: textTheme.bodyLarge)),
-                            ],
-                          ),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.message_outlined),
-                              const SizedBox(width: 6.0),
-                              Expanded(
-                                  child: Text(
-                                      provider.staffCallLogData?.call
-                                              ?.description?.capitalizeFirst ??
-                                          '',
-                                      style: textTheme.bodyLarge)),
-                            ],
-                          ),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.date_range),
-                              const SizedBox(width: 6.0),
-                              Expanded(
-                                  child: Text(
-                                      provider.staffCallLogData?.date ?? '',
-                                      style: textTheme.bodyLarge)),
-                            ],
-                          ),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.watch_later_outlined),
-                              const SizedBox(width: 6.0),
-                              Expanded(
-                                  child: Text(
-                                      provider.staffCallLogData?.slot
-                                              ?.capitalizeFirst ??
-                                          '',
-                                      style: textTheme.bodyLarge)),
-                            ],
-                          ),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.currency_rupee),
-                              const SizedBox(width: 6.0),
-                              Expanded(
-                                  child: Text(
-                                      provider.staffCallLogData?.charge ?? '',
-                                      style: textTheme.bodyLarge)),
-                            ],
-                          ),
-                          const SizedBox(height: 24.0),
-                        ],
+                        Text(
+                            provider.staffCallLogData?.call?.user?.name
+                                    ?.capitalizeFirst ??
+                                '',
+                            style: textTheme.titleLarge!
+                                .copyWith(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 12.0),
+                        Row(
+                          children: [
+                            Icon(Icons.call),
+                            const SizedBox(width: 6.0),
+                            Text(
+                                '${provider.staffCallLogData?.call?.user?.phone}',
+                                style: textTheme.bodyLarge),
+                          ],
+                        ),
+                        const SizedBox(height: 12.0),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.location_on_outlined),
+                            const SizedBox(width: 6.0),
+                            Expanded(
+                                child: Text(
+                                    provider.staffCallLogData?.call?.address
+                                            ?.capitalizeFirst ??
+                                        'N/A',
+                                    style: textTheme.bodyLarge)),
+                          ],
+                        ),
+                        const SizedBox(height: 12.0),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.message_outlined),
+                            const SizedBox(width: 6.0),
+                            Expanded(
+                                child: Text(
+                                    provider.staffCallLogData?.call?.description
+                                            ?.capitalizeFirst ??
+                                        '',
+                                    style: textTheme.bodyLarge)),
+                          ],
+                        ),
+                        const SizedBox(height: 12.0),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.date_range),
+                            const SizedBox(width: 6.0),
+                            Expanded(
+                                child: Text(
+                                    provider.staffCallLogData?.date ?? '',
+                                    style: textTheme.bodyLarge)),
+                          ],
+                        ),
+                        const SizedBox(height: 12.0),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.watch_later_outlined),
+                            const SizedBox(width: 6.0),
+                            Expanded(
+                                child: Text(
+                                    provider.staffCallLogData?.slot
+                                            ?.capitalizeFirst ??
+                                        '',
+                                    style: textTheme.bodyLarge)),
+                          ],
+                        ),
+                        const SizedBox(height: 12.0),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.currency_rupee),
+                            const SizedBox(width: 6.0),
+                            Expanded(
+                                child: Text(
+                                    provider.staffCallLogData?.charge ?? '',
+                                    style: textTheme.bodyLarge)),
+                          ],
+                        ),
                         const SizedBox(height: 16.0),
                         TextFormFieldWidget(
                           labelText: 'Select parts',
@@ -248,8 +247,7 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
                                   Icons.arrow_drop_down_circle_outlined)
                               : IconButton(
                                   icon: Icon(Icons.close),
-                                  onPressed: () =>
-                                      setState(() {
+                                  onPressed: () => setState(() {
                                         partsController.clear();
                                         this.selectedParts.clear();
                                       })),
@@ -520,6 +518,7 @@ class _PartsBottomSheetState extends State<PartsBottomSheet> {
                           spacing: 8.0,
                           children: List.generate(parts.length, (index) {
                             return InputChip(
+                                shape: StadiumBorder(),
                                 side: BorderSide(color: Colors.transparent),
                                 backgroundColor: AppColors.aPrimary,
                                 deleteIconColor: AppColors.onPrimaryLight,
@@ -640,7 +639,8 @@ class _PaymentMethodBottomSheet extends State<PaymentMethodBottomSheet> {
                       padding: EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(color: AppColors.aPrimary),
+                          border: Border.all(color: selectedPaymentMethod ==
+                              PaymentMethod.values[index] ? Colors.transparent : AppColors.grey),
                           color: selectedPaymentMethod ==
                                   PaymentMethod.values[index]
                               ? AppColors.aPrimary
@@ -653,19 +653,19 @@ class _PaymentMethodBottomSheet extends State<PaymentMethodBottomSheet> {
                                   color: (selectedPaymentMethod ==
                                           PaymentMethod.cash)
                                       ? AppColors.onPrimaryLight
-                                      : AppColors.aPrimary)
+                                      : AppColors.onPrimaryBlack)
                               : PaymentMethod.values[index] ==
                                       PaymentMethod.Debit
                                   ? Icon(Icons.currency_rupee,
                                       color: (selectedPaymentMethod ==
                                               PaymentMethod.Debit)
                                           ? AppColors.onPrimaryLight
-                                          : AppColors.aPrimary)
+                                          : AppColors.onPrimaryBlack)
                                   : Icon(Icons.qr_code,
                                       color: (selectedPaymentMethod ==
                                               PaymentMethod.QR)
                                           ? AppColors.onPrimaryLight
-                                          : AppColors.aPrimary),
+                                          : AppColors.onPrimaryBlack),
                           const SizedBox(width: 12.0),
                           Text(
                               PaymentMethod.values[index].name.capitalizeFirst!,
@@ -673,7 +673,7 @@ class _PaymentMethodBottomSheet extends State<PaymentMethodBottomSheet> {
                                   color: selectedPaymentMethod ==
                                           PaymentMethod.values[index]
                                       ? AppColors.onPrimaryLight
-                                      : AppColors.aPrimary)),
+                                      : AppColors.onPrimaryBlack)),
                         ],
                       ),
                     ),

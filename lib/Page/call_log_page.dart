@@ -67,6 +67,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
     isAdmin
         ? provider.getCallLogs(
             context: context,
+            date: dateController.text,
             status: context.read<CallStatusProvider>().callStatusEnum)
         : isUser
             ? provider.getStaffCallLogs(
@@ -121,8 +122,8 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                   .parse(dateController.text);
                           final pickedDate = await showDatePicker(
                             context: context,
-                            firstDate: DateTime(2024),
-                            lastDate: DateTime(2025),
+                            firstDate: DateTime.now().subtract(Duration(days: 365)),
+                            lastDate: DateTime.now().add(Duration(days: 365)),
                             initialDate: initialDate,
                             currentDate: DateTime.now(),
                             initialEntryMode: DatePickerEntryMode.calendarOnly,
@@ -203,7 +204,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                                         .allocatedStaffCallLogList[index];
                                     return InkWell(
                                       onTap: () {
-                                        final value = Navigator.of(context)
+                                        Navigator.of(context)
                                             .push(MaterialPageRoute(
                                                 builder: (context) =>
                                                     CallDetailsUserPage(
@@ -430,6 +431,7 @@ class _CallLogPageState extends State<CallLogPage> with NavigatorMixin {
                 child: IgnorePointer(
                   ignoring: !_isFabVisible,
                   child: FloatingActionButton(
+                    shape: CircleBorder(),
                     onPressed: () {
                       Navigator.of(context)
                           .push(MaterialPageRoute(
@@ -546,9 +548,24 @@ class CallLogDetails extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(callLog?.user?.name?.capitalizeFirst ?? '',
-                  style: textTheme.titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(callLog?.user?.name?.capitalizeFirst ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.titleLarge!
+                              .copyWith(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 8.0),
+                    Text("# ${callLog?.id.toString() ?? ''}",
+                        style: textTheme.titleLarge!
+                            .copyWith(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12.0),
               Row(
                 children: [
                   InputChip(
@@ -590,7 +607,7 @@ class CallLogDetails extends StatelessWidget {
               tooltip: 'Image',
               onPressed: onPressImageChip,
               label: Text(callLog?.photo ?? 'photo.jpg'),
-              avatar: Icon(Icons.image),
+              avatar: Icon(Icons.image, color: AppColors.onPrimaryBlack),
             ),
             const SizedBox(height: 10.0),
           ],
@@ -634,7 +651,8 @@ class CallLogDetails extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10.0),
-          if(context.read<CallStatusProvider>().callStatusEnum == CallStatusEnum.completed)...[
+          if (context.read<CallStatusProvider>().callStatusEnum ==
+              CallStatusEnum.completed) ...[
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -643,7 +661,7 @@ class CallLogDetails extends StatelessWidget {
                 Expanded(
                     child: Text(
                         ((callLog?.paymentMethod?.trim().toLowerCase() ?? '') ==
-                            'debit')
+                                'debit')
                             ? 'Unsettled'
                             : 'Settled',
                         style: textTheme.bodyLarge)),
@@ -679,37 +697,52 @@ class ClientCallDetails extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              InputChip(
-                  tooltip: 'Status',
-                  label: Text(callLog?.status?.capitalizeFirst ?? ''),
-                  padding: EdgeInsets.zero,
-                  onPressed: () {},
-                  visualDensity: VisualDensity(vertical: -4),
-                  shape: StadiumBorder(),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-              const SizedBox(width: 6.0),
-              if (context.read<CallStatusProvider>().callStatusEnum !=
-                      CallStatusEnum.completed &&
-                  context.read<CallStatusProvider>().callStatusEnum !=
-                      CallStatusEnum.cancelled) ...[
-                IconButton(
-                    tooltip: 'More actions',
-                    visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                    padding: EdgeInsets.zero,
-                    onPressed: () async {
-                      await showModalBottomSheet(
-                          context: context,
-                          builder: (context) {
-                            return CallLogActionWidget(
-                              onTapWaiting: null,
-                              onTapCancel: onTapCancel,
-                              onTapComplete: onTapComplete,
-                              onTapPending: null,
-                            );
-                          });
-                    },
-                    icon: const Icon(Icons.more_vert))
-              ]
+              if (callLog?.assign?.isNotEmpty ?? false) ...[
+                Text("# ${callLog?.assign?.first.id ?? ''}",
+                    style: textTheme.titleLarge!
+                        .copyWith(fontWeight: FontWeight.bold)),
+              ] else ...[
+                Text("# ${callLog?.id ?? ''}",
+                    style: textTheme.titleLarge!
+                        .copyWith(fontWeight: FontWeight.bold)),
+              ],
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InputChip(
+                      tooltip: 'Status',
+                      label: Text(callLog?.status?.capitalizeFirst ?? ''),
+                      padding: EdgeInsets.zero,
+                      onPressed: () {},
+                      visualDensity: VisualDensity(vertical: -4),
+                      shape: StadiumBorder(),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  const SizedBox(width: 6.0),
+                  if (context.read<CallStatusProvider>().callStatusEnum !=
+                          CallStatusEnum.completed &&
+                      context.read<CallStatusProvider>().callStatusEnum !=
+                          CallStatusEnum.cancelled) ...[
+                    IconButton(
+                        tooltip: 'More actions',
+                        visualDensity:
+                            VisualDensity(horizontal: -4, vertical: -4),
+                        padding: EdgeInsets.zero,
+                        onPressed: () async {
+                          await showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return CallLogActionWidget(
+                                  onTapWaiting: null,
+                                  onTapCancel: onTapCancel,
+                                  onTapComplete: onTapComplete,
+                                  onTapPending: null,
+                                );
+                              });
+                        },
+                        icon: const Icon(Icons.more_vert))
+                  ]
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 10.0),
@@ -745,17 +778,19 @@ class ClientCallDetails extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10.0),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.currency_rupee),
-              const SizedBox(width: 6.0),
-              Expanded(
-                  child: Text(callLog?.assign?.charge ?? '',
-                      style: textTheme.bodyLarge)),
-            ],
-          ),
-          if (callLog?.photo == null) ...[
+          if (callLog?.assign?.isNotEmpty ?? false) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.currency_rupee),
+                const SizedBox(width: 6.0),
+                Expanded(
+                    child: Text(callLog?.assign?.first.charge ?? '',
+                        style: textTheme.bodyLarge)),
+              ],
+            ),
+          ],
+          if (callLog?.photo != null) ...[
             const SizedBox(height: 10.0),
             ActionChip(
               visualDensity: VisualDensity(vertical: -4),
@@ -763,7 +798,7 @@ class ClientCallDetails extends StatelessWidget {
               tooltip: 'Image',
               onPressed: onPressImageChip,
               label: Text(callLog?.photo ?? 'photo.jpg'),
-              avatar: Icon(Icons.image),
+              avatar: Icon(Icons.image, color: AppColors.onPrimaryBlack),
             ),
           ],
         ],
@@ -802,9 +837,25 @@ class StaffCallLogDetails extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(callLog?.call?.user?.name?.capitalizeFirst ?? '',
-                  style: textTheme.titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: Text(callLog?.call?.user?.name?.capitalizeFirst ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.titleLarge!
+                              .copyWith(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 8.0),
+                    Text("# ${callLog?.callId.toString() ?? ''}",
+                        style: textTheme.titleLarge!
+                            .copyWith(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12.0),
               InputChip(
                   tooltip: 'Status',
                   label: Text(callLog?.call?.status?.capitalizeFirst ?? ''),
@@ -818,10 +869,12 @@ class StaffCallLogDetails extends StatelessWidget {
           const SizedBox(height: 10.0),
           if (callLog?.call?.photo != null) ...[
             ActionChip(
+                padding: EdgeInsets.zero,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 tooltip: 'Image',
                 onPressed: onPressImageChip,
                 label: Text(callLog?.call?.photo ?? 'photo.jpg'),
-                avatar: Icon(Icons.image)),
+                avatar: Icon(Icons.image, color: AppColors.onPrimaryBlack)),
             const SizedBox(height: 10.0),
           ],
           Row(

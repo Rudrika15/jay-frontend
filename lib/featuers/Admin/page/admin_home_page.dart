@@ -55,37 +55,37 @@ class _AdminHomePageState extends State<AdminHomePage> with NavigatorMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // appBar: AppBar(
-        //   title: Row(
-        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //     children: [
-        //       Image.asset(StringHelper.appLogo, width: 150),
-        //       StreamBuilder(
-        //         stream: currentTime(),
-        //         builder: (context, snapShot) {
-        //           return Column(
-        //             children: [
-        //               Text(
-        //                 snapShot.data != null
-        //                     ? DateFormat.yMMMEd().format(snapShot.data!)
-        //                     : '',
-        //                 style: Theme.of(context)
-        //                     .textTheme
-        //                     .bodyMedium!
-        //                     .copyWith(fontWeight: FontWeight.w500),
-        //               ),
-        //             ],
-        //           );
-        //         },
-        //       ),
-        //     ],
-        //   ),
-        //   actions: [
-        //     NotificationButton(
-        //       isAdmin: true,
-        //     )
-        //   ],
-        // ),
+        appBar: AppBar(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Image.asset(StringHelper.appLogo, width: 150),
+              StreamBuilder(
+                stream: currentTime(),
+                builder: (context, snapShot) {
+                  return Column(
+                    children: [
+                      Text(
+                        snapShot.data != null
+                            ? DateFormat.yMMMEd().format(snapShot.data!)
+                            : '',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+          actions: [
+            NotificationButton(
+              isAdmin: true,
+            )
+          ],
+        ),
         body: SafeArea(
       child: Consumer2<AttendanceProvider, TaskProvider>(
         builder: (context, attendancValue, taskProvider, child) =>
@@ -297,10 +297,11 @@ class AttendanceCard extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 15,
-                        backgroundColor: AppColors.aPrimary.withOpacity(0.4),
+                        backgroundColor: AppColors.aPrimary,
                         child: Icon(
                           Icons.food_bank_outlined,
                           size: 18,
+                          color: AppColors.onPrimaryLight,
                         ),
                       ),
                       SizedBox(
@@ -353,10 +354,11 @@ class AttendanceCard extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 15,
-                        backgroundColor: AppColors.aPrimary.withOpacity(0.4),
+                        backgroundColor: AppColors.aPrimary,
                         child: Icon(
                           Icons.watch_later_outlined,
                           size: 18,
+                          color: AppColors.onPrimaryLight,
                         ),
                       ),
                       SizedBox(
@@ -414,10 +416,11 @@ class CustomAttendanceChip extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 15,
-              backgroundColor: AppColors.aPrimary.withOpacity(0.4),
+              backgroundColor: AppColors.aPrimary,
               child: Icon(
                 icon,
                 size: 18,
+                color: AppColors.onPrimaryLight,
               ),
             ),
             SizedBox(

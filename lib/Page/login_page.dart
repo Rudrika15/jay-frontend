@@ -29,8 +29,8 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
   @override
   void initState() {
     super.initState();
-    _numberController.text = "9979404044";
-    _passwordController.text = "12345678";
+    // _numberController.text = "9909941341";
+    // _passwordController.text = "123456";
     _numberController.addListener(_handleInputChange);
     _passwordController.addListener(_handleInputChange);
   }
@@ -62,14 +62,11 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                     Image.asset(StringHelper.appLogo),
                     const SizedBox(height: 24.0),
                     TextFormFieldWidget(
-                        isFilled: true,
-                        readOnly: true,
                         prefixWidget: Icon(
                           Icons.phone,
                           color: AppColors.onPrimaryBlack,
                         ),
                         hintText: StringHelper.mobileTextFieldHint,
-                        fillColor: AppColors.backgroundLight,
                         validator: (value) {
                           if (value == null ||
                               value.length != 10 ||
@@ -90,7 +87,6 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                         controller: _numberController),
                     SizedBox(height: 16),
                     TextFormFieldWidget(
-                      readOnly: true,
                       obscureText: !showPassword,
                       controller: _passwordController,
                       // obscureText: _obscureText,
@@ -103,8 +99,6 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                         }
                         return null;
                       },
-                      isFilled: true,
-                      fillColor: AppColors.backgroundLight,
                       hintText: StringHelper.passWordTextFieldHint,
                       prefixWidget: Icon(
                         Icons.password,
@@ -122,50 +116,52 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                       keyboardType: TextInputType.number,
                     ),
                     SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SegmentedButton(
-                            segments: <ButtonSegment<UserRole>>[
-                              ButtonSegment(
-                                  value: UserRole.admin,
-                                  label: Text(UserRole.admin.name.capitalizeFirst!)),
-                              ButtonSegment(
-                                  value: UserRole.user,
-                                  label: Text(UserRole.user.name.capitalizeFirst!)),
-                              ButtonSegment(
-                                  value: UserRole.client,
-                                  label: Text(UserRole.client.name.capitalizeFirst!)),
-                            ],
-                            selected: <UserRole>{selectedUserType},
-                            onSelectionChanged: (Set<UserRole> value) {
-                              setState(() {
-                                if(value.first == UserRole.admin) {
-                                  _numberController.text = "9979404044";
-                                  _passwordController.text = "12345678";
-                                } else if(value.first == UserRole.user) {
-                                  _numberController.text = "9687574999";
-                                  _passwordController.text = "123456";
-                                } else {
-                                  _numberController.text = "8306180808";
-                                  _passwordController.text = "123456";
-                                }
-                                selectedUserType = value.first;
-                              });
-                            },
-                            showSelectedIcon: false,
-                            style: SegmentedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)
-                              ),
-                                selectedBackgroundColor: AppColors.aPrimary,
-                                selectedForegroundColor:
-                                    AppColors.onPrimaryLight),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
+                    // Row(
+                    //   children: [
+                    //     Expanded(
+                    //       child: SegmentedButton(
+                    //         segments: <ButtonSegment<UserRole>>[
+                    //           ButtonSegment(
+                    //               value: UserRole.admin,
+                    //               label: Text(
+                    //                   UserRole.admin.name.capitalizeFirst!)),
+                    //           ButtonSegment(
+                    //               value: UserRole.user,
+                    //               label: Text(
+                    //                   UserRole.user.name.capitalizeFirst!)),
+                    //           ButtonSegment(
+                    //               value: UserRole.client,
+                    //               label: Text(
+                    //                   UserRole.client.name.capitalizeFirst!)),
+                    //         ],
+                    //         selected: <UserRole>{selectedUserType},
+                    //         onSelectionChanged: (Set<UserRole> value) {
+                    //           setState(() {
+                    //             if (value.first == UserRole.admin) {
+                    //               _numberController.text = "9909941341";
+                    //               _passwordController.text = "123456";
+                    //             } else if (value.first == UserRole.user) {
+                    //               _numberController.text = "9409991814";
+                    //               _passwordController.text = "123456";
+                    //             } else {
+                    //               _numberController.text = "9426975796";
+                    //               _passwordController.text = "123456";
+                    //             }
+                    //             selectedUserType = value.first;
+                    //           });
+                    //         },
+                    //         showSelectedIcon: false,
+                    //         style: SegmentedButton.styleFrom(
+                    //             shape: StadiumBorder(),
+                    //             side: BorderSide(color: AppColors.aPrimary),
+                    //             selectedBackgroundColor: AppColors.aPrimary,
+                    //             selectedForegroundColor:
+                    //                 AppColors.onPrimaryLight),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    // SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
@@ -175,6 +171,7 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                                 final enabled = true;
                                 return ElevatedButton(
                                   style: ElevatedButton.styleFrom(
+                                      shape: StadiumBorder(),
                                       fixedSize: Size(
                                           screenWidth(context: context), 56),
                                       textStyle: Theme.of(context)
@@ -185,22 +182,35 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                                   onPressed: enabled
                                       ? () async {
                                           setState(() {});
-                                          if(_formKey.currentState!.validate()) {
+                                          if (_formKey.currentState!
+                                              .validate()) {
                                             await loginProvider
                                                 .getUserToken(
-                                                phone: _numberController.text,
-                                                password: _passwordController.text)
+                                                    phone:
+                                                        _numberController.text,
+                                                    password:
+                                                        _passwordController
+                                                            .text)
                                                 .then(
-                                                  (value) {
-                                                    if(value) {
-                                                      final isAdmin = context.read<LoginProvider>().isAdmin;
-                                                      final isUser = context.read<LoginProvider>().isUser;
-                                                      (isAdmin)
-                                                          ? pushReplacement(context, AdminNavbar())
-                                                          : (isUser)
-                                                            ? pushReplacement(context, UserNavbar())
-                                                            : pushReplacement(context, ClientNavbar());
-                                                    }
+                                              (value) async{
+                                                if (value) {
+                                                  final isAdmin = context
+                                                      .read<LoginProvider>()
+                                                      .isAdmin;
+                                                  final isUser = context
+                                                      .read<LoginProvider>()
+                                                      .isUser;
+                                                  (isAdmin)
+                                                      ? pushReplacement(context,
+                                                          AdminNavbar())
+                                                      : (isUser)
+                                                          ? pushReplacement(
+                                                              context,
+                                                              UserNavbar())
+                                                          : pushReplacement(
+                                                              context,
+                                                              ClientNavbar());
+                                                }
                                               },
                                             );
                                           }

@@ -50,9 +50,11 @@ class CallLogProvider extends ChangeNotifier {
 
   Future<void> getCallLogs(
       {CallStatusEnum status = CallStatusEnum.pending,
-      required BuildContext context}) async {
+      required BuildContext context,
+      String? date}) async {
     final url = ApiHelper.callLogList +
-        '?status=${status.name.toString().toLowerCase()}';
+        '?date=$date' +
+        '&status=${status.name.toString().toLowerCase()}';
     _isLoading = true;
     try {
       final response = await apiService.invokeApi(
@@ -160,7 +162,7 @@ class CallLogProvider extends ChangeNotifier {
     final parsedDate = DateFormat("dd-MM-yyyy").parse(date);
     final formattedDate = DateFormat("yyyy-MM-dd").format(parsedDate);
     final userIds = [];
-    for(final member in members) {
+    for (final member in members) {
       userIds.add(member.userId.toString());
     }
     final dynamic _body = {
@@ -225,15 +227,16 @@ class CallLogProvider extends ChangeNotifier {
       {required String callId,
       required List<String> partsList,
       required String paymentMethod,
-      required String totalCharge, String? qrId}) async {
+      required String totalCharge,
+      String? qrId}) async {
     var url = ApiHelper.updateCallLog;
     _isLoading = true;
     final _body = {
-      'id' : callId,
-      'part_name' : partsList,
-      'payment_method' : paymentMethod,
-      'total_charge' : totalCharge,
-      'qr_id' : qrId,
+      'id': callId,
+      'part_name': partsList,
+      'payment_method': paymentMethod,
+      'total_charge': totalCharge,
+      'qr_id': qrId,
     };
     try {
       await apiService.invokeApi(

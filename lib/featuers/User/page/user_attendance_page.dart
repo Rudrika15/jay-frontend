@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:flipcodeattendence/Page/notification_page.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +21,8 @@ class UserAttendancePage extends StatefulWidget {
   _UserAttendancePageState createState() => _UserAttendancePageState();
 }
 
-class _UserAttendancePageState extends State<UserAttendancePage> with NavigatorMixin {
+class _UserAttendancePageState extends State<UserAttendancePage>
+    with NavigatorMixin {
   Timer? timer, longPressTimer;
   bool isLongPressing = false;
   bool loading = false;
@@ -145,12 +145,12 @@ class _UserAttendancePageState extends State<UserAttendancePage> with NavigatorM
     }
   }
 
-  // Stream<DateTime> currentTime() async* {
-  //   while (true) {
-  //     await Future.delayed(Duration.zero);
-  //     yield DateTime.now();
-  //   }
-  // }
+  Stream<DateTime> currentTime() async* {
+    while (true) {
+      await Future.delayed(Duration.zero);
+      yield DateTime.now();
+    }
+  }
 
   Future<void> _toggleCheckInOut() async {
     try {
@@ -177,22 +177,14 @@ class _UserAttendancePageState extends State<UserAttendancePage> with NavigatorM
     progressValue = 0.0;
     longPressTimer =
         Timer.periodic(Duration(milliseconds: 20), (Timer timer) async {
-      setState(() {
-        progressValue += 0.01;
-      });
+      setState(() => progressValue += 0.01);
       if (progressValue >= 1.0) {
         timer.cancel();
-        setState(() {
-          isLongPressing = false;
-        });
-        setState(() {
-          loading = true;
-        });
+        setState(() => isLongPressing = false);
+        setState(() => loading = true);
 
         await _toggleCheckInOut();
-        setState(() {
-          loading = false;
-        });
+        setState(() => loading = false);
       }
     });
   }
@@ -215,40 +207,40 @@ class _UserAttendancePageState extends State<UserAttendancePage> with NavigatorM
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Image.asset(StringHelper.appLogo, width: 150),
-              // StreamBuilder(
-              //   stream: currentTime(),
-              //   builder: (context, snapShot) {
-              //     return Column(
-              //       children: [
-              //         Text(
-              //           snapShot.data != null
-              //               ? DateFormat.yMMMEd().format(snapShot.data!)
-              //               : '',
-              //           style: Theme.of(context)
-              //               .textTheme
-              //               .bodyMedium!
-              //               .copyWith(fontWeight: FontWeight.w500),
-              //         ),
-              //       ],
-              //     );
-              //   },
-              // ),
+              StreamBuilder(
+                stream: currentTime(),
+                builder: (context, snapShot) {
+                  return Column(
+                    children: [
+                      Text(
+                        snapShot.data != null
+                            ? DateFormat.yMMMEd().format(snapShot.data!)
+                            : '',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                push(
-                    context,
-                    NotificationPage(
-                      isAdmin: false,
-                    ));
-              },
-              icon: Icon(
-                Icons.notifications,
-              ),
-            )
-          ],
+          // actions: [
+          //   IconButton(
+          //     onPressed: () {
+          //       push(
+          //           context,
+          //           NotificationPage(
+          //             isAdmin: false,
+          //           ));
+          //     },
+          //     icon: Icon(
+          //       Icons.notifications,
+          //     ),
+          //   )
+          // ],
         ),
         body: Consumer<TodayProvider>(
             builder: (context, todayAttendanceProvider, _) {

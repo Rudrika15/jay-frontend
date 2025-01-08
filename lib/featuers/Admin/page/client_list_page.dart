@@ -81,11 +81,12 @@ class _ClientListPageState extends State<ClientListPage> {
                           itemBuilder: (context, index) {
                             final client = provider.clientModel?.data?[index];
                             return ListTile(
+                              shape: StadiumBorder(),
                               title: Text('${client?.name}'),
                               trailing: (selectedId == client?.id)
                                   ? Icon(Icons.check_circle,
                                       color: AppColors.aPrimary)
-                                  : const SizedBox.shrink(),
+                                  : Icon(Icons.circle_outlined,color: AppColors.aPrimary),
                               onTap: () {
                                 setState(() {
                                   selectedId = client?.id;

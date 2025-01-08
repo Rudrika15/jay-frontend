@@ -267,6 +267,7 @@ class _UserLeavePageState extends State<UserLeavePage> {
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.grey,
+                                      shape: StadiumBorder(),
                                       fixedSize: Size(
                                           screenWidth(context: context), 56),
                                       textStyle: Theme.of(context)
@@ -286,6 +287,7 @@ class _UserLeavePageState extends State<UserLeavePage> {
                               Expanded(
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
+                                      shape: StadiumBorder(),
                                       fixedSize: Size(
                                           screenWidth(context: context), 56),
                                       textStyle: Theme.of(context)
@@ -397,6 +399,7 @@ class _UserLeavePageState extends State<UserLeavePage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => addLeavePopup(),
+          shape: CircleBorder(),
           child: Icon(
             Icons.add,
             color: AppColors.onPrimaryLight,
@@ -426,7 +429,7 @@ class CustomOutlineContainer extends StatelessWidget {
         height: 55,
         decoration: BoxDecoration(
           color: isSelected ? AppColors.aPrimary.withOpacity(0.5) : null,
-          border: Border.all(color: AppColors.aPrimary),
+          border: Border.all(color: isSelected ? Colors.transparent : AppColors.grey),
           borderRadius: BorderRadius.circular(10),
         ),
         alignment: Alignment.center,

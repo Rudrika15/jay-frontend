@@ -82,6 +82,7 @@ class _TextFormFieldCustomState extends State<TextFormFieldWidget> {
       onTapOutside: (event) {
         FocusManager.instance.primaryFocus!.unfocus();
       },
+
       decoration: InputDecoration(
         alignLabelWithHint: true,
         filled: widget.isFilled,
@@ -96,21 +97,21 @@ class _TextFormFieldCustomState extends State<TextFormFieldWidget> {
         enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-              color: widget.borderColor ?? colorScheme(context).primary,
+              color: widget.borderColor ?? AppColors.grey,
             )),
         focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-                color: widget.borderColor ?? colorScheme(context).primary,
+                color: widget.borderColor ?? AppColors.grey,
                 width: 1.5)),
         errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-                color: widget.borderColor ?? colorScheme(context).error)),
+                color: widget.borderColor ?? AppColors.red)),
         focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-                color: widget.borderColor ?? colorScheme(context).primary,
+                color: widget.borderColor ?? AppColors.red,
                 width: 1.5)),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

@@ -1,8 +1,10 @@
 class ApiHelper {
+  // development
   static String baseUrl = 'https://dev.jayinfotech.org/';
+
   static String imageBaseUrl = '${baseUrl}images/';
   static String loginUrl = '${baseUrl}api/auth/login';
-  static String changePasswordUrl = '${baseUrl}change-password';
+  static String changePasswordUrl = '${baseUrl}api/auth/change-password';
   static String attendance = '${baseUrl}api/attendance';
   static String today = '${baseUrl}api/today-attendance';
   static String showAttendance = '${baseUrl}api/show-attendance';
@@ -27,12 +29,10 @@ class ApiHelper {
   // client
   static String updateCallLog = '${baseUrl}api/update-call';
 
-
   // Staff
   static String staffCallLogList = '${baseUrl}api/call-list';
   static String getParts = '${baseUrl}api/parts-list';
   static String qrList = '${baseUrl}api/qr-list';
-
 
   static String dailyAttendence = '${baseUrl}api/daily';
   static String leaveApplications = '${baseUrl}api/leave-applications';
@@ -58,7 +58,7 @@ class ApiHelper {
   static String getAppVersion = '${baseUrl}api/getVersion';
 
   final String _appVersion = '1.0.4';
-  final String _appPlayStoreUrl = 'https://play.google.com/store/apps/details?id=com.flipcode.flipcodeattendence&pli=1';
   String get appVersion => _appVersion;
-  String get appPlayStoreUrl => _appPlayStoreUrl;
+  // final String _appPlayStoreUrl = 'https://play.google.com/store/apps/details?id=com.flipcode.flipcodeattendence&pli=1';
+  // String get appPlayStoreUrl => _appPlayStoreUrl;
 }

@@ -1,6 +1,5 @@
 import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/provider/call_status_provider.dart';
-import 'package:flipcodeattendence/provider/login_provider.dart';
 import 'package:flipcodeattendence/provider/team_provider.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +10,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../featuers/Admin/model/team_model.dart';
 import '../../provider/call_log_provider.dart';
-import '../../widget/call_log_action_widget.dart';
 import '../../widget/custom_elevated_button.dart';
 import '../../widget/custom_outlined_button.dart';
 import '../../widget/text_form_field_custom.dart';
@@ -41,7 +39,8 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
     provider = Provider.of<CallLogProvider>(context, listen: false);
     dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
     callStatus = context.read<CallStatusProvider>().callStatusEnum;
-    (callStatus == CallStatusEnum.allocated || callStatus == CallStatusEnum.completed)
+    (callStatus == CallStatusEnum.allocated ||
+            callStatus == CallStatusEnum.completed)
         ? provider.getCallLogDetail(context: context, id: widget.id)
         : null;
   }
@@ -72,22 +71,22 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
         leading: IconButton(
             onPressed: () => Navigator.pop(context),
             icon: Icon(CupertinoIcons.clear)),
-        actions: [
-          if(context.read<LoginProvider>().isAdmin)...[
-            IconButton(
-                onPressed: () async {
-                  await showModalBottomSheet(
-                      context: context,
-                      builder: (context) {
-                        return CallLogActionWidget(
-                          onTapWaiting: null,
-                          onTapCancel: null,
-                        );
-                      });
-                },
-                icon: const Icon(Icons.more_vert))
-          ],
-        ],
+        // actions: [
+        //   if(context.read<LoginProvider>().isAdmin)...[
+        //     IconButton(
+        //         onPressed: () async {
+        //           await showModalBottomSheet(
+        //               context: context,
+        //               builder: (context) {
+        //                 return CallLogActionWidget(
+        //                   onTapWaiting: null,
+        //                   onTapCancel: null,
+        //                 );
+        //               });
+        //         },
+        //         icon: const Icon(Icons.more_vert))
+        //   ],
+        // ],
       ),
       body: SingleChildScrollView(
         child: Consumer<CallLogProvider>(builder: (context, provider, _) {
@@ -114,8 +113,7 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                             children: [
                               Icon(Icons.call),
                               const SizedBox(width: 6.0),
-                              Text(
-                                  '${provider.callLog?.call?.user?.phone}',
+                              Text('${provider.callLog?.call?.user?.phone}',
                                   style: textTheme.bodyLarge),
                             ],
                           ),
@@ -141,7 +139,8 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               const SizedBox(width: 6.0),
                               Expanded(
                                   child: Text(
-                                      provider.callLog?.call?.description?.capitalizeFirst ??
+                                      provider.callLog?.call?.description
+                                              ?.capitalizeFirst ??
                                           '',
                                       style: textTheme.bodyLarge)),
                             ],
@@ -153,8 +152,7 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               Icon(Icons.date_range),
                               const SizedBox(width: 6.0),
                               Expanded(
-                                  child: Text(
-                                      provider.callLog?.date ?? '',
+                                  child: Text(provider.callLog?.date ?? '',
                                       style: textTheme.bodyLarge)),
                             ],
                           ),
@@ -166,45 +164,65 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               const SizedBox(width: 6.0),
                               Expanded(
                                   child: Text(
-                                      provider.callLog?.slot
-                                              ?.capitalizeFirst ??
+                                      provider.callLog?.slot?.capitalizeFirst ??
                                           '',
                                       style: textTheme.bodyLarge)),
                             ],
                           ),
                           const SizedBox(height: 12.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.currency_rupee),
-                              const SizedBox(width: 6.0),
-                              Expanded(
-                                  child: Text(
-                                      provider.callLog?.charge ?? '',
-                                      style: textTheme.bodyLarge)),
-                            ],
-                          ),
-                          const SizedBox(height: 24.0),
-                          if (callStatus == CallStatusEnum.completed)...[
+                          if (provider.callLog?.call?.totalCharge == null) ...[
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Payment method :',style: textTheme.bodyLarge),
+                                Icon(Icons.currency_rupee),
                                 const SizedBox(width: 6.0),
                                 Expanded(
-                                    child: Text(provider.callLog?.call?.paymentMethod ?? '',style: textTheme.bodyLarge)),
+                                    child: Text(provider.callLog?.charge ?? '',
+                                        style: textTheme.bodyLarge)),
+                              ],
+                            ),
+                            const SizedBox(height: 24.0),
+                          ] else...[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(Icons.currency_rupee),
+                                const SizedBox(width: 6.0),
+                                Expanded(
+                                    child: Text(provider.callLog?.call?.totalCharge.toString() ?? '',
+                                        style: textTheme.bodyLarge)),
+                              ],
+                            ),
+                            const SizedBox(height: 24.0),
+                          ],
+                          if (callStatus == CallStatusEnum.completed) ...[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Payment method :',
+                                    style: textTheme.bodyLarge),
+                                const SizedBox(width: 6.0),
+                                Expanded(
+                                    child: Text(
+                                        provider.callLog?.call?.paymentMethod ??
+                                            '',
+                                        style: textTheme.bodyLarge)),
                               ],
                             ),
                             const SizedBox(height: 8.0),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Payment status :',style: textTheme.bodyLarge),
+                                Text('Payment status :',
+                                    style: textTheme.bodyLarge),
                                 const SizedBox(width: 6.0),
                                 Expanded(
                                     child: Text(
-                                        ((provider.callLog?.call?.paymentMethod?.trim().toLowerCase() ?? '') ==
-                                            'debit')
+                                        ((provider.callLog?.call?.paymentMethod
+                                                        ?.trim()
+                                                        .toLowerCase() ??
+                                                    '') ==
+                                                'debit')
                                             ? 'Unsettled'
                                             : 'Settled',
                                         style: textTheme.bodyLarge)),
@@ -214,21 +232,13 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Total charge :',style: textTheme.bodyLarge),
+                                Text('Parts :', style: textTheme.bodyLarge),
                                 const SizedBox(width: 6.0),
                                 Expanded(
-                                    child: Text(provider.callLog?.call?.totalCharge.toString() ?? '',
-                                        style: textTheme.bodyLarge)),
-                              ],
-                            ),
-                            const SizedBox(height: 8.0),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Parts :',style: textTheme.bodyLarge),
-                                const SizedBox(width: 6.0),
-                                Expanded(
-                                    child: Text(provider.callLog?.call?.partName.toString() ?? '',
+                                    child: Text(
+                                        provider.callLog?.call?.partName
+                                                .toString() ??
+                                            '',
                                         style: textTheme.bodyLarge)),
                               ],
                             ),
@@ -347,11 +357,10 @@ class _CallDetailsAdminPageState extends State<CallDetailsAdminPage> {
                               final pickedDate = await showDatePicker(
                                 context: context,
                                 firstDate: DateTime.now(),
-                                lastDate: DateTime(2025),
+                                lastDate: DateTime.now().add(Duration(days: 365)),
                                 initialDate: initialDate,
                                 currentDate: DateTime.now(),
-                                initialEntryMode:
-                                    DatePickerEntryMode.calendarOnly,
+                                initialEntryMode: DatePickerEntryMode.calendarOnly,
                               );
                               if (pickedDate != null) {
                                 dateController.text =
@@ -435,12 +444,12 @@ class _TimeSlotBottomSheetState extends State<TimeSlotBottomSheet> {
           const SizedBox(height: 12.0),
           GridView.builder(
               shrinkWrap: true,
+              itemCount: TimeSlot.values.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 12.0,
                   crossAxisSpacing: 12.0,
                   childAspectRatio: 2.5),
-              itemCount: TimeSlot.values.length,
               itemBuilder: (context, index) => InkWell(
                     borderRadius: BorderRadius.circular(12.0),
                     onTap: () {
@@ -456,18 +465,11 @@ class _TimeSlotBottomSheetState extends State<TimeSlotBottomSheet> {
                           color: selectedTimeSlot == TimeSlot.values[index]
                               ? AppColors.aPrimary
                               : AppColors.onPrimaryLight),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(TimeSlot.values[index].name.capitalizeFirst!,
-                              style: TextStyle(
-                                  color:
-                                      selectedTimeSlot == TimeSlot.values[index]
-                                          ? AppColors.onPrimaryLight
-                                          : AppColors.aPrimary)),
-                        ],
-                      ),
+                      child: Text(TimeSlot.values[index].name.capitalizeFirst!,
+                          style: TextStyle(
+                              color: selectedTimeSlot == TimeSlot.values[index]
+                                  ? AppColors.onPrimaryLight
+                                  : AppColors.aPrimary)),
                     ),
                   )),
           const SizedBox(height: 12.0),
@@ -521,7 +523,7 @@ class _TeamBottomSheetState extends State<TeamBottomSheet> {
     return Consumer<TeamProvider>(builder: (context, provider, _) {
       return provider.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : (provider.teamModel?.data?.isEmpty ?? true)
+          : (provider.teamModel?.data?.isEmpty ?? false)
               ? const Center(child: Text('No data found'))
               : Container(
                   padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -547,6 +549,9 @@ class _TeamBottomSheetState extends State<TeamBottomSheet> {
                           spacing: 8.0,
                           children: List.generate(members.length, (index) {
                             return InputChip(
+                                shape: StadiumBorder(),
+                                avatar: Icon(Icons.person,
+                                    color: AppColors.onPrimaryLight),
                                 side: BorderSide(color: Colors.transparent),
                                 backgroundColor: AppColors.aPrimary,
                                 deleteIconColor: AppColors.onPrimaryLight,

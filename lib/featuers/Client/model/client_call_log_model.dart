@@ -34,10 +34,14 @@ class ClientCall {
   String? photo;
   String? description;
   String? address;
+  String? partName;
+  String? paymentMethod;
+  int? totalCharge;
+  int? qrId;
   String? status;
   String? createdAt;
   String? updatedAt;
-  Assign? assign;
+  List<Assign>? assign;
 
   ClientCall(
       {this.id,
@@ -46,6 +50,10 @@ class ClientCall {
         this.photo,
         this.description,
         this.address,
+        this.partName,
+        this.paymentMethod,
+        this.totalCharge,
+        this.qrId,
         this.status,
         this.createdAt,
         this.updatedAt,
@@ -58,11 +66,19 @@ class ClientCall {
     photo = json['photo'];
     description = json['description'];
     address = json['address'];
+    partName = json['part_name'];
+    paymentMethod = json['payment_method'];
+    totalCharge = json['total_charge'];
+    qrId = json['qr_id'];
     status = json['status'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    assign =
-    json['assign'] != null ? new Assign.fromJson(json['assign']) : null;
+    if (json['assign'] != null) {
+      assign = <Assign>[];
+      json['assign'].forEach((v) {
+        assign!.add(new Assign.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -73,11 +89,15 @@ class ClientCall {
     data['photo'] = this.photo;
     data['description'] = this.description;
     data['address'] = this.address;
+    data['part_name'] = this.partName;
+    data['payment_method'] = this.paymentMethod;
+    data['total_charge'] = this.totalCharge;
+    data['qr_id'] = this.qrId;
     data['status'] = this.status;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     if (this.assign != null) {
-      data['assign'] = this.assign!.toJson();
+      data['assign'] = this.assign!.map((v) => v.toJson()).toList();
     }
     return data;
   }

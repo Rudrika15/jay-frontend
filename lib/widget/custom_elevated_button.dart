@@ -27,11 +27,7 @@ class CustomElevatedButton extends StatelessWidget {
             foregroundColor: forgroundColor,
             fixedSize: size,
             shape: shape ??
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(10),
-                  ),
-                ),
+                StadiumBorder(),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap),
         onPressed: onPressed,
         child: Padding(

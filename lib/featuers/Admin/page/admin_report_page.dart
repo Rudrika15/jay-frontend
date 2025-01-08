@@ -39,26 +39,6 @@ class _AdminReportPageState extends State<AdminReportPage>
         title: Text(
           StringHelper.report,
         ),
-        actions: [
-          IconButton(
-              onPressed: () {
-                showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return DateSelectionWidget(
-                        startDate: startDate,
-                        endDate: endDate,
-                        onPressed: (startDate, endDate) {
-                          pop(context);
-                          this.startDate = startDate;
-                          this.endDate = endDate;
-                          getEmployeeReport(startDate: startDate, endDate: endDate);
-                        },
-                      );
-                    });
-              },
-              icon: const Icon(Icons.filter_alt_rounded))
-        ],
       ),
       body: Consumer<ReportProvider>(builder: (context, provider, _) {
         return (provider.isLoading)
@@ -109,6 +89,26 @@ class _AdminReportPageState extends State<AdminReportPage>
                   );
                 });
       }),
+      floatingActionButton: FloatingActionButton(
+        shape: CircleBorder(),
+        onPressed: () {
+          showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return DateSelectionWidget(
+                  startDate: startDate,
+                  endDate: endDate,
+                  onPressed: (startDate, endDate) {
+                    pop(context);
+                    this.startDate = startDate;
+                    this.endDate = endDate;
+                    getEmployeeReport(startDate: startDate, endDate: endDate);
+                  },
+                );
+              });
+        },
+        child: const Icon(Icons.filter_alt_rounded),
+      ),
     );
   }
 }

@@ -103,7 +103,7 @@ class User {
   String? name;
   String? phone;
   String? email;
-  Null? token;
+  String? token;
   String? birthdate;
   String? createdAt;
   String? updatedAt;

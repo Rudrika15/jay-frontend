@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "287810161949",
+    "project_id": "jay-infotech-c447d",
+    "storage_bucket": "jay-infotech-c447d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287810161949:android:a898a9c7ce1eec38d225f4",
+        "android_client_info": {
+          "package_name": "com.flipcode.jayinfotech"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsyOnc8U-j1_wuyr71icMoAIJ3j1Njpq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

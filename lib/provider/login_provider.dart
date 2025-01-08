@@ -2,7 +2,6 @@ import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/service/shared_preferences_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
-
 import '/service/login_service.dart';
 
 class LoginProvider extends ChangeNotifier {
@@ -42,9 +41,9 @@ class LoginProvider extends ChangeNotifier {
     return value;
   }
 
-  // Future<void> updateToken() async {
-  //   await loginService.updateToken();
-  // }
+  Future<void> updateToken() async {
+    await loginService.updateToken();
+  }
 
   Future<String?> getUserRole() async {
     _isLoading = true;

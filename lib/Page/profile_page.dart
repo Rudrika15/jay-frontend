@@ -12,7 +12,6 @@ import '../service/shared_preferences_service.dart';
 import '../theme/app_colors.dart';
 import '../widget/text_form_field_custom.dart';
 import 'login_page.dart';
-import 'notification_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -188,6 +187,7 @@ class _ProfilePageState extends State<ProfilePage> with NavigatorMixin {
                         Expanded(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
+                              shape: StadiumBorder(),
                                 fixedSize:
                                     Size(screenWidth(context: context), 56),
                                 textStyle: Theme.of(context)
@@ -294,21 +294,21 @@ class _ProfilePageState extends State<ProfilePage> with NavigatorMixin {
                   title: Text(StringHelper.report),
                 ),
               ],
-              ListTile(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => NotificationPage(
-                        isAdmin: isAdmin,
-                      ),
-                    ),
-                  );
-                },
-                leading: CircleAvatar(
-                    backgroundColor: AppColors.aPrimary,
-                    child: Icon(CupertinoIcons.bell,color: AppColors.onPrimaryLight)),
-                title: Text(StringHelper.notification),
-              ),
+              // ListTile(
+              //   onTap: () {
+              //     Navigator.of(context).push(
+              //       MaterialPageRoute(
+              //         builder: (context) => NotificationPage(
+              //           isAdmin: isAdmin,
+              //         ),
+              //       ),
+              //     );
+              //   },
+              //   leading: CircleAvatar(
+              //       backgroundColor: AppColors.aPrimary,
+              //       child: Icon(CupertinoIcons.bell,color: AppColors.onPrimaryLight)),
+              //   title: Text(StringHelper.notification),
+              // ),
               ListTile(
                 leading: CircleAvatar(
                     backgroundColor: AppColors.aPrimary,
