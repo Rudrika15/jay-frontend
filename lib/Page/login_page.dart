@@ -86,7 +86,6 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                     TextFormFieldWidget(
                       obscureText: !showPassword,
                       controller: _passwordController,
-                      // obscureText: _obscureText,
                       onChanged: (p0) => _handleInputChange(),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
