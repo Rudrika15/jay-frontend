@@ -9,6 +9,7 @@ import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
+import '../../../helper/app_version_checker.dart';
 import '../../../widget/dialog_widget.dart';
 import '/provider/login_provider.dart';
 import 'package:flutter/material.dart';
@@ -22,12 +23,14 @@ class UserNavbar extends StatefulWidget {
 
 class _UserNavbarState extends State<UserNavbar> with NavigatorMixin {
   int _selectedIndex = 0;
+  final _appVersionChecker = AppVersionChecker();
   final _connectivityService = ConnectivityService();
 
   @override
   void initState() {
     super.initState();
     Provider.of<LoginProvider>(context, listen: false).updateToken();
+    _appVersionChecker.checkForAppUpdate(context);
   }
 
   @override

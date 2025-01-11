@@ -57,8 +57,8 @@ class ApiHelper {
   static String adminAllTask = '${baseUrl}api/allTask';
   static String getAppVersion = '${baseUrl}api/getVersion';
 
-  final String _appVersion = '1.0.4';
+  final String _appVersion = '1.0.2';
   String get appVersion => _appVersion;
-  // final String _appPlayStoreUrl = 'https://play.google.com/store/apps/details?id=com.flipcode.flipcodeattendence&pli=1';
-  // String get appPlayStoreUrl => _appPlayStoreUrl;
+  final String _appPlayStoreUrl = 'https://play.google.com/store/apps/details?id=com.flipcode.jayinfotech&pcampaignid=web_share';
+  String get appPlayStoreUrl => _appPlayStoreUrl;
 }

@@ -113,12 +113,12 @@ class _CallDetailsUserPageState extends State<CallDetailsUserPage> {
   }
 
   Future<void> completeCallLog() async {
-    var partsList;
+    List<String>? partsList = [];
     if(selectedParts.isEmpty) {
       partsList = null;
     } else {
       for (final part in selectedParts) {
-        partsList.add(part.name.toString());
+        partsList.add(part.name ?? '');
       }
     }
     Provider.of<CallLogProvider>(context, listen: false)

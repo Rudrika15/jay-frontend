@@ -21,7 +21,7 @@ class AdminHomePage extends StatefulWidget {
 
 class _AdminHomePageState extends State<AdminHomePage> with NavigatorMixin {
   DateTime? selectedDate;
-  final TextEditingController_searchController = TextEditingController();
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -118,7 +118,7 @@ class _AdminHomePageState extends State<AdminHomePage> with NavigatorMixin {
                         onChanged: (value) {
                           attendancValue.searchEmployee(value);
                         },
-                        controller: TextEditingController_searchController,
+                        controller: _searchController,
                         suffixIcon: IconButton(
                           onPressed: () async {
                             selectedDate = await showDatePicker(
