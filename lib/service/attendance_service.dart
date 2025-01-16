@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flipcodeattendence/featuers/Admin/model/daily_attendence_model.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../featuers/Admin/model/AttendanceRecord.dart';
@@ -14,15 +15,22 @@ import 'package:intl/intl.dart';
 import '../helper/api_helper.dart';
 
 class AttendanceService {
-  Future<void> userAttendance(BuildContext context, String timekey) async {
+  Future<void> userAttendance(BuildContext context,
+      {required String type,required String userId, TimeOfDay? time, DateTime? date}) async {
     try {
       final token = await SharedPreferencesService.getUserToken();
+      final body = {
+        'userId': userId,
+        'type': type,
+        if(date != null)
+        'date': DateFormat('yyyy-MM-dd').format(date),
+        if(time != null)
+        'time': '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00'
+      };
+      print(body);
       final response = await http.post(
-        Uri.parse(ApiHelper.attendance),
-        body: {
-          'timekey': timekey,
-          'time': DateFormat('HH:mm:ss').format(DateTime.now())
-        },
+        Uri.parse(ApiHelper.updateAttendance),
+        body: body,
         headers: {'Authorization': 'Bearer $token'},
       );
       print(response.statusCode);

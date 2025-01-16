@@ -23,10 +23,10 @@ class UserAttendancePage extends StatefulWidget {
 
 class _UserAttendancePageState extends State<UserAttendancePage>
     with NavigatorMixin {
-  Timer? timer, longPressTimer;
-  bool isLongPressing = false;
-  bool loading = false;
-  double progressValue = 0.0;
+  // Timer? timer, longPressTimer;
+  // bool isLongPressing = false;
+  // bool loading = false;
+  // double progressValue = 0.0;
   final attendanceProvider = AttendanceProvider();
   late StreamController<String> elapsedStreamController;
   String? checkInTime,
@@ -43,11 +43,6 @@ class _UserAttendancePageState extends State<UserAttendancePage>
     elapsedStreamController = StreamController<String>();
     super.initState();
     _setCurrentState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   Future<void> _setCurrentState() async {
@@ -152,52 +147,52 @@ class _UserAttendancePageState extends State<UserAttendancePage>
     }
   }
 
-  Future<void> _toggleCheckInOut() async {
-    try {
-      if (currentState == StringHelper.checkIn) {
-        await attendanceProvider.addData(context, 'checkin');
-        _setCurrentState();
-      } else if (currentState == StringHelper.onBreak) {
-        await attendanceProvider.addData(context, 'on_break');
-        _setCurrentState();
-      } else if (currentState == StringHelper.offBreak) {
-        await attendanceProvider.addData(context, 'off_break');
-        _setCurrentState();
-      } else if (currentState == StringHelper.checkOut) {
-        await attendanceProvider.addData(context, 'checkout');
-        _setCurrentState();
-      }
-    } catch (e) {
-      print('Error during attendance update: $e');
-    }
-  }
-
-  Future<void> _startLongPressTimer() async {
-    isLongPressing = true;
-    progressValue = 0.0;
-    longPressTimer =
-        Timer.periodic(Duration(milliseconds: 20), (Timer timer) async {
-      setState(() => progressValue += 0.01);
-      if (progressValue >= 1.0) {
-        timer.cancel();
-        setState(() => isLongPressing = false);
-        setState(() => loading = true);
-
-        await _toggleCheckInOut();
-        setState(() => loading = false);
-      }
-    });
-  }
-
-  void _stopLongPressTimer() async {
-    if (longPressTimer != null && longPressTimer!.isActive) {
-      longPressTimer!.cancel();
-    }
-    setState(() {
-      isLongPressing = false;
-      progressValue = 0.0;
-    });
-  }
+  // Future<void> _toggleCheckInOut() async {
+  //   try {
+  //     if (currentState == StringHelper.checkIn) {
+  //       await attendanceProvider.addData(context, 'checkin');
+  //       _setCurrentState();
+  //     } else if (currentState == StringHelper.onBreak) {
+  //       await attendanceProvider.addData(context, 'on_break');
+  //       _setCurrentState();
+  //     } else if (currentState == StringHelper.offBreak) {
+  //       await attendanceProvider.addData(context, 'off_break');
+  //       _setCurrentState();
+  //     } else if (currentState == StringHelper.checkOut) {
+  //       await attendanceProvider.addData(context, 'checkout');
+  //       _setCurrentState();
+  //     }
+  //   } catch (e) {
+  //     print('Error during attendance update: $e');
+  //   }
+  // }
+  //
+  // Future<void> _startLongPressTimer() async {
+  //   isLongPressing = true;
+  //   progressValue = 0.0;
+  //   longPressTimer =
+  //       Timer.periodic(Duration(milliseconds: 20), (Timer timer) async {
+  //     setState(() => progressValue += 0.01);
+  //     if (progressValue >= 1.0) {
+  //       timer.cancel();
+  //       setState(() => isLongPressing = false);
+  //       setState(() => loading = true);
+  //
+  //       await _toggleCheckInOut();
+  //       setState(() => loading = false);
+  //     }
+  //   });
+  // }
+  //
+  // void _stopLongPressTimer() async {
+  //   if (longPressTimer != null && longPressTimer!.isActive) {
+  //     longPressTimer!.cancel();
+  //   }
+  //   setState(() {
+  //     isLongPressing = false;
+  //     progressValue = 0.0;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -351,73 +346,73 @@ class _UserAttendancePageState extends State<UserAttendancePage>
                       ),
                     ],
                   ),
-                  SizedBox(height: 48),
-                  if (todayAttendanceProvider.isLoading || loading) ...[
-                    Container(
-                      height: 140,
-                      width: 140,
-                      alignment: Alignment.center,
-                      child: CircularProgressIndicator(),
-                    )
-                  ] else ...[
-                    GestureDetector(
-                      onLongPressStart: (_) => (attendance.isEmpty)
-                          ? _startLongPressTimer()
-                          : (attendance.first.checkout == null)
-                              ? _startLongPressTimer()
-                              : () {},
-                      onLongPressEnd: (_) => (attendance.isEmpty)
-                          ? _stopLongPressTimer()
-                          : (attendance.first.checkout == null)
-                              ? _stopLongPressTimer()
-                              : () {},
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            height: 140,
-                            width: 140,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: getColor(),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 2,
-                                  offset: Offset(0, 3),
-                                )
-                              ],
-                            ),
-                            child: Icon(
-                              getIcon(),
-                              size: 80,
-                              color: Colors.white,
-                            ),
-                          ),
-                          if (isLongPressing)
-                            SizedBox(
-                              width: 140,
-                              height: 140,
-                              child: CircularProgressIndicator(
-                                value: progressValue,
-                                strokeWidth: 6,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppColors.onPrimaryLight),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      getState(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: AppColors.onPrimaryBlack,
-                      ),
-                    ),
-                  ]
+                  // SizedBox(height: 48),
+                  // if (todayAttendanceProvider.isLoading || loading) ...[
+                  //   Container(
+                  //     height: 140,
+                  //     width: 140,
+                  //     alignment: Alignment.center,
+                  //     child: CircularProgressIndicator(),
+                  //   )
+                  // ] else ...[
+                  //   GestureDetector(
+                  //     onLongPressStart: (_) => (attendance.isEmpty)
+                  //         ? _startLongPressTimer()
+                  //         : (attendance.first.checkout == null)
+                  //             ? _startLongPressTimer()
+                  //             : () {},
+                  //     onLongPressEnd: (_) => (attendance.isEmpty)
+                  //         ? _stopLongPressTimer()
+                  //         : (attendance.first.checkout == null)
+                  //             ? _stopLongPressTimer()
+                  //             : () {},
+                  //     child: Stack(
+                  //       alignment: Alignment.center,
+                  //       children: [
+                  //         Container(
+                  //           height: 140,
+                  //           width: 140,
+                  //           decoration: BoxDecoration(
+                  //             shape: BoxShape.circle,
+                  //             color: getColor(),
+                  //             boxShadow: [
+                  //               BoxShadow(
+                  //                 color: Colors.grey.withOpacity(0.5),
+                  //                 spreadRadius: 2,
+                  //                 blurRadius: 2,
+                  //                 offset: Offset(0, 3),
+                  //               )
+                  //             ],
+                  //           ),
+                  //           child: Icon(
+                  //             getIcon(),
+                  //             size: 80,
+                  //             color: Colors.white,
+                  //           ),
+                  //         ),
+                  //         if (isLongPressing)
+                  //           SizedBox(
+                  //             width: 140,
+                  //             height: 140,
+                  //             child: CircularProgressIndicator(
+                  //               value: progressValue,
+                  //               strokeWidth: 6,
+                  //               valueColor: AlwaysStoppedAnimation<Color>(
+                  //                   AppColors.onPrimaryLight),
+                  //             ),
+                  //           ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  //   SizedBox(height: 12),
+                  //   Text(
+                  //     getState(),
+                  //     style: TextStyle(
+                  //       fontSize: 18,
+                  //       color: AppColors.onPrimaryBlack,
+                  //     ),
+                  //   ),
+                  // ]
                 ],
               ),
             ),
@@ -425,44 +420,44 @@ class _UserAttendancePageState extends State<UserAttendancePage>
         }));
   }
 
-  String getState() {
-    if (currentState == StringHelper.checkIn) {
-      return StringHelper.checkIn;
-    } else if (currentState == StringHelper.onBreak) {
-      return StringHelper.onBreak;
-    } else if (currentState == StringHelper.offBreak) {
-      return StringHelper.offBreak;
-    } else if (currentState == StringHelper.checkOut) {
-      return StringHelper.checkOut;
-    } else {
-      return StringHelper.comeTmrw;
-    }
-  }
+  // String getState() {
+  //   if (currentState == StringHelper.checkIn) {
+  //     return StringHelper.checkIn;
+  //   } else if (currentState == StringHelper.onBreak) {
+  //     return StringHelper.onBreak;
+  //   } else if (currentState == StringHelper.offBreak) {
+  //     return StringHelper.offBreak;
+  //   } else if (currentState == StringHelper.checkOut) {
+  //     return StringHelper.checkOut;
+  //   } else {
+  //     return StringHelper.comeTmrw;
+  //   }
+  // }
 
-  IconData getIcon() {
-    if (currentState == StringHelper.checkIn) {
-      return Icons.touch_app_outlined;
-    } else if (currentState == StringHelper.onBreak) {
-      return CupertinoIcons.pause_solid;
-    } else if (currentState == StringHelper.offBreak) {
-      return Icons.play_arrow_rounded;
-    } else if (currentState == StringHelper.checkOut) {
-      return Icons.exit_to_app_rounded;
-    } else {
-      return Icons.touch_app_outlined;
-    }
-  }
+  // IconData getIcon() {
+  //   if (currentState == StringHelper.checkIn) {
+  //     return Icons.touch_app_outlined;
+  //   } else if (currentState == StringHelper.onBreak) {
+  //     return CupertinoIcons.pause_solid;
+  //   } else if (currentState == StringHelper.offBreak) {
+  //     return Icons.play_arrow_rounded;
+  //   } else if (currentState == StringHelper.checkOut) {
+  //     return Icons.exit_to_app_rounded;
+  //   } else {
+  //     return Icons.touch_app_outlined;
+  //   }
+  // }
 
-  Color getColor() {
-    if (currentState == StringHelper.checkIn) {
-      return Colors.green;
-    } else if (currentState == StringHelper.onBreak ||
-        currentState == StringHelper.offBreak) {
-      return Colors.orange;
-    } else if (currentState == StringHelper.checkOut) {
-      return Colors.red;
-    } else {
-      return AppColors.grey;
-    }
-  }
+  // Color getColor() {
+  //   if (currentState == StringHelper.checkIn) {
+  //     return Colors.green;
+  //   } else if (currentState == StringHelper.onBreak ||
+  //       currentState == StringHelper.offBreak) {
+  //     return Colors.orange;
+  //   } else if (currentState == StringHelper.checkOut) {
+  //     return Colors.red;
+  //   } else {
+  //     return AppColors.grey;
+  //   }
+  // }
 }

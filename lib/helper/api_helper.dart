@@ -21,6 +21,7 @@ class ApiHelper {
   static String teamList = '${baseUrl}api/team-list';
   static String assignTask = '${baseUrl}api/assign-task';
   static String getCallDetail = '${baseUrl}api/get-call-detail';
+  static String updateAttendance = '${baseUrl}api/update-attendance';
 
   // Admin & Client
   static String createCall = '${baseUrl}api/create-call';

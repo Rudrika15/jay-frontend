@@ -1,4 +1,5 @@
 import 'package:flipcodeattendence/featuers/Admin/model/daily_attendence_model.dart';
+import 'package:flutter/material.dart';
 
 import '../featuers/Admin/model/AttendanceRecord.dart';
 import '/service/attendance_service.dart';
@@ -13,10 +14,10 @@ class AttendanceProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   AttendanceRecord? get attendanceRecord => _attendanceRecord;
 
-  Future<void> addData(BuildContext context, String timekey) async {
+  Future<void> updateAttendanceData(BuildContext context, {required String type, required String userId,DateTime? date, TimeOfDay? time}) async {
     _isLoading = true;
     notifyListeners();
-    await attendanceService.userAttendance(context, timekey);
+    await attendanceService.userAttendance(context,type: type,time: time, date: date,userId: userId);
     _isLoading = false;
     notifyListeners();
   }

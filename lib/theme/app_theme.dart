@@ -94,6 +94,12 @@ class AppTheme {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           closeIconColor: AppColors.onPrimaryLight,
           showCloseIcon: true,
-        ));
+        ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: AppColors.backgroundLight,
+        dialBackgroundColor: AppColors.backgroundBlack.withOpacity(0.1),
+        hourMinuteColor: AppColors.backgroundBlack.withOpacity(0.1)
+      )
+    );
   }
 }

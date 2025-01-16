@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -47,6 +48,17 @@ class LoginService {
         );
         return false;
       }
+    } on SocketException {
+      Get.showSnackbar(
+        GetSnackBar(
+          title: "Connection failed",
+          message: 'No Internet Connection',
+          duration: Duration(seconds: 2),
+          backgroundColor: AppColors.red,
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
+      return false;
     } catch (e) {
       Get.showSnackbar(
         GetSnackBar(
@@ -101,6 +113,17 @@ class LoginService {
         );
         return false;
       }
+    } on SocketException {
+      Get.showSnackbar(
+        GetSnackBar(
+          title: "Connection failed",
+          message: 'No Internet Connection',
+          duration: Duration(seconds: 2),
+          backgroundColor: AppColors.red,
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
+      return false;
     } catch (e) {
       Get.showSnackbar(
         GetSnackBar(

@@ -3,6 +3,7 @@ import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flipcodeattendence/models/notification_response_model.dart';
 import 'package:flipcodeattendence/provider/notification_provider.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:view_more/view_more.dart';
@@ -38,7 +39,6 @@ class _NotificationPageState extends State<NotificationPage> {
                             ?.isNotEmpty ??
                         false
                     ? ListView.builder(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
                           NotificationData? notificationData = notificationValue
@@ -46,10 +46,27 @@ class _NotificationPageState extends State<NotificationPage> {
                               ?.notificationList?[index];
                           return Padding(
                             padding: const EdgeInsets.only(top: 10),
-                            child: CustomNotificationCard(
-                              title: notificationData?.title,
-                              detail: notificationData?.detail,
-                              date: notificationData?.createdAt,
+                            child: Dismissible(
+                              key: ValueKey<NotificationData?>(notificationData),
+                              direction: DismissDirection.endToStart,
+                              dismissThresholds: const {
+                                DismissDirection.endToStart : 0.8
+                              },
+                              background: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                color: AppColors.red,
+                                alignment: AlignmentDirectional.centerEnd,
+                                child: const Icon(CupertinoIcons.trash,
+                                    color: AppColors.onPrimaryLight),
+                              ),
+                              onDismissed: (direction) {
+                                print('object');
+                              },
+                              child: CustomNotificationCard(
+                                title: notificationData?.title,
+                                detail: notificationData?.detail,
+                                date: notificationData?.createdAt,
+                              ),
                             ),
                           );
                         },
@@ -81,8 +98,6 @@ class CustomNotificationCard extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: 0),
-          // leading: Icon(Icons.notifications_none_rounded),
           title: Text(
             title ?? '',
             style:
@@ -114,17 +129,17 @@ class CustomNotificationCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text(
-              MethodHelper.formateUtcDate(value: date, formate: 'dd MMM') ?? '',
-              style: TextStyle(
-                color: AppColors.grey,
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: Text(
+                MethodHelper.formateUtcDate(value: date, formate: 'dd MMM') ?? '',
+                style: TextStyle(
+                  color: AppColors.grey,
+                ),
               ),
             ),
           ],
         ),
-        Divider(
-          color: AppColors.grey.withOpacity(0.4),
-        )
       ],
     );
   }

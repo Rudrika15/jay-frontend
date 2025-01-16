@@ -29,8 +29,8 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
   @override
   void initState() {
     super.initState();
-    // _numberController.text = "9909941341";
-    // _passwordController.text = "123456";
+    _numberController.text = "9909941341";
+    _passwordController.text = "123456";
     _numberController.addListener(_handleInputChange);
     _passwordController.addListener(_handleInputChange);
   }
@@ -110,52 +110,52 @@ class _LoginPageState extends State<LoginPage> with NavigatorMixin {
                       keyboardType: TextInputType.number,
                     ),
                     SizedBox(height: 16),
-                    // Row(
-                    //   children: [
-                    //     Expanded(
-                    //       child: SegmentedButton(
-                    //         segments: <ButtonSegment<UserRole>>[
-                    //           ButtonSegment(
-                    //               value: UserRole.admin,
-                    //               label: Text(
-                    //                   UserRole.admin.name.capitalizeFirst!)),
-                    //           ButtonSegment(
-                    //               value: UserRole.user,
-                    //               label: Text(
-                    //                   UserRole.user.name.capitalizeFirst!)),
-                    //           ButtonSegment(
-                    //               value: UserRole.client,
-                    //               label: Text(
-                    //                   UserRole.client.name.capitalizeFirst!)),
-                    //         ],
-                    //         selected: <UserRole>{selectedUserType},
-                    //         onSelectionChanged: (Set<UserRole> value) {
-                    //           setState(() {
-                    //             if (value.first == UserRole.admin) {
-                    //               _numberController.text = "9909941341";
-                    //               _passwordController.text = "123456";
-                    //             } else if (value.first == UserRole.user) {
-                    //               _numberController.text = "9409991814";
-                    //               _passwordController.text = "123456";
-                    //             } else {
-                    //               _numberController.text = "9426975796";
-                    //               _passwordController.text = "123456";
-                    //             }
-                    //             selectedUserType = value.first;
-                    //           });
-                    //         },
-                    //         showSelectedIcon: false,
-                    //         style: SegmentedButton.styleFrom(
-                    //             shape: StadiumBorder(),
-                    //             side: BorderSide(color: AppColors.aPrimary),
-                    //             selectedBackgroundColor: AppColors.aPrimary,
-                    //             selectedForegroundColor:
-                    //                 AppColors.onPrimaryLight),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-                    // SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SegmentedButton(
+                            segments: <ButtonSegment<UserRole>>[
+                              ButtonSegment(
+                                  value: UserRole.admin,
+                                  label: Text(
+                                      UserRole.admin.name.capitalizeFirst!)),
+                              ButtonSegment(
+                                  value: UserRole.user,
+                                  label: Text(
+                                      UserRole.user.name.capitalizeFirst!)),
+                              ButtonSegment(
+                                  value: UserRole.client,
+                                  label: Text(
+                                      UserRole.client.name.capitalizeFirst!)),
+                            ],
+                            selected: <UserRole>{selectedUserType},
+                            onSelectionChanged: (Set<UserRole> value) {
+                              setState(() {
+                                if (value.first == UserRole.admin) {
+                                  _numberController.text = "9909941341";
+                                  _passwordController.text = "123456";
+                                } else if (value.first == UserRole.user) {
+                                  _numberController.text = "7485985544";
+                                  _passwordController.text = "123456";
+                                } else {
+                                  _numberController.text = "9426975796";
+                                  _passwordController.text = "123456";
+                                }
+                                selectedUserType = value.first;
+                              });
+                            },
+                            showSelectedIcon: false,
+                            style: SegmentedButton.styleFrom(
+                                shape: StadiumBorder(),
+                                side: BorderSide(color: AppColors.aPrimary),
+                                selectedBackgroundColor: AppColors.aPrimary,
+                                selectedForegroundColor:
+                                    AppColors.onPrimaryLight),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
