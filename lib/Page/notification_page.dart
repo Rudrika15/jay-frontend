@@ -10,6 +10,7 @@ import 'package:view_more/view_more.dart';
 
 class NotificationPage extends StatefulWidget {
   final bool isAdmin;
+
   const NotificationPage({super.key, required this.isAdmin});
 
   @override
@@ -24,6 +25,17 @@ class _NotificationPageState extends State<NotificationPage> {
     super.initState();
   }
 
+  Future<void> deleteNotification(String id) async {
+    Provider.of<NotificationProvider>(context, listen: false)
+        .deleteNotification(context, id: id)
+        .then((value) {
+      if (value == true) {
+        Provider.of<NotificationProvider>(context, listen: false)
+            .getNotification(context);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,51 +44,50 @@ class _NotificationPageState extends State<NotificationPage> {
         titleSpacing: 0.0,
       ),
       body: Consumer<NotificationProvider>(
-        builder: (context, notificationValue, child) =>
-            notificationValue.isLoading
-                ? Center(child: CircularProgressIndicator())
-                : notificationValue.notificationResponseModel?.notificationList
-                            ?.isNotEmpty ??
-                        false
-                    ? ListView.builder(
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          NotificationData? notificationData = notificationValue
-                              .notificationResponseModel
-                              ?.notificationList?[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Dismissible(
-                              key: ValueKey<NotificationData?>(notificationData),
-                              direction: DismissDirection.endToStart,
-                              dismissThresholds: const {
-                                DismissDirection.endToStart : 0.8
-                              },
-                              background: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12),
-                                color: AppColors.red,
-                                alignment: AlignmentDirectional.centerEnd,
-                                child: const Icon(CupertinoIcons.trash,
-                                    color: AppColors.onPrimaryLight),
-                              ),
-                              onDismissed: (direction) {
-                                print('object');
-                              },
-                              child: CustomNotificationCard(
-                                title: notificationData?.title,
-                                detail: notificationData?.detail,
-                                date: notificationData?.createdAt,
-                              ),
-                            ),
-                          );
-                        },
-                        itemCount: notificationValue.notificationResponseModel
-                                ?.notificationList?.length ??
-                            0,
-                      )
-                    : Center(
-                        child: Text(StringHelper.noNotificationFound),
-                      ),
+        builder: (context, notificationValue, child) => notificationValue
+                .isLoading
+            ? Center(child: CircularProgressIndicator())
+            : notificationValue.notificationResponseModel?.notificationList
+                        ?.isNotEmpty ??
+                    false
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      NotificationData? notificationData = notificationValue
+                          .notificationResponseModel?.notificationList?[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Dismissible(
+                          key: ValueKey<NotificationData?>(notificationData),
+                          direction: DismissDirection.endToStart,
+                          dismissThresholds: const {
+                            DismissDirection.endToStart: 0.8
+                          },
+                          background: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            color: AppColors.red,
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: const Icon(CupertinoIcons.trash,
+                                color: AppColors.onPrimaryLight),
+                          ),
+                          onDismissed: (direction) async{
+                            deleteNotification(notificationData?.id.toString() ?? '');
+                          },
+                          child: CustomNotificationCard(
+                            title: notificationData?.title,
+                            detail: notificationData?.detail,
+                            date: notificationData?.createdAt,
+                          ),
+                        ),
+                      );
+                    },
+                    itemCount: notificationValue.notificationResponseModel
+                            ?.notificationList?.length ??
+                        0,
+                  )
+                : Center(
+                    child: Text(StringHelper.noNotificationFound),
+                  ),
       ),
     );
   }
@@ -86,6 +97,7 @@ class CustomNotificationCard extends StatelessWidget {
   final String? title;
   final String? detail;
   final String? date;
+
   const CustomNotificationCard({
     super.key,
     this.title,
@@ -132,7 +144,8 @@ class CustomNotificationCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 12.0),
               child: Text(
-                MethodHelper.formateUtcDate(value: date, formate: 'dd MMM') ?? '',
+                MethodHelper.formateUtcDate(value: date, formate: 'dd MMM') ??
+                    '',
                 style: TextStyle(
                   color: AppColors.grey,
                 ),

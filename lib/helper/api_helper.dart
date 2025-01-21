@@ -11,7 +11,7 @@ class ApiHelper {
   static String showLeave = '${baseUrl}api/leaves';
   static String applyLeave = '${baseUrl}api/leave/request';
   static String updateToken = '${baseUrl}api/save-token';
-
+  static String staffList = '${baseUrl}api/staff-list';
   // common
   static String changeStatus = '${baseUrl}api/chage-status';
 
@@ -22,6 +22,7 @@ class ApiHelper {
   static String assignTask = '${baseUrl}api/assign-task';
   static String getCallDetail = '${baseUrl}api/get-call-detail';
   static String updateAttendance = '${baseUrl}api/update-attendance';
+  static String deleteNotification = '${baseUrl}api/notification/delete';
 
   // Admin & Client
   static String createCall = '${baseUrl}api/create-call';

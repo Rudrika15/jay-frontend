@@ -12,12 +12,18 @@ class AttendanceProvider extends ChangeNotifier {
   bool _isLoading = false;
 
   bool get isLoading => _isLoading;
+
   AttendanceRecord? get attendanceRecord => _attendanceRecord;
 
-  Future<void> updateAttendanceData(BuildContext context, {required String type, required String userId,DateTime? date, TimeOfDay? time}) async {
+  Future<void> updateAttendanceData(BuildContext context,
+      {required String type,
+      required String userId,
+      DateTime? date,
+      TimeOfDay? time}) async {
     _isLoading = true;
     notifyListeners();
-    await attendanceService.userAttendance(context,type: type,time: time, date: date,userId: userId);
+    await attendanceService.userAttendance(context,
+        type: type, time: time, date: date, userId: userId);
     _isLoading = false;
     notifyListeners();
   }
@@ -30,28 +36,31 @@ class AttendanceProvider extends ChangeNotifier {
     return _attendanceRecord;
   }
 
-  DailyAttendenceModel? _dailyAttendenceModel;
-  DailyAttendenceModel? get dailyAttendenceModel => _dailyAttendenceModel;
-  List<DailyAttendenceData>? _dailyAttendanceList;
-  List<DailyAttendenceData>? get dailyAttendanceList => _dailyAttendanceList;
+  DailyAttendanceModel? _dailyAttendanceModel;
 
-  Future<void> getDailyAttendence({String? date}) async {
+  DailyAttendanceModel? get dailyAttendanceModel => _dailyAttendanceModel;
+  List<DailyAttendanceData>? _dailyAttendanceList;
+
+  List<DailyAttendanceData>? get dailyAttendanceList => _dailyAttendanceList;
+
+  Future<void> getDailyAttendance({String? date}) async {
     _isLoading = true;
-    _dailyAttendenceModel = await attendanceService.getDailyAttedence(date);
-    _dailyAttendanceList = _dailyAttendenceModel?.dailyAttendenceData;
+    _dailyAttendanceModel = await attendanceService.getDailyAttendance(date);
+    _dailyAttendanceList = _dailyAttendanceModel?.data;
     _isLoading = false;
     notifyListeners();
   }
 
-  void searchEmployee(String? searchText) {
-    if (searchText != null) {
-      _dailyAttendanceList = _dailyAttendenceModel?.dailyAttendenceData
-          ?.where((element) =>
-              element.user?.name?.toLowerCase().contains(searchText) ?? false)
-          .toList();
-    } else {
-      _dailyAttendanceList = _dailyAttendenceModel?.dailyAttendenceData;
-    }
+  List<DailyAttendanceData>? _staffList;
+
+  List<DailyAttendanceData>? get staffList => _staffList;
+
+  Future<void> getStaffList(BuildContext context) async {
+    _isLoading = true;
+    notifyListeners();
+    final data = await attendanceService.getDailyAttendance(null);
+    _staffList = data?.data;
+    _isLoading = false;
     notifyListeners();
   }
 }

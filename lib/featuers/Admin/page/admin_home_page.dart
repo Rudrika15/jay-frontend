@@ -1,17 +1,17 @@
 import 'package:flipcodeattendence/Page/notification_page.dart';
+import 'package:flipcodeattendence/featuers/Admin/page/app_users_view.dart';
 import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
-import 'package:flipcodeattendence/featuers/Admin/model/daily_attendence_model.dart';
 import 'package:flipcodeattendence/provider/attendance_provider.dart';
-import 'package:flipcodeattendence/provider/task_provider.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:flipcodeattendence/widget/call_widget.dart';
-import 'package:flipcodeattendence/widget/custom_elevated_button.dart';
 import 'package:flipcodeattendence/widget/text_form_field_custom.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+import '../model/daily_attendence_model.dart';
 
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
@@ -26,10 +26,8 @@ class _AdminHomePageState extends State<AdminHomePage> with NavigatorMixin {
 
   @override
   void initState() {
+    selectedDate = DateTime.now();
     getData();
-    Provider.of<TaskProvider>(context, listen: false).getAllEmployeeTask(
-        context: context,
-        date: DateFormat('yyyy-MM-dd').format(DateTime.now()));
     super.initState();
   }
 
@@ -40,195 +38,145 @@ class _AdminHomePageState extends State<AdminHomePage> with NavigatorMixin {
     }
   }
 
-  bool hasSubmittedTask({required String userId}) {
-    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-    if (taskProvider.allEmployeeTaskModel == null ||
-        (taskProvider.allEmployeeTaskModel?.data?.isEmpty ?? true)) {
-      return false;
-    } else {
-      return (taskProvider.allEmployeeTaskModel?.data?.any((element) =>
-              element.task?.userId.toString().trim() == userId.trim()) ??
-          false);
-    }
-  }
-
   Future<void> getData() async {
-    Provider.of<AttendanceProvider>(
-        context,
-        listen: false)
-        .getDailyAttendence();
+    Provider.of<AttendanceProvider>(context, listen: false).getDailyAttendance(
+        date: DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now()));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Image.asset(StringHelper.appLogo, width: 150),
-              StreamBuilder(
-                stream: currentTime(),
-                builder: (context, snapShot) {
-                  return Column(
-                    children: [
-                      Text(
-                        snapShot.data != null
-                            ? DateFormat.yMMMEd().format(snapShot.data!)
-                            : '',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
-          actions: [
-            NotificationButton(
-              isAdmin: true,
-            )
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Image.asset(StringHelper.appLogo, width: 150),
+            StreamBuilder(
+              stream: currentTime(),
+              builder: (context, snapShot) {
+                return Column(
+                  children: [
+                    Text(
+                      snapShot.data != null
+                          ? DateFormat.yMMMEd().format(snapShot.data!)
+                          : '',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                );
+              },
+            ),
           ],
         ),
-        body: SafeArea(
-          child: Consumer2<AttendanceProvider, TaskProvider>(
-            builder: (context, attendancValue, taskProvider, child) =>
-                RefreshIndicator(
-              onRefresh: () async {
-                attendancValue.getDailyAttendence();
-                taskProvider.getAllEmployeeTask(
-                    context: context,
-                    date: DateFormat('yyyy-MM-dd').format(DateTime.now()));
-                selectedDate = null;
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: attendancValue.isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : Column(
-                        children: [
-                          const SizedBox(height: 12.0),
-                          TextFormFieldWidget(
-                            isFilled: true,
-                            prefixWidget: Icon(
-                              CupertinoIcons.search,
-                              color: AppColors.onPrimaryBlack,
-                            ),
-                            hintText: StringHelper.search,
-                            borderColor: AppColors.grey,
-                            fillColor: AppColors.onPrimaryLight,
-                            onChanged: (value) {
-                              attendancValue.searchEmployee(value);
+        actions: [
+          NotificationButton(
+            isAdmin: true,
+          )
+        ],
+      ),
+      body: SafeArea(
+        child: Consumer<AttendanceProvider>(
+          builder: (context, attendanceValue, child) => RefreshIndicator(
+            onRefresh: () async {
+              attendanceValue.getDailyAttendance();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: attendanceValue.isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : Column(
+                      children: [
+                        const SizedBox(height: 12.0),
+                        TextFormFieldWidget(
+                          isFilled: true,
+                          borderColor: AppColors.grey,
+                          fillColor: AppColors.onPrimaryLight,
+                          controller: _searchController,
+                          readOnly: true,
+                          hintText: (selectedDate != null)
+                              ? DateFormat('yyyy-MM-dd').format(selectedDate!)
+                              : DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                          suffixIcon: IconButton(
+                            onPressed: () async {
+                              selectedDate = await showDatePicker(
+                                context: context,
+                                initialDate: selectedDate ?? DateTime.now(),
+                                firstDate: DateTime(1947, 1, 1),
+                                lastDate: DateTime.now(),
+                              );
+                              if (selectedDate != null) {
+                                attendanceValue.getDailyAttendance(
+                                    date: DateFormat('yyyy-MM-dd')
+                                        .format(selectedDate!));
+                              }
                             },
-                            controller: _searchController,
-                            suffixIcon: IconButton(
-                              onPressed: () async {
-                                selectedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: selectedDate ?? DateTime.now(),
-                                  firstDate: DateTime(1947, 1, 1),
-                                  lastDate: DateTime.now(),
-                                );
-                                if (selectedDate != null) {
-                                  attendancValue.getDailyAttendence(
-                                      date: DateFormat('yyyy-MM-dd')
-                                          .format(selectedDate!));
-                                  taskProvider.getAllEmployeeTask(
-                                      context: context,
-                                      date: DateFormat('yyyy-MM-dd')
-                                          .format(selectedDate!));
-                                }
-                              },
-                              icon: Icon(Icons.date_range),
-                            ),
+                            icon: Icon(Icons.date_range),
                           ),
-                          attendancValue.dailyAttendanceList?.isNotEmpty ??
-                                  false
-                              ? Expanded(
-                                  child: ListView.builder(
-                                      itemCount: attendancValue
-                                              .dailyAttendanceList?.length ??
-                                          0,
-                                      itemBuilder: (context, index) {
-                                        final DailyAttendenceData?
-                                            dailyAttendenceData = attendancValue
-                                                .dailyAttendanceList?[index];
-                                        return Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 10),
-                                          child: AttendanceCard(
-                                            onTapEditTime: (type) async {
-                                              DateTime? date;
-                                              TimeOfDay? time;
-                                              await showDatePicker(
-                                                context: context,
-                                                initialDate: DateTime.now(),
-                                                firstDate: DateTime.now()
-                                                    .subtract(
-                                                        Duration(days: 365)),
-                                                lastDate: DateTime.now(),
-                                              ).then((value) async {
-                                                if (value != null) {
-                                                  date = value;
-                                                  await showTimePicker(
-                                                          context: context,
-                                                          initialTime:
-                                                              TimeOfDay.now())
-                                                      .then((value) {
-                                                    if (value != null)
-                                                      time = value;
-                                                  });
-                                                }
-                                              });
-                                              await attendancValue
-                                                  .updateAttendanceData(context,
-                                                      userId:
-                                                          dailyAttendenceData
-                                                                  ?.user?.id
-                                                                  .toString() ??
-                                                              '',
-                                                      type: type,
-                                                      time: time,
-                                                      date: date).then((value) => getData());
-                                            },
-                                            onTapNoticeTime: (text) async {
-                                              await attendancValue
-                                                  .updateAttendanceData(context,
-                                                      type: text,
-                                                      userId:
-                                                          dailyAttendenceData
-                                                                  ?.user?.id
-                                                                  .toString() ??
-                                                              '')
-                                                  .then((value) => getData());
-                                            },
-                                            attendenceData: dailyAttendenceData,
-                                            hasSubmittedTask: hasSubmittedTask(
-                                                userId: dailyAttendenceData
-                                                        ?.user?.id
-                                                        ?.toString()
-                                                        .trim() ??
-                                                    '0'),
-                                          ),
-                                        );
-                                      }),
-                                )
-                              : Expanded(
-                                  child: Center(
-                                    child: Text(StringHelper.noAttendanceFound),
-                                  ),
+                        ),
+                        attendanceValue.dailyAttendanceList?.isNotEmpty ?? false
+                            ? Expanded(
+                                child: ListView.builder(
+                                    itemCount: attendanceValue
+                                            .dailyAttendanceList?.length ??
+                                        0,
+                                    itemBuilder: (context, index) {
+                                      final dailyAttendanceData =
+                                          attendanceValue
+                                              .dailyAttendanceList?[index];
+                                      return Padding(
+                                        padding: const EdgeInsets.only(top: 10),
+                                        child: AttendanceCard(
+                                          onTapEditTime: (type) async {
+                                            TimeOfDay? time;
+                                            await showTimePicker(
+                                                    context: context,
+                                                    initialTime:
+                                                        TimeOfDay.now())
+                                                .then((value) async {
+                                              if (value != null) {
+                                                time = value;
+                                                await attendanceValue
+                                                    .updateAttendanceData(
+                                                        context,
+                                                        userId:
+                                                            dailyAttendanceData
+                                                                    ?.id
+                                                                    .toString() ??
+                                                                '',
+                                                        type: type,
+                                                        time: time,
+                                                        date: selectedDate)
+                                                    .then((value) => getData());
+                                              }
+                                            });
+                                          },
+                                          attendanceData: dailyAttendanceData,
+                                        ),
+                                      );
+                                    }),
+                              )
+                            : Expanded(
+                                child: Center(
+                                  child: Text(StringHelper.noAttendanceFound),
                                 ),
-                        ],
-                      ),
-              ),
+                              ),
+                      ],
+                    ),
             ),
           ),
-        ));
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => push(context,const AppUsersView()),
+        child: Icon(Icons.add),
+        shape: CircleBorder(),
+      ),
+    );
   }
 }
 
@@ -260,51 +208,27 @@ class NotificationButton extends StatelessWidget {
 }
 
 class AttendanceCard extends StatelessWidget {
-  final DailyAttendenceData? attendenceData;
-  final bool hasSubmittedTask;
-  final void Function(String text) onTapNoticeTime;
+  final DailyAttendanceData? attendanceData;
   final void Function(String type) onTapEditTime;
 
   const AttendanceCard(
-      {super.key,
-      required this.hasSubmittedTask,
-      this.attendenceData,
-      required this.onTapNoticeTime,
-      required this.onTapEditTime});
+      {super.key, this.attendanceData, required this.onTapEditTime});
 
   @override
   Widget build(BuildContext context) {
-    final bool hasData = attendenceData?.attendanceData?.isNotEmpty ?? false;
-    final name = attendenceData?.user?.name ?? '';
-    final phoneNumber = attendenceData?.user?.phone ?? '';
+    final hasAttendance = attendanceData?.attendances?.isNotEmpty ?? false;
+    final name = attendanceData?.name ?? '';
+    final phoneNumber = attendanceData?.phone ?? '';
     final checkInTime =
-        hasData ? attendenceData?.attendanceData?.first.checkin : '00:00';
+        hasAttendance ? attendanceData?.attendances?.first.checkin : '00:00';
     final checkOutTime =
-        hasData ? attendenceData?.attendanceData?.first.checkout : '00:00';
+        hasAttendance ? attendanceData?.attendances?.first.checkout : '00:00';
     final onBreakTime =
-        hasData ? attendenceData?.attendanceData?.first.onBreak : '00:00';
+        hasAttendance ? attendanceData?.attendances?.first.onBreak : '00:00';
     final offBreakTime =
-        hasData ? attendenceData?.attendanceData?.first.offBreak : '00:00';
-    final breakTime = attendenceData?.attendanceData?.first.offBreak != null
-        ? (attendenceData?.totalBreakTime?.isNotEmpty ?? false)
-            ? attendenceData?.totalBreakTime
-            : '00:00'
-        : null;
-    final workingHour = attendenceData?.attendanceData?.first.checkout != null
-        ? (attendenceData?.totalWorkingHours?.isNotEmpty ?? false)
-            ? attendenceData?.totalWorkingHours
-            : '00:00'
-        : null;
-    final String buttonText = getButtonText(
-        checkIn: checkInTime,
-        checkOut: checkOutTime,
-        onBreak: onBreakTime,
-        offBreak: offBreakTime);
-    final String timeType = getType(
-        checkIn: checkInTime,
-        checkOut: checkOutTime,
-        onBreak: onBreakTime,
-        offBreak: offBreakTime);
+        hasAttendance ? attendanceData?.attendances?.first.offBreak : '00:00';
+    final breakTime = attendanceData?.totalBreakTime ?? '00:00';
+    final workingHour = attendanceData?.totalWorkingHours ?? '00:00';
 
     return Container(
       padding: EdgeInsets.all(5),
@@ -346,129 +270,114 @@ class AttendanceCard extends StatelessWidget {
               height: 10,
             ),
             // Break duration
-            if (breakTime != null)
-              Container(
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(
-                    10,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 15,
-                        backgroundColor: AppColors.aPrimary,
-                        child: Icon(
-                          Icons.food_bank_outlined,
-                          size: 18,
-                          color: AppColors.onPrimaryLight,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        breakTime,
-                      ),
-                    ],
-                  ),
+            Container(
+              alignment: Alignment.center,
+              margin: EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: AppColors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(
+                  10,
                 ),
               ),
-            // On break and off Break
-            if (onBreakTime != null && onBreakTime != '00:00') ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => onTapEditTime('on_break'),
-                      child: CustomAttendanceChip(
-                        value: onBreakTime,
-                        icon: Icons.pause,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 15,
+                      backgroundColor: AppColors.aPrimary,
+                      child: Icon(
+                        Icons.food_bank_outlined,
+                        size: 18,
+                        color: AppColors.onPrimaryLight,
                       ),
                     ),
-                  ),
-                  if (offBreakTime != null && offBreakTime != '00:00') ...[
                     SizedBox(
                       width: 10,
                     ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => onTapEditTime('off_break'),
-                        child: CustomAttendanceChip(
-                          value: offBreakTime,
-                          icon: Icons.play_arrow,
-                        ),
-                      ),
+                    Text(
+                      breakTime,
                     ),
                   ],
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-            ],
-            // Working hour
-            if (workingHour != null)
-              Container(
-                margin: EdgeInsets.only(bottom: 10),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(
-                    10,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 15,
-                        backgroundColor: AppColors.aPrimary,
-                        child: Icon(
-                          Icons.watch_later_outlined,
-                          size: 18,
-                          color: AppColors.onPrimaryLight,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        workingHour,
-                      ),
-                    ],
-                  ),
                 ),
               ),
-            // Checkout
-            if (checkOutTime != null && checkOutTime != '00:00') ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => onTapEditTime('checkout'),
-                      child: CustomAttendanceChip(
-                        value: checkOutTime,
-                        icon: CupertinoIcons.arrow_up_right,
-                      ),
+            ),
+            // On break and off Break
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => onTapEditTime('on_break'),
+                    child: CustomAttendanceChip(
+                      value: onBreakTime,
+                      icon: Icons.pause,
                     ),
                   ),
-                ],
-              )
-            ],
-            if (checkOutTime == null || checkOutTime == '00:00') ...[
-              CustomElevatedButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  onPressed: () => onTapNoticeTime(timeType),
-                  buttonText: buttonText)
-            ]
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => onTapEditTime('off_break'),
+                    child: CustomAttendanceChip(
+                      value: offBreakTime,
+                      icon: Icons.play_arrow,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            // Working hour
+            Container(
+              margin: EdgeInsets.only(bottom: 10),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(
+                  10,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 15,
+                      backgroundColor: AppColors.aPrimary,
+                      child: Icon(
+                        Icons.watch_later_outlined,
+                        size: 18,
+                        color: AppColors.onPrimaryLight,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      workingHour,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Checkout
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => onTapEditTime('checkout'),
+                    child: CustomAttendanceChip(
+                      value: checkOutTime,
+                      icon: CupertinoIcons.arrow_up_right,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -532,22 +441,27 @@ class CustomAttendanceChip extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            CircleAvatar(
-              radius: 15,
-              backgroundColor: AppColors.aPrimary,
-              child: Icon(
-                icon,
-                size: 18,
-                color: AppColors.onPrimaryLight,
-              ),
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              (value == null) ? '00:00' : value?.substring(0, 5) ?? '00:00',
-            ),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 15,
+                  backgroundColor: AppColors.aPrimary,
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: AppColors.onPrimaryLight,
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Text(
+                  (value == null) ? '00:00' : value?.substring(0, 5) ?? '00:00',
+                ),
+              ],
+            )
           ],
         ),
       ),

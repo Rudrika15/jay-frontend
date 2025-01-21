@@ -31,7 +31,7 @@ class RestApiService {
 
       printResponse(response: response, responseBody: responseBody);
       if (response.statusCode == 201 || response.statusCode == 200) {
-        if (responseBody['status'].toString() == 'true') {
+        if (responseBody['status'].toString() == 'true' || responseBody['success'].toString() == 'true') {
           return data;
         } else {
           throw ApiException(responseBody);

@@ -79,22 +79,22 @@ class AttendanceService {
     return null;
   }
 
-  Future<DailyAttendenceModel?> getDailyAttedence(String? date) async {
+  Future<DailyAttendanceModel?> getDailyAttendance(String? date) async {
     try {
       final _token = await SharedPreferencesService.getUserToken();
       print(_token);
       final response = await http.get(
         Uri.parse(
-            ApiHelper.dailyAttendence + (date != null ? "?date=$date" : '')),
+            ApiHelper.staffList + (date != null ? "?date=$date" : '')),
         headers: {
           'Authorization': 'Bearer $_token',
         },
       );
-      print(ApiHelper.dailyAttendence + (date != null ? "?date=$date" : ''));
+      print(ApiHelper.staffList + (date != null ? "?date=$date" : ''));
       print(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {
         print(response.body);
-        return DailyAttendenceModel.fromJson(jsonDecode(response.body));
+        return DailyAttendanceModel.fromJson(jsonDecode(response.body));
       } else {
         return null;
       }
