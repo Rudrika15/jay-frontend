@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flipcodeattendence/featuers/Admin/model/daily_attendence_model.dart';
+import 'package:flipcodeattendence/helper/api_helper.dart';
+import 'package:flipcodeattendence/service/rest_api_service.dart';
+import 'package:flipcodeattendence/widget/common_widgets.dart';
 import 'package:flutter/material.dart';
 
 import '../featuers/Admin/model/AttendanceRecord.dart';
@@ -63,4 +68,24 @@ class AttendanceProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+  final service = RestApiService();
+  Future<bool> createUser(BuildContext context, {required Map<String, String> userDetails}) async {
+    _isLoading = true;
+    notifyListeners();
+    final api = ApiHelper.createUser;
+    final body = userDetails;
+    try {
+      await service.invokeApi(url: api, requestType: HttpRequestType.post,body: jsonEncode(body));
+      CommonWidgets.customSnackBar(context: context, title: "User created successfully");
+      return true;
+    } catch(e) {
+      CommonWidgets.customSnackBar(context: context, title: e.toString());
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
 }

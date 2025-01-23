@@ -55,9 +55,11 @@ class ApiHelper {
   static String report = '${baseUrl}api/report';
 
   // Admin task
-  // allTask?date=2024-09-18&name=rud
   static String adminAllTask = '${baseUrl}api/allTask';
   static String getAppVersion = '${baseUrl}api/getVersion';
+
+  // Create user
+  static String createUser = '${baseUrl}api/create-user';
 
   final String _appVersion = '1.0.2';
   String get appVersion => _appVersion;
