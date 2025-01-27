@@ -87,5 +87,38 @@ class AttendanceProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+  Future<bool> updateUser(BuildContext context, {required String id,required Map<String, String> userDetails}) async {
+    _isLoading = true;
+    notifyListeners();
+    final api = ApiHelper.updateUser + "/$id";
+    final body = userDetails;
+    try {
+      await service.invokeApi(url: api, requestType: HttpRequestType.post,body: jsonEncode(body));
+      CommonWidgets.customSnackBar(context: context, title: "User updated successfully");
+      return true;
+    } catch(e) {
+      CommonWidgets.customSnackBar(context: context, title: e.toString());
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+  Future<bool> deleteUser(BuildContext context, {required String id}) async {
+    _isLoading = true;
+    notifyListeners();
+    final api = ApiHelper.deleteUser + "/$id";
+    try {
+      await service.invokeApi(url: api, requestType: HttpRequestType.post);
+      CommonWidgets.customSnackBar(context: context, title: "User deleted successfully");
+      return true;
+    } catch(e) {
+      CommonWidgets.customSnackBar(context: context, title: e.toString());
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
 }

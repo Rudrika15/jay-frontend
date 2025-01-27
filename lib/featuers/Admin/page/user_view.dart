@@ -1,3 +1,4 @@
+import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flipcodeattendence/provider/attendance_provider.dart';
 import 'package:flipcodeattendence/widget/custom_elevated_button.dart';
@@ -11,10 +12,15 @@ import '../../../helper/string_helper.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widget/text_form_field_custom.dart';
 
-enum _UserType { Admin, User, Client }
-
 class UserView extends StatefulWidget {
-  const UserView({super.key});
+  final bool isUpdate;
+  final UserRole role;
+  final String? id,name, mobileNo, email, birthDate;
+
+  const UserView(
+      {super.key,
+      this.isUpdate = false,
+      this.role = UserRole.admin, this.id, this.name, this.mobileNo, this.email, this.birthDate});
 
   @override
   State<UserView> createState() => _UserView();
@@ -28,7 +34,19 @@ class _UserView extends State<UserView> with NavigatorMixin {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _birthDateController = TextEditingController();
-  var selectedUserType = _UserType.Admin;
+  var selectedUserType = UserRole.admin;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isUpdate) {
+      _nameController.text = widget.name ?? '';
+      _numberController.text = widget.mobileNo ?? '';
+      _emailController.text = widget.email ?? '';
+      _birthDateController.text = widget.birthDate ?? '';
+      selectedUserType = widget.role;
+    }
+  }
 
   @override
   void dispose() {
@@ -56,9 +74,50 @@ class _UserView extends State<UserView> with NavigatorMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        titleSpacing: 0.0,
         title: const Text('Create user'),
         leading: GestureDetector(
             onTap: () => pop(context), child: Icon(Icons.close)),
+        actions: [
+          if (widget.isUpdate)
+            IconButton(
+                onPressed: () async {
+                  await showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Icon(Icons.warning_rounded,
+                              color: AppColors.red, size: 40),
+                          content: Text(
+                            'This will permanently delete user. Are you sure you want to delete user?',
+                            textAlign: TextAlign.center,
+                          ),
+                          actions: [
+                            Row(
+                              children: [
+                                Expanded(
+                                    child: CustomElevatedButton(
+                                        buttonText: 'Yes',
+                                        onPressed: () async =>
+                                            Navigator.pop(context, true))),
+                              ],
+                            )
+                          ],
+                        );
+                      }).then((value) {
+                    if (value == true) {
+                      context
+                          .read<AttendanceProvider>()
+                          .deleteUser(context,
+                              id: widget.id.toString())
+                          .then((value) {
+                        Navigator.pop(context, true);
+                      });
+                    }
+                  });
+                },
+                icon: const Icon(Icons.delete_forever, color: AppColors.red))
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -74,16 +133,16 @@ class _UserView extends State<UserView> with NavigatorMixin {
                       child: SegmentedButton(
                         segments: [
                           ButtonSegment(
-                            value: _UserType.Admin,
-                            label: Text(_UserType.Admin.name.capitalizeFirst!),
+                            value: UserRole.admin,
+                            label: Text(UserRole.admin.name.capitalizeFirst!),
                           ),
                           ButtonSegment(
-                            value: _UserType.User,
-                            label: Text(_UserType.User.name.capitalizeFirst!),
+                            value: UserRole.user,
+                            label: Text(UserRole.user.name.capitalizeFirst!),
                           ),
                           ButtonSegment(
-                            value: _UserType.Client,
-                            label: Text(_UserType.Client.name.capitalizeFirst!),
+                            value: UserRole.client,
+                            label: Text(UserRole.client.name.capitalizeFirst!),
                           )
                         ],
                         selected: {selectedUserType},
@@ -149,41 +208,43 @@ class _UserView extends State<UserView> with NavigatorMixin {
                     keyboardType: TextInputType.emailAddress,
                     controller: _emailController),
                 SizedBox(height: 16),
-                TextFormFieldWidget(
-                    prefixWidget: Icon(
-                      Icons.password,
-                      color: AppColors.onPrimaryBlack,
-                    ),
-                    hintText: 'Password',
-                    validator: (value) {
-                      return (value?.trim().isEmpty ?? false)
-                          ? 'Password is required'
-                          : (value!.length < 6)
-                              ? 'Password should be 6 characters long'
-                              : null;
-                    },
-                    keyboardType: TextInputType.number,
-                    controller: _passwordController),
-                SizedBox(height: 16),
-                TextFormFieldWidget(
-                    prefixWidget: Icon(
-                      Icons.password,
-                      color: AppColors.onPrimaryBlack,
-                    ),
-                    hintText: 'Confirm Password',
-                    validator: (value) {
-                      return (value?.trim().isEmpty ?? false)
-                          ? 'Password is required'
-                          : (value!.length < 6)
-                              ? 'Password should be 6 characters long'
-                              : (value.trim() !=
-                                      _passwordController.text.trim())
-                                  ? 'Password does not match'
-                                  : null;
-                    },
-                    keyboardType: TextInputType.number,
-                    controller: _confirmPasswordController),
-                SizedBox(height: 16),
+                if (!widget.isUpdate) ...[
+                  TextFormFieldWidget(
+                      prefixWidget: Icon(
+                        Icons.password,
+                        color: AppColors.onPrimaryBlack,
+                      ),
+                      hintText: 'Password',
+                      validator: (value) {
+                        return (value?.trim().isEmpty ?? false)
+                            ? 'Password is required'
+                            : (value!.length < 6)
+                                ? 'Password should be 6 characters long'
+                                : null;
+                      },
+                      keyboardType: TextInputType.number,
+                      controller: _passwordController),
+                  SizedBox(height: 16),
+                  TextFormFieldWidget(
+                      prefixWidget: Icon(
+                        Icons.password,
+                        color: AppColors.onPrimaryBlack,
+                      ),
+                      hintText: 'Confirm Password',
+                      validator: (value) {
+                        return (value?.trim().isEmpty ?? false)
+                            ? 'Password is required'
+                            : (value!.length < 6)
+                                ? 'Password should be 6 characters long'
+                                : (value.trim() !=
+                                        _passwordController.text.trim())
+                                    ? 'Password does not match'
+                                    : null;
+                      },
+                      keyboardType: TextInputType.number,
+                      controller: _confirmPasswordController),
+                  SizedBox(height: 16),
+                ],
                 TextFormFieldWidget(
                   readOnly: true,
                   prefixWidget: Icon(
@@ -227,20 +288,39 @@ class _UserView extends State<UserView> with NavigatorMixin {
                   ? SizedBox(child: CircularProgressIndicator())
                   : Expanded(
                       child: CustomElevatedButton(
-                          buttonText: 'Save',
+                          buttonText: widget.isUpdate ? 'Update' : 'Save',
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              final userDetails = {
-                                "name": _nameController.text.trim(),
-                                "email": _emailController.text.trim(),
-                                "phone": _numberController.text.trim(),
-                                "password": _passwordController.text.trim(),
-                                "confirm_password":
-                                    _confirmPasswordController.text.trim(),
-                                "roles": selectedUserType.name.trim(),
-                                "birthdate": _birthDateController.text,
-                              };
-                              createUser(userDetails);
+                              if (widget.isUpdate) {
+                                final userDetails = {
+                                  "name": _nameController.text.trim(),
+                                  "email": _emailController.text.trim(),
+                                  "phone": _numberController.text.trim(),
+                                  "password": _passwordController.text.trim(),
+                                  "confirm_password":
+                                      _confirmPasswordController.text.trim(),
+                                  "roles": selectedUserType.name
+                                      .trim()
+                                      .capitalizeFirst!,
+                                  "birthdate": _birthDateController.text,
+                                };
+                                updateUser(userDetails,
+                                    id: widget.id?.toString() ?? '');
+                              } else {
+                                final userDetails = {
+                                  "name": _nameController.text.trim(),
+                                  "email": _emailController.text.trim(),
+                                  "phone": _numberController.text.trim(),
+                                  "password": _passwordController.text.trim(),
+                                  "confirm_password":
+                                      _confirmPasswordController.text.trim(),
+                                  "roles": selectedUserType.name
+                                      .trim()
+                                      .capitalizeFirst!,
+                                  "birthdate": _birthDateController.text,
+                                };
+                                createUser(userDetails);
+                              }
                             }
                           }))
             ],
@@ -256,6 +336,16 @@ class _UserView extends State<UserView> with NavigatorMixin {
         .then((value) {
       clearForm();
       pop(context);
+    });
+  }
+
+  Future<void> updateUser(Map<String, String> userDetails,
+      {required String id}) async {
+    await Provider.of<AttendanceProvider>(context, listen: false)
+        .updateUser(context, id: id, userDetails: userDetails)
+        .then((value) {
+      clearForm();
+      Navigator.pop(context, value);
     });
   }
 }

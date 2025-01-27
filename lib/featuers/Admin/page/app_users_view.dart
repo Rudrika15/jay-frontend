@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flipcodeattendence/featuers/Admin/model/daily_attendence_model.dart';
 import 'package:flipcodeattendence/featuers/Admin/page/user_view.dart';
+import 'package:flipcodeattendence/helper/enum_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flipcodeattendence/provider/client_provider.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -14,20 +16,6 @@ import '../../../theme/app_colors.dart';
 import '../../../widget/text_form_field_custom.dart';
 
 enum _UserType { Staff, Client }
-
-Future<void> getStaffData(BuildContext context) async {
-  Future.delayed(
-      Duration.zero,
-      () => Provider.of<AttendanceProvider>(context, listen: false)
-          .getStaffList(context));
-}
-
-Future<void> getClientData(BuildContext context) async {
-  Future.delayed(
-      Duration.zero,
-      () => Provider.of<ClientProvider>(context, listen: false)
-          .getClients(context: context));
-}
 
 class AppUsersView extends StatefulWidget {
   const AppUsersView({super.key});
@@ -45,7 +33,21 @@ class _AppUsersState extends State<AppUsersView> with NavigatorMixin {
   @override
   void initState() {
     super.initState();
-    getStaffData(context);
+    getStaffData();
+  }
+
+  Future<void> getStaffData() async {
+    Future.delayed(
+        Duration.zero,
+        () => Provider.of<AttendanceProvider>(context, listen: false)
+            .getStaffList(context));
+  }
+
+  Future<void> getClientData() async {
+    Future.delayed(
+        Duration.zero,
+        () => Provider.of<ClientProvider>(context, listen: false)
+            .getClients(context: context));
   }
 
   var _filteredStaff = <DailyAttendanceData>[];
@@ -84,7 +86,7 @@ class _AppUsersState extends State<AppUsersView> with NavigatorMixin {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        toolbarHeight: 140,
+        toolbarHeight: 130,
         flexibleSpace: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
@@ -92,6 +94,7 @@ class _AppUsersState extends State<AppUsersView> with NavigatorMixin {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormFieldWidget(
+                  contentPadding: EdgeInsets.zero,
                   controller: searchController,
                   prefixWidget: Icon(CupertinoIcons.search),
                   hintText: 'Search',
@@ -118,7 +121,7 @@ class _AppUsersState extends State<AppUsersView> with NavigatorMixin {
                   children: [
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: SegmentedButton(
                           segments: [
                             ButtonSegment(
@@ -137,8 +140,8 @@ class _AppUsersState extends State<AppUsersView> with NavigatorMixin {
                             _filteredStaff.clear();
                             isSearching = false;
                             (value.first == _UserType.Staff)
-                                ? getStaffData(context)
-                                : getClientData(context);
+                                ? getStaffData()
+                                : getClientData();
                           }),
                           style: SegmentedButton.styleFrom(
                               shape: RoundedRectangleBorder(
@@ -160,12 +163,119 @@ class _AppUsersState extends State<AppUsersView> with NavigatorMixin {
       body: Consumer<AttendanceProvider>(builder: (context, provider, _) {
         if (selectedUserType == _UserType.Staff) {
           if (isSearching) {
-            return _buildFilteredStaffWidget();
+            return (_filteredStaff.isEmpty)
+                ? Center(child: Text('No Staff Found'))
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _filteredStaff.length,
+                    itemBuilder: (context, index) {
+                      final staff = _filteredStaff[index];
+                      return ListTile(
+                        onTap: () {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) {
+                            return UserView(
+                              isUpdate: true,
+                              id: staff.id?.toString(),
+                              name: staff.name,
+                              mobileNo: staff.phone?.toString(),
+                              email: staff.email,
+                              birthDate: staff.birthdate,
+                              role: UserRole.user,
+                            );
+                          })).then((value) {
+                            if (value == true) getStaffData();
+                          });
+                        },
+                        leading: CircleAvatar(
+                            backgroundColor: AppColors.aPrimary,
+                            foregroundColor: AppColors.onPrimaryLight,
+                            child: Text(staff.name?[0].toUpperCase() ?? '')),
+                        title: Text(staff.name?.capitalizeFirst ?? ''),
+                      );
+                    });
           } else {
-            return _StaffListWidget();
+            return provider.isLoading
+                ? Center(child: CircularProgressIndicator())
+                : (provider.staffList?.isEmpty ?? true)
+                    ? Center(
+                        child: Text('No Staff Found'),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: getStaffData,
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: provider.staffList?.length ?? 0,
+                            itemBuilder: (context, index) {
+                              final staff = provider.staffList?[index];
+                              return ListTile(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (context) {
+                                    return UserView(
+                                      isUpdate: true,
+                                      id: staff?.id?.toString(),
+                                      name: staff?.name,
+                                      mobileNo: staff?.phone?.toString(),
+                                      email: staff?.email,
+                                      birthDate: staff?.birthdate,
+                                      role: UserRole.user,
+                                    );
+                                  })).then((value) {
+                                    if (value == true) getStaffData();
+                                  });
+                                },
+                                leading: CircleAvatar(
+                                    backgroundColor: AppColors.aPrimary,
+                                    foregroundColor: AppColors.onPrimaryLight,
+                                    child: Text(
+                                        staff?.name?[0].toUpperCase() ?? '')),
+                                title: Text(staff?.name?.capitalizeFirst ?? ''),
+                              );
+                            }),
+                      );
+            ;
           }
         } else {
-          return _ClientListWidget();
+          return Consumer<ClientProvider>(builder: (context, provider, _) {
+            return provider.isLoading
+                ? Center(child: CircularProgressIndicator())
+                : (provider.clientModel?.data?.isEmpty ?? true)
+                    ? Text('No clients found')
+                    : RefreshIndicator(
+                        onRefresh: getClientData,
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: provider.clientModel?.data?.length ?? 0,
+                            itemBuilder: (context, index) {
+                              final client = provider.clientModel?.data?[index];
+                              return ListTile(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                        MaterialPageRoute(builder: (context) {
+                                      return UserView(
+                                        isUpdate: true,
+                                        id: client?.id?.toString(),
+                                        name: client?.name,
+                                        mobileNo: client?.phone?.toString(),
+                                        email: client?.email,
+                                        birthDate: client?.birthdate,
+                                        role: UserRole.client,
+                                      );
+                                    })).then((value) {
+                                      if (value == true) getClientData();
+                                    });
+                                  },
+                                  leading: CircleAvatar(
+                                      backgroundColor: AppColors.aPrimary,
+                                      foregroundColor: AppColors.onPrimaryLight,
+                                      child: Text(
+                                          client?.name?[0].toUpperCase() ??
+                                              '')),
+                                  title: Text(client?.name ?? ''));
+                            }),
+                      );
+          });
         }
       }),
       floatingActionButton: FloatingActionButton(
@@ -174,87 +284,5 @@ class _AppUsersState extends State<AppUsersView> with NavigatorMixin {
         shape: CircleBorder(),
       ),
     );
-  }
-
-  Widget _buildFilteredStaffWidget() {
-    return (_filteredStaff.isEmpty)
-        ? Center(child: Text('No Staff Found'))
-        : ListView.builder(
-            shrinkWrap: true,
-            itemCount: _filteredStaff.length,
-            itemBuilder: (context, index) {
-              final staff = _filteredStaff[index];
-              return ListTile(
-                onTap: () {},
-                leading: CircleAvatar(
-                    backgroundColor: AppColors.aPrimary,
-                    foregroundColor: AppColors.onPrimaryLight,
-                    child: Text(staff.name?[0].toUpperCase() ?? '')),
-                title: Text(staff.name?.capitalizeFirst ?? ''),
-              );
-            });
-  }
-}
-
-class _StaffListWidget extends StatelessWidget {
-  const _StaffListWidget();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<AttendanceProvider>(builder: (context, provider, _) {
-      return provider.isLoading
-          ? Center(child: CircularProgressIndicator())
-          : (provider.staffList?.isEmpty ?? true)
-              ? Center(
-                  child: Text('No Staff Found'),
-                )
-              : RefreshIndicator(
-                  onRefresh: () => getStaffData(context),
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: provider.staffList?.length ?? 0,
-                      itemBuilder: (context, index) {
-                        final staff = provider.staffList?[index];
-                        return ListTile(
-                          onTap: () {},
-                          leading: CircleAvatar(
-                              backgroundColor: AppColors.aPrimary,
-                              foregroundColor: AppColors.onPrimaryLight,
-                              child: Text(staff?.name?[0].toUpperCase() ?? '')),
-                          title: Text(staff?.name?.capitalizeFirst ?? ''),
-                        );
-                      }),
-                );
-    });
-  }
-}
-
-class _ClientListWidget extends StatelessWidget {
-  const _ClientListWidget();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ClientProvider>(builder: (context, provider, _) {
-      return provider.isLoading
-          ? Center(child: CircularProgressIndicator())
-          : (provider.clientModel?.data?.isEmpty ?? true)
-              ? Text('No clients found')
-              : RefreshIndicator(
-                  onRefresh: () => getClientData(context),
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: provider.clientModel?.data?.length ?? 0,
-                      itemBuilder: (context, index) {
-                        final client = provider.clientModel?.data?[index];
-                        return ListTile(
-                            leading: CircleAvatar(
-                                backgroundColor: AppColors.aPrimary,
-                                foregroundColor: AppColors.onPrimaryLight,
-                                child:
-                                    Text(client?.name?[0].toUpperCase() ?? '')),
-                            title: Text(client?.name ?? ''));
-                      }),
-                );
-    });
   }
 }

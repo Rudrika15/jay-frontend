@@ -58,8 +58,10 @@ class ApiHelper {
   static String adminAllTask = '${baseUrl}api/allTask';
   static String getAppVersion = '${baseUrl}api/getVersion';
 
-  // Create user
+  // Create, Update, Delete user
   static String createUser = '${baseUrl}api/create-user';
+  static String updateUser = '${baseUrl}api/update-user';
+  static String deleteUser = '${baseUrl}api/delete-user';
 
   final String _appVersion = '1.0.2';
   String get appVersion => _appVersion;

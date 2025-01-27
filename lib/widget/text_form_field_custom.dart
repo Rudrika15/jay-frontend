@@ -30,6 +30,7 @@ class TextFormFieldWidget extends StatefulWidget {
   final int maxLines;
   final Color? borderColor;
   final void Function(String)? onChanged;
+  final EdgeInsetsGeometry? contentPadding;
 
   const TextFormFieldWidget(
       {super.key,
@@ -55,7 +56,7 @@ class TextFormFieldWidget extends StatefulWidget {
       this.suffixIcon,
       this.maxLines = _defaultMaxLines,
       this.borderColor,
-      this.onChanged});
+      this.onChanged, this.contentPadding});
 
   @override
   State<TextFormFieldWidget> createState() => _TextFormFieldCustomState();
@@ -84,6 +85,7 @@ class _TextFormFieldCustomState extends State<TextFormFieldWidget> {
       },
 
       decoration: InputDecoration(
+        contentPadding: widget.contentPadding,
         alignLabelWithHint: true,
         filled: widget.isFilled,
         fillColor: widget.fillColor,
