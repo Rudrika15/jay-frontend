@@ -9,7 +9,7 @@ import 'package:flipcodeattendence/helper/string_helper.dart';
 import 'package:flipcodeattendence/mixins/navigator_mixin.dart';
 import 'package:flipcodeattendence/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
-import '../../../helper/app_version_checker.dart';
+import 'package:upgrader/upgrader.dart';
 import '../../../widget/dialog_widget.dart';
 import '/provider/login_provider.dart';
 import 'package:flutter/material.dart';
@@ -23,14 +23,12 @@ class UserNavbar extends StatefulWidget {
 
 class _UserNavbarState extends State<UserNavbar> with NavigatorMixin {
   int _selectedIndex = 0;
-  final _appVersionChecker = AppVersionChecker();
   final _connectivityService = ConnectivityService();
 
   @override
   void initState() {
     super.initState();
     Provider.of<LoginProvider>(context, listen: false).updateToken();
-    _appVersionChecker.checkForAppUpdate(context);
   }
 
   @override
@@ -89,80 +87,85 @@ class _UserNavbarState extends State<UserNavbar> with NavigatorMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Consumer<LoginProvider>(
-        builder: (context, loginValue, child) {
-          return PopScope(
-            canPop: false,
-            onPopInvoked: (didPop) async {
-              if (didPop) return;
-              await _showExitAppDialog();
-            },
-            child: StreamBuilder<List<ConnectivityResult>>(
-              stream: _connectivityService.connectivityStream,
-              initialData: _connectivityService.connectivityResult,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
-                }
-                final result = snapshot.data!;
-                final bool isDisconnected =
-                    result.first == ConnectivityResult.none;
-                return (isDisconnected)
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(CupertinoIcons.wifi_exclamationmark,
-                                color: AppColors.aPrimary, size: 100),
-                            Text(
-                              'No connection',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ],
-                        ),
-                      )
-                    : loginValue.isLoading
-                        ? Center(
-                            child: CircularProgressIndicator(),
-                          )
-                        : [
-                            UserAttendancePage(),
-                            UserLeavePage(),
-                            CallLogPage(),
-                            ProfilePage()
-                          ][_selectedIndex];
+    return UpgradeAlert(
+      barrierDismissible: false,
+      showIgnore: false,
+      showLater: false,
+      child: Scaffold(
+        body: Consumer<LoginProvider>(
+          builder: (context, loginValue, child) {
+            return PopScope(
+              canPop: false,
+              onPopInvoked: (didPop) async {
+                if (didPop) return;
+                await _showExitAppDialog();
               },
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (value) {
-          setState(() {
-            _selectedIndex = value;
-          });
-        },
-        destinations: [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(
-              icon: Icon(CupertinoIcons.arrow_up_right), label: 'Leave'),
-          NavigationDestination(
-              icon: Icon(Icons.list_alt_rounded), label: 'Call log'),
-          NavigationDestination(
-              icon: Icon(CupertinoIcons.person_fill),
-              label: 'Profile',
-              selectedIcon: Icon(CupertinoIcons.person)),
-        ],
+              child: StreamBuilder<List<ConnectivityResult>>(
+                stream: _connectivityService.connectivityStream,
+                initialData: _connectivityService.connectivityResult,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
+                  final result = snapshot.data!;
+                  final bool isDisconnected =
+                      result.first == ConnectivityResult.none;
+                  return (isDisconnected)
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(CupertinoIcons.wifi_exclamationmark,
+                                  color: AppColors.aPrimary, size: 100),
+                              Text(
+                                'No connection',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ],
+                          ),
+                        )
+                      : loginValue.isLoading
+                          ? Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : [
+                              UserAttendancePage(),
+                              UserLeavePage(),
+                              CallLogPage(),
+                              ProfilePage()
+                            ][_selectedIndex];
+                },
+              ),
+            );
+          },
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: (value) {
+            setState(() {
+              _selectedIndex = value;
+            });
+          },
+          destinations: [
+            NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+            NavigationDestination(
+                icon: Icon(CupertinoIcons.arrow_up_right), label: 'Leave'),
+            NavigationDestination(
+                icon: Icon(Icons.list_alt_rounded), label: 'Call log'),
+            NavigationDestination(
+                icon: Icon(CupertinoIcons.person_fill),
+                label: 'Profile',
+                selectedIcon: Icon(CupertinoIcons.person)),
+          ],
+        ),
       ),
     );
   }

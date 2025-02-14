@@ -63,7 +63,7 @@ class ApiHelper {
   static String updateUser = '${baseUrl}api/update-user';
   static String deleteUser = '${baseUrl}api/delete-user';
 
-  final String _appVersion = '1.0.2';
+  final String _appVersion = '1.0.3';
   String get appVersion => _appVersion;
   final String _appPlayStoreUrl = 'https://play.google.com/store/apps/details?id=com.flipcode.jayinfotech&pcampaignid=web_share';
   String get appPlayStoreUrl => _appPlayStoreUrl;
